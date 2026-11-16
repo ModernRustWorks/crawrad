@@ -87,6 +87,19 @@ jobs:
       - name: Tests
         run: cargo test --workspace --no-fail-fast
 
+  # The ONE required check on main: green when every job above passed or was
+  # skipped for lack of source, red when any of them failed or was cancelled.
+  ok:
+    name: ci ok
+    needs: [source, windows, unix]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - shell: bash
+        run: |
+          echo '${{ toJSON(needs) }}'
+          if [ "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}" = "true" ]; then exit 1; fi
+
   # Security advisories are reported, not blocking: most come from third-party
   # dependencies we cannot fix ourselves. Licences ARE blocking (in the gate above).
   advisories:
