@@ -1,0 +1,84 @@
+name: Release
+
+# A version tag (`v0.1.0`) builds the install bundle and the installers on
+# Windows, Linux and macOS, and attaches them to one DRAFT GitHub release.
+# Nothing is published until the draft is reviewed and released by hand.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_VERSION: "1.95"
+
+jobs:
+  build:
+    name: installer (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+      - uses: Swatinem/rust-cache@v2
+      - name: Version
+        shell: bash
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          case "$v" in [0-9]*) ;; *) v="0.0.0-dev" ;; esac
+          echo "VERSION=$v" >> "$GITHUB_ENV"
+      - name: System libraries
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends pkg-config libasound2-dev libpulse-dev \
+            libx11-dev libxcursor-dev libxrandr-dev libxi-dev libxkbcommon-dev libwayland-dev \
+            libgl1-mesa-dev libgtk-3-dev libclang-dev libfuse2
+          curl -fsSL -o /usr/local/bin/appimagetool \
+            https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          sudo chmod +x /usr/local/bin/appimagetool
+      - name: Bundle
+        run: python tools/bundle/bundle.py
+      - name: Windows installer
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $iscc = @("${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
+                    "$env:ProgramFiles\Inno Setup 6\ISCC.exe") | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $iscc) { choco install innosetup -y --no-progress; $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" }
+          & $iscc "/DAppVersion=$env:VERSION" installer\windows\crawrad.iss
+          Compress-Archive -Path target\bundle\CrawRAD -DestinationPath "target\installer\CrawRAD-$env:VERSION-windows-x64.zip"
+      - name: Linux packages
+        if: runner.os == 'Linux'
+        run: bash installer/linux/package.sh
+      - name: macOS disk image
+        if: runner.os == 'macOS'
+        run: bash installer/macos/package.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installer-${{ matrix.os }}
+          path: target/installer/CrawRAD-*
+          if-no-files-found: error
+
+  draft:
+    name: draft release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Create the draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" --draft --title "CrawRAD ${GITHUB_REF_NAME}" dist/*

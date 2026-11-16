@@ -1,0 +1,102 @@
+name: CI
+
+# Every push to main and every pull request is built and tested on GitHub's
+# runners: Windows, Linux and macOS. Pull requests from forks run here too,
+# on throwaway machines, never on anyone's own computer.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Only the latest commit of a ref matters: an older run of the same ref is cancelled.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_VERSION: "1.95"
+
+jobs:
+  # The repository opens before the source arrives. Until there is a Cargo.toml,
+  # every other job is skipped and the run is green.
+  source:
+    name: source present
+    runs-on: ubuntu-latest
+    outputs:
+      rust: ${{ steps.check.outputs.rust }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: check
+        shell: bash
+        run: |
+          if [ -f Cargo.toml ]; then echo "rust=true" >> "$GITHUB_OUTPUT"; else echo "rust=false" >> "$GITHUB_OUTPUT"; echo "No Cargo.toml yet: build jobs skipped."; fi
+
+  # The full local gate (format, clippy with -D warnings for every target,
+  # tests, architecture gates, licences), the same script contributors run.
+  windows:
+    name: gate (Windows)
+    needs: source
+    if: needs.source.outputs.rust == 'true'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          components: rustfmt, clippy
+          targets: x86_64-unknown-linux-gnu, aarch64-apple-darwin
+      - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-deny
+      - name: Gate
+        shell: pwsh
+        run: ./portao.ps1 -SemDocker
+
+  # Behaviour on Linux and macOS: native build, clippy and the whole test suite.
+  unix:
+    name: test (${{ matrix.os }})
+    needs: source
+    if: needs.source.outputs.rust == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: System libraries
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends pkg-config libasound2-dev libpulse-dev \
+            libx11-dev libxcursor-dev libxrandr-dev libxi-dev libxkbcommon-dev libwayland-dev \
+            libgl1-mesa-dev libgtk-3-dev libclang-dev
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+      - name: Tests
+        run: cargo test --workspace --no-fail-fast
+
+  # Security advisories are reported, not blocking: most come from third-party
+  # dependencies we cannot fix ourselves. Licences ARE blocking (in the gate above).
+  advisories:
+    name: security advisories (report only)
+    needs: source
+    if: needs.source.outputs.rust == 'true'
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          command: check advisories
