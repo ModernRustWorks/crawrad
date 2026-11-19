@@ -312,11 +312,15 @@ fn view_row_count_and_heading() {
 
 #[test]
 fn install_all_on_plan_of_only_non_interactive_starts_nothing() {
+    // Only the debugger is missing, and its step is manual on every host. (Missing build
+    // tools are not: on macOS they install by running `xcode-select --install`.)
     let mut session = EnvironmentSession {
         statuses: vec![
             ToolStatus {
                 tool: Tool::BuildTools,
-                state: ToolState::Missing,
+                state: ToolState::Installed {
+                    version: String::new(),
+                },
             },
             ToolStatus {
                 tool: Tool::RustToolchain,
