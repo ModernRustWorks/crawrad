@@ -54,6 +54,8 @@ jobs:
       - uses: taiki-e/install-action@v2
         with:
           tool: cargo-deny
+      # The cross clippy step compiles the bundled SQLite's C for Linux and macOS with `zig cc`.
+      - uses: mlugg/setup-zig@v2
       - name: Gate
         shell: pwsh
         run: ./gate.ps1 -NoDocker
