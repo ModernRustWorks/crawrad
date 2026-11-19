@@ -11,7 +11,7 @@ double-click to write the event, build a native app.
 ![rust](https://img.shields.io/badge/Rust-edition%202024-b7410e)
 ![targets](https://img.shields.io/badge/targets-Windows%20%C2%B7%20Linux%20%C2%B7%20macOS%20%C2%B7%20Web-555)
 [![Manual](https://img.shields.io/badge/manual-read-2f7d4f)](https://isaquepinheiro.com.br/crawrad/manual/)
-[![Support](https://img.shields.io/badge/support-donate-ff69b4)](https://link.mercadopago.com.br/aefosai)
+[![Support](https://img.shields.io/badge/support-donate-ff69b4)](https://link.mercadopago.com.br/isaquepinheiro)
 
 ![CrawRAD: the Contacts example in the Designer, and the app it builds running on top](docs/src/images/examples/contacts-hero.png)
 
@@ -66,7 +66,7 @@ are in [`examples/`](examples/).
 
 **CrawRAD is free software — built and maintained by one developer.**
 
-### **[→ Donate / Sponsor CrawRAD ←](https://link.mercadopago.com.br/aefosai)**
+### **[→ Donate / Sponsor CrawRAD ←](https://link.mercadopago.com.br/isaquepinheiro)**
 
 *Any amount, any payment method — you choose both. Card, Pix or boleto.*
 
