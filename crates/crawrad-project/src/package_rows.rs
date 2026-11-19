@@ -29,7 +29,6 @@
 //! in [`model`], which both binaries include by
 //! `#[path]`. This module only decides what a list row IS.
 //!
-//! https://github.com/ModernRustWorks/crawrad/issues/127
 
 // The HEADLESS package manager, through the same module path in both binaries —
 // see the note in the Explorer panel beside it.

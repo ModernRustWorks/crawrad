@@ -10,7 +10,10 @@ double-click to write the event, build a native app.
 ![status](https://img.shields.io/badge/status-pre--Beta-orange)
 ![rust](https://img.shields.io/badge/Rust-edition%202024-b7410e)
 ![targets](https://img.shields.io/badge/targets-Windows%20%C2%B7%20Linux%20%C2%B7%20macOS%20%C2%B7%20Web-555)
+[![Manual](https://img.shields.io/badge/manual-read-2f7d4f)](https://isaquepinheiro.com.br/crawrad/manual/)
 [![Support](https://img.shields.io/badge/support-donate-ff69b4)](https://link.mercadopago.com.br/aefosai)
+
+![CrawRAD: the Contacts example in the Designer, and the app it builds running on top](docs/src/images/examples/contacts-hero.png)
 
 </div>
 
@@ -52,8 +55,9 @@ text and says so.
 
 ## Documentation
 
-The user manual lives in [`docs/`](docs/) (mdBook, organised by the
-[Diátaxis](https://diataxis.fr/) framework). Small real projects you can open in the IDE
+**Read the manual: [isaquepinheiro.com.br/crawrad/manual](https://isaquepinheiro.com.br/crawrad/manual/)**
+— tutorials, how-to guides, concepts and reference. Its source lives in [`docs/`](docs/)
+(mdBook, organised by the [Diátaxis](https://diataxis.fr/) framework). Small real projects you can open in the IDE
 are in [`examples/`](examples/).
 
 ## Support CrawRAD

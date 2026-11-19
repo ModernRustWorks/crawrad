@@ -29,10 +29,9 @@ fn origin_badge_colors_distinguish_save_and_external() {
     assert_ne!(text_save, text_ext);
     assert_ne!(bg_save, bg_ext);
 
-    // Save should have blue tint
-    assert_eq!(text_save[0], 137.0 / 255.0);
-    // External should have amber tint
-    assert_eq!(text_ext[0], 250.0 / 255.0);
+    // A save wears the IDE accent; an external change the IDE's info blue.
+    assert_eq!(text_save[0], 1.0);
+    assert_eq!(text_ext[0], 179.0 / 255.0);
 }
 
 #[test]

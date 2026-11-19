@@ -12,6 +12,7 @@ live_design! {
     use link::theme::*;
     use link::shaders::*;
     use crate::canvas::*;
+    use crate::borderless::*;
 
     SizeRowSlot = <RoundedView> {
         visible: false,
@@ -182,13 +183,12 @@ live_design! {
             width: Fill, height: Fill,
             flow: Down,
 
-            toolbar = <View> {
+            toolbar = <CrawradTopRounded> {
                 width: Fill, height: 38.0,
                 flow: Right, align: { y: 0.5 }
                 padding: { left: 14.0, right: 14.0 },
                 spacing: 8.0,
-                show_bg: true,
-                draw_bg: { color: #1e1e24 }
+                draw_bg: { color: #161819 }
 
                 lbl_sizes = <Label> {
                     draw_text: {

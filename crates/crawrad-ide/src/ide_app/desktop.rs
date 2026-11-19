@@ -153,14 +153,8 @@ impl IdeApp {
         let Some(w) = self.startup_window.filter(|w| !w.maximized) else {
             return false;
         };
-        let (x, y, width, height) = (w.x, w.y, w.width, w.height);
-        let rect = crawrad_os::ScreenRect {
-            x,
-            y,
-            width,
-            height,
-        };
-        let centre = (x + width / 2.0, y + height / 2.0);
+        let rect = crawrad_os::ScreenRect::of_window([w.x, w.y], [w.width, w.height], 1.0);
+        let centre = (rect.x + rect.width / 2.0, rect.y + rect.height / 2.0);
         let fits = crawrad_os::monitor_at(centre).is_some_and(|m| rect.fits_in(&m.full));
         fits && crawrad_os::place_main_window(rect)
     }

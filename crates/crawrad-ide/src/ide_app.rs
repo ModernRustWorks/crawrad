@@ -20,18 +20,18 @@ use std::path::PathBuf;
 use std::sync::mpsc::Receiver;
 
 use crate::ide_app::mcp_host::{McpRequest, McpServer};
+use crawrad_actions::KeymapScheme;
 use crawrad_actions::capability::CapabilityRegistry;
 use crawrad_actions::capability::PaletteItem as QuickOpenCommandItem;
-use crawrad_extension_host::ShellExtensionHost;
-use crawrad_insight::lsp_cell::LspCell;
-use makepad_code_editor::*;
-use crawrad_actions::KeymapScheme;
 use crawrad_designer::clipboard::Clipboard;
 use crawrad_designer::{Designer, TabAction};
 use crawrad_doc::Doc;
+use crawrad_extension_host::ShellExtensionHost;
 use crawrad_host::HostModel;
 use crawrad_host::disk_watch::DiskWatch;
+use crawrad_insight::lsp_cell::LspCell;
 use crawrad_ir::{NodeId, Value};
+use makepad_code_editor::*;
 use makepad_widgets::splitter::SplitterAlign;
 use makepad_widgets::*;
 // The trait must be in scope: it provides `open`, `set_selection`,
@@ -270,8 +270,8 @@ mod status_bar;
 #[path = "ide_app/ui_zoom.rs"]
 mod ui_zoom;
 
-use explorer::Folds;
 use crate::options;
+use explorer::Folds;
 // SINGLE-SEGMENT alias, due to the `#[derive(Live)]` pitfall noted in
 // `CacheDeOpcoes`: it does not read multi-segment paths as field types.
 use crate::action_list;
@@ -285,8 +285,8 @@ use crate::options::Category as OptionsCategory;
 use crawrad_actions::Panel;
 use crawrad_agent::AcpConfig;
 use crawrad_terminal::{ShellType, TerminalModel};
-use inspector::Tab as InspectorTab;
 use dialogos::build::BuildMode;
+use inspector::Tab as InspectorTab;
 use packages::model::PackageManagerState as PackageStore;
 #[note("ide-app-audiosessioninstance")]
 pub type AudioSessionInstance = crawrad_audio::AudioSession<crawrad_audio::CpalAudioRecorder>;

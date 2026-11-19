@@ -17,7 +17,7 @@ live_design! {
 
     InfoRow = <View> {
         show_bg: true,
-        draw_bg: { color: #181825 }
+        draw_bg: { color: #1d1f20 }
         width: Fill, height: 26.0,
         flow: Overlay,
         btn = <CrawradBorderlessButton> {
@@ -32,8 +32,8 @@ live_design! {
             width: Fill, height: Fill,
             flow: Right,
             align: { y: 0.5 },
-            c_saved = <Label> { width: 120.0, height: Fit, padding: { left: 8.0 }, draw_text: { color: #cdd6f4, text_style: <THEME_FONT_REGULAR> { font_size: 9.0 } }, text: "" }
-            c_when = <Label> { width: 100.0, height: Fit, draw_text: { color: #a6adc8, text_style: <THEME_FONT_REGULAR> { font_size: 9.0 } }, text: "" }
+            c_saved = <Label> { width: 120.0, height: Fit, padding: { left: 8.0 }, draw_text: { color: #e7e7ea, text_style: <THEME_FONT_REGULAR> { font_size: 9.0 } }, text: "" }
+            c_when = <Label> { width: 100.0, height: Fit, draw_text: { color: #b7b7ba, text_style: <THEME_FONT_REGULAR> { font_size: 9.0 } }, text: "" }
             c_origin = <View> {
                 width: 80.0, height: Fill,
                 align: { y: 0.5 },
@@ -41,12 +41,12 @@ live_design! {
                     width: Fit, height: Fit,
                     padding: { left: 6.0, right: 6.0, top: 2.0, bottom: 2.0 },
                     show_bg: true,
-                    draw_bg: { color: #22324d }
-                    lbl_badge = <Label> { draw_text: { color: #89b4fa, text_style: <THEME_FONT_BOLD> { font_size: 8.0 } }, text: "" }
+                    draw_bg: { color: #3a2a24 }
+                    lbl_badge = <Label> { draw_text: { color: #ff9c6a, text_style: <THEME_FONT_BOLD> { font_size: 8.0 } }, text: "" }
                 }
             }
-            c_size = <Label> { width: 90.0, height: Fit, draw_text: { color: #a6adc8, text_style: <THEME_FONT_REGULAR> { font_size: 9.0 } }, text: "" }
-            c_lines = <Label> { width: 80.0, height: Fit, draw_text: { color: #a6adc8, text_style: <THEME_FONT_REGULAR> { font_size: 9.0 } }, text: "" }
+            c_size = <Label> { width: 90.0, height: Fit, draw_text: { color: #b7b7ba, text_style: <THEME_FONT_REGULAR> { font_size: 9.0 } }, text: "" }
+            c_lines = <Label> { width: 80.0, height: Fit, draw_text: { color: #b7b7ba, text_style: <THEME_FONT_REGULAR> { font_size: 9.0 } }, text: "" }
         }
     }
 
@@ -54,7 +54,7 @@ live_design! {
         width: Fill, height: 54.0,
         flow: Overlay,
         show_bg: true,
-        draw_bg: { color: #181825 }
+        draw_bg: { color: #1d1f20 }
         btn = <CrawradBorderlessButton> {
             width: Fill, height: Fill,
             draw_bg: {
@@ -67,7 +67,7 @@ live_design! {
             visible: false,
             width: 3.0, height: Fill,
             show_bg: true,
-            draw_bg: { color: #89b4fa }
+            draw_bg: { color: #de5a2b }
         }
         info_box = <View> {
             width: Fill, height: Fill,
@@ -81,7 +81,7 @@ live_design! {
                 lbl_time = <Label> {
                     width: Fill, height: Fit,
                     draw_text: {
-                        color: #cdd6f4,
+                        color: #e7e7ea,
                         text_style: <THEME_FONT_BOLD> { font_size: 11.0 }
                     }
                     text: ""
@@ -90,10 +90,10 @@ live_design! {
                     width: Fit, height: Fit,
                     padding: { left: 5.0, right: 5.0, top: 1.0, bottom: 1.0 },
                     show_bg: true,
-                    draw_bg: { color: #22324d }
+                    draw_bg: { color: #3a2a24 }
                     lbl_badge = <Label> {
                         draw_text: {
-                            color: #89b4fa,
+                            color: #ff9c6a,
                             text_style: <THEME_FONT_BOLD> { font_size: 8.0 }
                         }
                         text: ""
@@ -103,7 +103,7 @@ live_design! {
             lbl_meta = <Label> {
                 width: Fill, height: Fit,
                 draw_text: {
-                    color: #7f849c,
+                    color: #98989b,
                     text_style: <THEME_FONT_REGULAR> { font_size: 9.0 }
                 }
                 text: ""
@@ -116,21 +116,18 @@ live_design! {
     pub CrawradHistoryPanel = <CrawradHistoryPanelBase> {
         width: Fill, height: Fill,
         flow: Down,
-        show_bg: true,
-        draw_bg: { color: #181825 }
 
-        header = <View> {
+        header = <CrawradTopRounded> {
             width: Fill, height: 38.0,
             flow: Right,
             align: { y: 0.5 },
             padding: { left: 16.0, right: 16.0 },
-            show_bg: true,
-            draw_bg: { color: #1e1e2e }
+            draw_bg: { color: #161819 }
 
             lbl_title = <Label> {
                 width: Fill, height: Fit,
                 draw_text: {
-                    color: #cdd6f4,
+                    color: #e7e7ea,
                     text_style: <THEME_FONT_BOLD> { font_size: 11.0 }
                 }
                 text: "History"
@@ -160,6 +157,8 @@ live_design! {
         }
 
         body_split = <View> {
+            show_bg: true,
+            draw_bg: { color: #1d1f20 }
             width: Fill, height: Fill,
             flow: Right,
 
@@ -167,7 +166,7 @@ live_design! {
                 width: 240.0, height: Fill,
                 flow: Down,
                 show_bg: true,
-                draw_bg: { color: #181825 }
+                draw_bg: { color: #1d1f20 }
 
                 copies_list = <PortalList> {
                     width: Fill, height: Fill,
@@ -178,7 +177,7 @@ live_design! {
             split_sep = <View> {
                 width: 1.0, height: Fill,
                 show_bg: true,
-                draw_bg: { color: #313244 }
+                draw_bg: { color: #424244 }
             }
 
             diff_container = <View> {
@@ -197,12 +196,12 @@ live_design! {
                     padding: { left: 12.0, right: 12.0 },
                     spacing: 8.0,
                     show_bg: true,
-                    draw_bg: { color: #1e1e2e }
+                    draw_bg: { color: #161819 }
 
                     lbl_changes = <Label> {
                         width: Fit, height: Fit,
                         draw_text: {
-                            color: #cdd6f4,
+                            color: #e7e7ea,
                             text_style: <THEME_FONT_REGULAR> { font_size: 10.0 }
                         }
                         text: "No changes"
@@ -217,23 +216,23 @@ live_design! {
                         flow: Right,
                         align: { y: 0.5 },
                         spacing: 6.0,
-                        <View> { width: 10.0, height: 10.0, show_bg: true, draw_bg: { color: #a6e3a1 } }
-                        <Label> { draw_text: { color: #a6adc8, text_style: <THEME_FONT_REGULAR> { font_size: 9.0 } }, text: "added" }
+                        <View> { width: 10.0, height: 10.0, show_bg: true, draw_bg: { color: #7cb46b } }
+                        <Label> { draw_text: { color: #b7b7ba, text_style: <THEME_FONT_REGULAR> { font_size: 9.0 } }, text: "added" }
                         <View> { width: 6.0, height: Fit }
-                        <View> { width: 10.0, height: 10.0, show_bg: true, draw_bg: { color: #f38ba8 } }
-                        <Label> { draw_text: { color: #a6adc8, text_style: <THEME_FONT_REGULAR> { font_size: 9.0 } }, text: "removed" }
+                        <View> { width: 10.0, height: 10.0, show_bg: true, draw_bg: { color: #e2726b } }
+                        <Label> { draw_text: { color: #b7b7ba, text_style: <THEME_FONT_REGULAR> { font_size: 9.0 } }, text: "removed" }
                         <View> { width: 6.0, height: Fit }
-                        <View> { width: 10.0, height: 10.0, show_bg: true, draw_bg: { color: #89b4fa } }
-                        <Label> { draw_text: { color: #a6adc8, text_style: <THEME_FONT_REGULAR> { font_size: 9.0 } }, text: "changed" }
+                        <View> { width: 10.0, height: 10.0, show_bg: true, draw_bg: { color: #b3dcff } }
+                        <Label> { draw_text: { color: #b7b7ba, text_style: <THEME_FONT_REGULAR> { font_size: 9.0 } }, text: "changed" }
                     }
                     <View> { width: Fill, height: Fit }
                     btn_revert = <Button> {
                         width: 160.0, height: 26.0,
                         draw_bg: {
-                            color: #89b4fa, color_hover: #b4befe, color_down: #74c7ec,
+                            color: #de5a2b, color_hover: #f07b46, color_down: #b83d16,
                             border_color_1: #0000, border_color_2: #0000,
                         }
-                        draw_text: { color: #11111b, text_style: <THEME_FONT_BOLD> { font_size: 9.5 } }
+                        draw_text: { color: #f5f5f8, text_style: <THEME_FONT_BOLD> { font_size: 9.5 } }
                         text: "Revert to this version"
                     }
                 }
@@ -248,7 +247,7 @@ live_design! {
                     width: Fill, height: Fill,
                     is_read_only: true,
                     draw_text: {
-                        color: #cdd6f4,
+                        color: #e7e7ea,
                         text_style: <THEME_FONT_CODE> { font_size: 9.5 }
                     }
                 }
@@ -259,17 +258,17 @@ live_design! {
                     align: { y: 0.5 },
                     padding: { left: 12.0, right: 12.0 },
                     show_bg: true,
-                    draw_bg: { color: #1e1e2e }
+                    draw_bg: { color: #161819 }
 
                     btn_compare = <Button> { width: 140.0, height: 24.0, text: "Compare with buffer" }
                     <View> { width: Fill, height: Fit }
                     btn_revert_contents = <Button> {
                         width: 160.0, height: 26.0,
                         draw_bg: {
-                            color: #89b4fa, color_hover: #b4befe, color_down: #74c7ec,
+                            color: #de5a2b, color_hover: #f07b46, color_down: #b83d16,
                             border_color_1: #0000, border_color_2: #0000,
                         }
-                        draw_text: { color: #11111b, text_style: <THEME_FONT_BOLD> { font_size: 9.5 } }
+                        draw_text: { color: #f5f5f8, text_style: <THEME_FONT_BOLD> { font_size: 9.5 } }
                         text: "Revert to this version"
                     }
                 }
@@ -277,6 +276,8 @@ live_design! {
         }
 
         info_container = <View> {
+            show_bg: true,
+            draw_bg: { color: #1d1f20 }
             visible: false,
             width: Fill, height: Fill,
             flow: Down,
@@ -286,12 +287,12 @@ live_design! {
                 flow: Right,
                 align: { y: 0.5 },
                 show_bg: true,
-                draw_bg: { color: #202030 }
-                th_saved = <Label> { width: 120.0, height: Fit, padding: { left: 8.0 }, draw_text: { color: #cdd6f4, text_style: <THEME_FONT_BOLD> { font_size: 9.0 } }, text: "Saved" }
-                th_when = <Label> { width: 100.0, height: Fit, draw_text: { color: #cdd6f4, text_style: <THEME_FONT_BOLD> { font_size: 9.0 } }, text: "When" }
-                th_origin = <Label> { width: 80.0, height: Fit, draw_text: { color: #cdd6f4, text_style: <THEME_FONT_BOLD> { font_size: 9.0 } }, text: "Origin" }
-                th_size = <Label> { width: 90.0, height: Fit, draw_text: { color: #cdd6f4, text_style: <THEME_FONT_BOLD> { font_size: 9.0 } }, text: "Size" }
-                th_lines = <Label> { width: 80.0, height: Fit, draw_text: { color: #cdd6f4, text_style: <THEME_FONT_BOLD> { font_size: 9.0 } }, text: "Lines" }
+                draw_bg: { color: #232628 }
+                th_saved = <Label> { width: 120.0, height: Fit, padding: { left: 8.0 }, draw_text: { color: #e7e7ea, text_style: <THEME_FONT_BOLD> { font_size: 9.0 } }, text: "Saved" }
+                th_when = <Label> { width: 100.0, height: Fit, draw_text: { color: #e7e7ea, text_style: <THEME_FONT_BOLD> { font_size: 9.0 } }, text: "When" }
+                th_origin = <Label> { width: 80.0, height: Fit, draw_text: { color: #e7e7ea, text_style: <THEME_FONT_BOLD> { font_size: 9.0 } }, text: "Origin" }
+                th_size = <Label> { width: 90.0, height: Fit, draw_text: { color: #e7e7ea, text_style: <THEME_FONT_BOLD> { font_size: 9.0 } }, text: "Size" }
+                th_lines = <Label> { width: 80.0, height: Fit, draw_text: { color: #e7e7ea, text_style: <THEME_FONT_BOLD> { font_size: 9.0 } }, text: "Lines" }
             }
 
             info_list = <PortalList> {
@@ -302,7 +303,7 @@ live_design! {
             lbl_note = <Label> {
                 width: Fill, height: 26.0,
                 padding: { left: 12.0 },
-                draw_text: { color: #7f849c, text_style: <THEME_FONT_REGULAR> { font_size: 9.0 } },
+                draw_text: { color: #98989b, text_style: <THEME_FONT_REGULAR> { font_size: 9.0 } },
                 text: ""
             }
         }
@@ -348,13 +349,13 @@ pub fn can_navigate_blocks(blocks: usize) -> bool {
 pub fn origin_badge_colors(origin: &str) -> ([f32; 4], [f32; 4]) {
     if origin.eq_ignore_ascii_case("external") {
         (
-            [250.0 / 255.0, 179.0 / 255.0, 135.0 / 255.0, 1.0],
-            [61.0 / 255.0, 47.0 / 255.0, 31.0 / 255.0, 1.0],
+            [179.0 / 255.0, 220.0 / 255.0, 1.0, 1.0],
+            [45.0 / 255.0, 74.0 / 255.0, 99.0 / 255.0, 1.0],
         )
     } else {
         (
-            [137.0 / 255.0, 180.0 / 255.0, 250.0 / 255.0, 1.0],
-            [34.0 / 255.0, 50.0 / 255.0, 77.0 / 255.0, 1.0],
+            [1.0, 156.0 / 255.0, 106.0 / 255.0, 1.0],
+            [58.0 / 255.0, 42.0 / 255.0, 36.0 / 255.0, 1.0],
         )
     }
 }
@@ -436,12 +437,12 @@ impl Widget for CrawradHistoryPanel {
                     if is_selected {
                         item.apply_over(
                             cx,
-                            live! { draw_bg: { color: (vec4(0.180, 0.278, 0.478, 1.0)) } },
+                            live! { draw_bg: { color: (vec4(0.173, 0.271, 0.365, 1.0)) } },
                         );
                     } else {
                         item.apply_over(
                             cx,
-                            live! { draw_bg: { color: (vec4(0.094, 0.094, 0.145, 1.0)) } },
+                            live! { draw_bg: { color: (vec4(0.114, 0.122, 0.125, 1.0)) } },
                         );
                     }
                     item.label(id!(lbl_time)).set_text(cx, &entry.time);
@@ -468,12 +469,12 @@ impl Widget for CrawradHistoryPanel {
                     if is_selected {
                         item.apply_over(
                             cx,
-                            live! { draw_bg: { color: (vec4(0.180, 0.278, 0.478, 1.0)) } },
+                            live! { draw_bg: { color: (vec4(0.173, 0.271, 0.365, 1.0)) } },
                         );
                     } else {
                         item.apply_over(
                             cx,
-                            live! { draw_bg: { color: (vec4(0.094, 0.094, 0.145, 1.0)) } },
+                            live! { draw_bg: { color: (vec4(0.114, 0.122, 0.125, 1.0)) } },
                         );
                     }
                     item.label(id!(c_saved)).set_text(cx, &entry.time);
@@ -569,9 +570,9 @@ impl CrawradHistoryPanel {
         ] {
             let btn = self.view.button(btn_id);
             if active {
-                btn.apply_over(cx, live! { draw_bg: { color: (vec4(0.180, 0.278, 0.478, 1.0)), color_hover: (vec4(0.220, 0.345, 0.588, 1.0)), color_down: (vec4(0.220, 0.345, 0.588, 1.0)) } });
+                btn.apply_over(cx, live! { draw_bg: { color: (vec4(0.251, 0.259, 0.271, 1.0)), color_hover: (vec4(0.290, 0.298, 0.310, 1.0)), color_down: (vec4(0.290, 0.298, 0.310, 1.0)) } });
             } else {
-                btn.apply_over(cx, live! { draw_bg: { color: (vec4(0.118, 0.118, 0.180, 1.0)), color_hover: (vec4(0.149, 0.149, 0.216, 1.0)), color_down: (vec4(0.149, 0.149, 0.216, 1.0)) } });
+                btn.apply_over(cx, live! { draw_bg: { color: (vec4(0.169, 0.169, 0.176, 1.0)), color_hover: (vec4(0.208, 0.216, 0.227, 1.0)), color_down: (vec4(0.208, 0.216, 0.227, 1.0)) } });
             }
         }
         self.view.redraw(cx);

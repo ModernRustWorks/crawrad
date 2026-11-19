@@ -20,5 +20,5 @@ ground for an unchanged line.
 ```rust
 use crawrad_runtime_makepad::diff_view::{diff_row_tint, DiffRowKind};
 
-assert_eq!(diff_row_tint(DiffRowKind::Same), "#181825");
+assert_eq!(diff_row_tint(DiffRowKind::Same), "#1d1f20");
 ```

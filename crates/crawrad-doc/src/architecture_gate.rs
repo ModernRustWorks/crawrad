@@ -94,7 +94,7 @@ pub const ALLOWED_SHELL_ROOT_FILES: &[&str] = &["ide_app.rs", "main.rs"];
 /// editor's context menu and the menus' keyboard.
 /// Ratchet rule: This threshold can ONLY DECREASE as code is extracted into crates.
 /// The gate enforces equality: if lines decrease, the constant must be lowered in the same PR.
-pub const MAX_SHELL_SOURCE_LINES: usize = 33_071;
+pub const MAX_SHELL_SOURCE_LINES: usize = 33_064;
 
 /// Maximum allowed lines for any individual `.rs` file in `crates/crawrad-ide/src/` (outside `test/`).
 ///

@@ -7,6 +7,7 @@ live_design! {
     use link::widgets::*;
     use link::theme::*;
     use link::shaders::*;
+    use crate::borderless::*;
 
     LangChipSlot = <RoundedView> {
         visible: false,
@@ -235,10 +236,9 @@ live_design! {
     pub TranslationsView = {{TranslationsView}} {
         width: Fill, height: Fill,
         flow: Overlay,
-        show_bg: true,
-        draw_bg: { color: #1b1d1f }
 
-        main_content = <View> {
+        main_content = <CrawradTopRounded> {
+            draw_bg: { color: #1d1f20 }
             width: Fill, height: Fill,
             flow: Down,
 

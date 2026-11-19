@@ -249,7 +249,9 @@ pub fn prepare_main_window() -> bool {
         GetMonitorInfoW, MONITOR_DEFAULTTONEAREST, MONITORINFO, MonitorFromWindow,
     };
     use windows_sys::Win32::UI::Shell::{DefSubclassProc, RemoveWindowSubclass, SetWindowSubclass};
-    use windows_sys::Win32::UI::WindowsAndMessaging::{MINMAXINFO, WM_GETMINMAXINFO, WM_NCDESTROY};
+    use windows_sys::Win32::UI::WindowsAndMessaging::{
+        IsZoomed, MINMAXINFO, WM_GETMINMAXINFO, WM_NCCALCSIZE, WM_NCDESTROY,
+    };
 
     const SUBCLASS_ID: usize = 0x4352_4157;
     static INSTALLED: AtomicBool = AtomicBool::new(false);
@@ -285,6 +287,13 @@ pub fn prepare_main_window() -> bool {
                 mmi.ptMaxSize.y = info.rcWork.bottom - info.rcWork.top;
             }
             return r;
+        }
+        // Maximized, the window already IS the work area (above), so its client is the
+        // whole window: Makepad hands this message to the default procedure, which
+        // takes the sizing border off every side and leaves a 7 px empty frame.
+        // SAFETY: `IsZoomed` only reads the state of the valid `hwnd` Windows passed in.
+        if msg == WM_NCCALCSIZE && wparam != 0 && unsafe { IsZoomed(hwnd) } != 0 {
+            return 0;
         }
         if msg == WM_NCDESTROY {
             // SAFETY: Cleans up the subclass when the window's non-client area is destroyed.

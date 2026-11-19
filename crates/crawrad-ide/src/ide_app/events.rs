@@ -75,6 +75,11 @@ impl AppMain for IdeApp {
             self.iniciar_mcp(cx);
         }
         self.fit_on_screen_once(cx);
+        if !self.fit_on_screen_pending
+            && maximize::followed(event, &mut self.maximizada, &mut self.restore_to)
+        {
+            self.show_window_button(cx);
+        }
         self.restore_desktop_tabs(cx);
         let welcome = id!(designer_row.welcome_container);
         if self.host.center() == Center::Welcome

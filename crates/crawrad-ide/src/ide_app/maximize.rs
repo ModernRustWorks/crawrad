@@ -3,7 +3,7 @@ use super::*;
 use crawrad_note::note;
 use crawrad_os::ScreenRect;
 
-pub use crawrad_runtime_makepad::window::{centre_in_physical_pixels, on_screen};
+pub use crawrad_runtime_makepad::window::{centre_in_physical_pixels, followed, on_screen};
 
 impl IdeApp {
     #[note("ide-app-maximize-ideapp-toggle-maximized")]
@@ -64,12 +64,7 @@ impl IdeApp {
         }
         self.fit_on_screen_pending = false;
         let kept = self.startup_window.take();
-        let kept = kept.map(|w| ScreenRect {
-            x: w.x,
-            y: w.y,
-            width: w.width,
-            height: w.height,
-        });
+        let kept = kept.map(|w| ScreenRect::of_window([w.x, w.y], [w.width, w.height], 1.0));
         self.restore_to = Some(kept.unwrap_or(antes));
         self.maximizada = true;
         self.show_window_button(cx);

@@ -118,13 +118,13 @@ checksum = "4e7648175b45a9a48536d676f68d918270699102aa8dab5496df06904c914600"
 name = "contacts"
 version = "0.1.0"
 dependencies = [
+ "crawrad-runtime",
+ "crawrad-runtime-makepad",
  "datagrid",
  "datagrid-sql",
  "embed-resource",
  "makepad-widgets",
  "portadb-crawrad",
- "crawrad-runtime",
- "crawrad-runtime-makepad",
 ]
 
 [[package]]
@@ -134,6 +134,90 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec182b0ca2f35d8fc196cf3404988fd8b8c739a4d270ff118a398feb0cbec1ca"
 dependencies = [
  "unicode-segmentation",
+]
+
+[[package]]
+name = "crawrad-component"
+version = "0.1.0"
+
+[[package]]
+name = "crawrad-component-derive"
+version = "0.1.0"
+dependencies = [
+ "crawrad-manifest-gen",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
+]
+
+[[package]]
+name = "crawrad-ir"
+version = "0.1.0"
+dependencies = [
+ "crawrad-note",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
+name = "crawrad-manifest-gen"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "syn 2.0.119",
+]
+
+[[package]]
+name = "crawrad-note"
+version = "0.1.0"
+dependencies = [
+ "crawrad-note-format",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
+]
+
+[[package]]
+name = "crawrad-note-format"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
+]
+
+[[package]]
+name = "crawrad-os"
+version = "0.1.0"
+dependencies = [
+ "crawrad-note",
+ "windows-sys",
+]
+
+[[package]]
+name = "crawrad-runtime"
+version = "0.1.0"
+dependencies = [
+ "crawrad-component",
+ "crawrad-ir",
+ "crawrad-note",
+ "datagrid",
+ "rfd",
+ "thiserror",
+]
+
+[[package]]
+name = "crawrad-runtime-makepad"
+version = "0.1.0"
+dependencies = [
+ "crawrad-component",
+ "crawrad-ir",
+ "crawrad-note",
+ "crawrad-os",
+ "crawrad-runtime",
+ "datagrid",
+ "makepad-widgets",
 ]
 
 [[package]]
@@ -944,6 +1028,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "portadb-crawrad"
+version = "0.1.0"
+dependencies = [
+ "crawrad-component",
+ "crawrad-component-derive",
+]
+
+[[package]]
 name = "portadb-redis"
 version = "0.1.0"
 dependencies = [
@@ -957,14 +1049,6 @@ dependencies = [
  "portadb-core",
  "rusqlite",
  "tokio",
-]
-
-[[package]]
-name = "portadb-crawrad"
-version = "0.1.0"
-dependencies = [
- "crawrad-component",
- "crawrad-component-derive",
 ]
 
 [[package]]
@@ -1090,90 +1174,6 @@ name = "roxmltree"
 version = "0.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6c20b6793b5c2fa6553b250154b78d6d0db37e72700ae35fad9387a46f487c97"
-
-[[package]]
-name = "crawrad-component"
-version = "0.1.0"
-
-[[package]]
-name = "crawrad-component-derive"
-version = "0.1.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "crawrad-manifest-gen",
- "syn 2.0.119",
-]
-
-[[package]]
-name = "crawrad-ir"
-version = "0.1.0"
-dependencies = [
- "crawrad-note",
- "serde",
- "serde_json",
- "thiserror",
-]
-
-[[package]]
-name = "crawrad-manifest-gen"
-version = "0.1.0"
-dependencies = [
- "proc-macro2",
- "syn 2.0.119",
-]
-
-[[package]]
-name = "crawrad-note"
-version = "0.1.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "crawrad-note-format",
- "syn 2.0.119",
-]
-
-[[package]]
-name = "crawrad-note-format"
-version = "0.1.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.119",
-]
-
-[[package]]
-name = "crawrad-os"
-version = "0.1.0"
-dependencies = [
- "crawrad-note",
- "windows-sys",
-]
-
-[[package]]
-name = "crawrad-runtime"
-version = "0.1.0"
-dependencies = [
- "datagrid",
- "rfd",
- "crawrad-component",
- "crawrad-ir",
- "crawrad-note",
- "thiserror",
-]
-
-[[package]]
-name = "crawrad-runtime-makepad"
-version = "0.1.0"
-dependencies = [
- "datagrid",
- "makepad-widgets",
- "crawrad-component",
- "crawrad-ir",
- "crawrad-note",
- "crawrad-os",
- "crawrad-runtime",
-]
 
 [[package]]
 name = "rusqlite"

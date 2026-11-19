@@ -18,8 +18,7 @@ centered on it, like the RXP's `Align2::CENTER_TOP`
 
 `scale` is the same one as the frame's [`crate::Transformacao`] — the gap
 and the line height are DESIGN measures, and they shrink with the zoom along
-with the badge. (The FONT size does not scale yet: that is the debt of
-<https://github.com/ModernRustWorks/crawrad/issues/112>, and it is not fixed
+with the badge. (The FONT size does not scale yet: that is a tracked debt, and it is not fixed
 here.)
 
 The width is generous on purpose: `VeryLongName1` does not fit in 28 points,

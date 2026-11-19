@@ -44,7 +44,6 @@ pub(super) const ALIGN_ZONES: [(ZonePath, &str); 5] = [
     ),
 ];
 
-
 #[note("ide-app-constants-novo-campos")]
 pub(super) const NOVO_CAMPOS: [(ZonePath, &str); 3] = [
     (|| id!(novo_nome), "Name"),

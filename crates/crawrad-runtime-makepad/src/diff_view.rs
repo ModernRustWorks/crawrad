@@ -18,7 +18,7 @@ live_design! {
         flow: Right,
         align: { y: 0.5 },
         show_bg: true,
-        draw_bg: { color: #181825 }
+        draw_bg: { color: #1d1f20 }
         // The 3 px mark in the gutter: the colour of the change, on the side
         // that has it. Clear on an unchanged line.
         bar = <View> {
@@ -35,7 +35,7 @@ live_design! {
             padding: { left: 2.0 },
             align: { x: 0.0, y: 0.5 },
             draw_text: {
-                color: #7f849c,
+                color: #98989b,
                 text_style: <THEME_FONT_CODE> { font_size: 9.0 }
             }
             text: ""
@@ -49,7 +49,7 @@ live_design! {
             flow: Right,
             align: { x: 0.0, y: 0.5 },
             draw_text: {
-                color: #cdd6f4,
+                color: #e7e7ea,
                 text_style: <THEME_FONT_CODE> { font_size: 9.0 }
             }
             text: ""
@@ -63,30 +63,30 @@ live_design! {
     // colour, not as a difference.
     DiffCellAdded = <DiffCell> {
         draw_bg: { color: #1c2a24 }
-        bar = { draw_bg: { color: #a6e3a1 } }
-        gutter = { draw_text: { color: #a6e3a1 } }
+        bar = { draw_bg: { color: #7cb46b } }
+        gutter = { draw_text: { color: #7cb46b } }
     }
     DiffCellRemoved = <DiffCell> {
         draw_bg: { color: #2a1c24 }
-        bar = { draw_bg: { color: #f38ba8 } }
-        gutter = { draw_text: { color: #f38ba8 } }
+        bar = { draw_bg: { color: #e2726b } }
+        gutter = { draw_text: { color: #e2726b } }
     }
     DiffCellChanged = <DiffCell> {
-        draw_bg: { color: #1d2236 }
-        bar = { draw_bg: { color: #89b4fa } }
-        gutter = { draw_text: { color: #89b4fa } }
+        draw_bg: { color: #1d2d3d }
+        bar = { draw_bg: { color: #b3dcff } }
+        gutter = { draw_text: { color: #b3dcff } }
     }
 
     DiffRowBase = <View> {
         width: Fill, height: 20.0,
         flow: Right,
         show_bg: true,
-        draw_bg: { color: #181825 }
+        draw_bg: { color: #1d1f20 }
         left_col = <DiffCell> {}
         sep = <View> {
             width: 1.0, height: Fill,
             show_bg: true,
-            draw_bg: { color: #313244 }
+            draw_bg: { color: #424244 }
         }
         right_col = <DiffCell> {}
         // The list's vertical scroll bar sits over the right edge: the text
@@ -101,11 +101,11 @@ live_design! {
         width: Fill, height: Fill,
         padding: { left: 42.0, top: 3.0, bottom: 3.0, right: 4.0 },
         show_bg: true,
-        draw_bg: { color: #181825 }
+        draw_bg: { color: #1d1f20 }
         thumb = <View> {
             width: 0.0, height: Fill,
             show_bg: true,
-            draw_bg: { color: #45475a }
+            draw_bg: { color: #4d4f52 }
         }
     }
 
@@ -115,7 +115,7 @@ live_design! {
         width: Fill, height: Fill,
         flow: Down,
         show_bg: true,
-        draw_bg: { color: #181825 }
+        draw_bg: { color: #1d1f20 }
 
         list = <PortalList> {
             width: Fill, height: Fill,
@@ -138,7 +138,7 @@ live_design! {
             width: Fill, height: 12.0,
             flow: Right,
             left_track = <DiffHTrack> {}
-            <View> { width: 1.0, height: Fill, show_bg: true, draw_bg: { color: #313244 } }
+            <View> { width: 1.0, height: Fill, show_bg: true, draw_bg: { color: #424244 } }
             right_track = <DiffHTrack> {}
             <View> { width: (SCROLL_BAR_GAP), height: Fill }
         }
@@ -161,10 +161,10 @@ pub enum DiffRowKind {
 #[crawrad_note::note("diff-view-diff-row-tint")]
 pub fn diff_row_tint(kind: DiffRowKind) -> &'static str {
     match kind {
-        DiffRowKind::Same => "#181825",
+        DiffRowKind::Same => "#1d1f20",
         DiffRowKind::Removed => "#2a1c24",
         DiffRowKind::Added => "#1c2a24",
-        DiffRowKind::Changed => "#1d2236",
+        DiffRowKind::Changed => "#1d2d3d",
     }
 }
 
@@ -172,9 +172,9 @@ pub fn diff_row_tint(kind: DiffRowKind) -> &'static str {
 pub fn diff_row_accent(kind: DiffRowKind) -> Option<&'static str> {
     match kind {
         DiffRowKind::Same => None,
-        DiffRowKind::Removed => Some("#f38ba8"),
-        DiffRowKind::Added => Some("#a6e3a1"),
-        DiffRowKind::Changed => Some("#89b4fa"),
+        DiffRowKind::Removed => Some("#e2726b"),
+        DiffRowKind::Added => Some("#7cb46b"),
+        DiffRowKind::Changed => Some("#b3dcff"),
     }
 }
 

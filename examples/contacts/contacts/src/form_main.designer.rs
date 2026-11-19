@@ -580,6 +580,7 @@ pub struct Grid {
     pub default_col_width: i64,
     pub default_row_height: i64,
     pub grid_lines: bool,
+    pub group_bar: bool,
     pub editing: bool,
     pub cell_text: String,
     pub data_source: String,
@@ -596,7 +597,7 @@ live_design! {
 
     App = {{App}} {
         ui: <Window> {
-            window: {inner_size: vec2(646.0, 420.0), title: "Form1"},
+            window: {inner_size: vec2(646.0, 420.0), title: "Contacts"},
             // THE TITLE BAR IS DRAWN BY MAKEPAD ITSELF, and it
             // starts out saying "Makepad"
             // (`makepad-widgets-1.0.0/src/window.rs:33`). Without this line the
@@ -605,7 +606,7 @@ live_design! {
             // the SYSTEM title, this is the label Makepad paints.
             // `margin: 0`: Makepad's label has a 100 px left margin; in a narrow
             // window it leaves no room and the title is not drawn at all.
-            caption_bar = { caption_label = { label = { text: "Form1", margin: {left: 0} } } },
+            caption_bar = { caption_label = { label = { text: "Contacts", margin: {left: 0} } } },
             pass: {clear_color: #242424},
             body = <View> {
                 flow: Overlay,
@@ -673,6 +674,7 @@ impl App {
             };
             crawrad_runtime_makepad::CrawradDataGridWidgetRefExt::crawrad_data_grid(&self.ui, id!(grid1)).set_source(cx, source, columns);
             crawrad_runtime_makepad::CrawradDataGridWidgetRefExt::crawrad_data_grid(&self.ui, id!(grid1)).set_row_height(self.form.grid1.default_row_height as f64);
+            crawrad_runtime_makepad::CrawradDataGridWidgetRefExt::crawrad_data_grid(&self.ui, id!(grid1)).set_group_bar(cx, self.form.grid1.group_bar);
         }
         crawrad_runtime_makepad::dialogs::sync_message_dialog(cx, &self.ui.view(id!(crawrad_message_dialog)));
         self.ui.redraw(cx);
@@ -712,8 +714,8 @@ impl Form for FormMain {
 impl Default for FormMain {
     fn default() -> Self {
         Self {
-            base: FormBase::new("Form1", 646.0, 420.0),
-            sqlite1: portadb_crawrad::SqliteProvider {},
+            base: FormBase::new("Contacts", 646.0, 420.0),
+            sqlite1: portadb_crawrad::SqliteProvider::default(),
             conn1: portadb_crawrad::Connection { provider: "sqlite1".to_string(), url: "sqlite:contacts.db".to_string(), max_connections: 10, connect_timeout: 30000, connected: false },
             dst1: portadb_crawrad::Dataset { connection: "conn1".to_string(), table: "".to_string(), sql: "SELECT name, email, city FROM contacts ORDER BY name".to_string(), active: false },
             grid1: Grid {
@@ -730,6 +732,7 @@ visible: true,
     default_col_width: 80,
     default_row_height: 24,
     grid_lines: true,
+    group_bar: false,
     editing: false,
     cell_text: "".to_string(),
     data_source: "dst1".to_string(),
@@ -744,6 +747,10 @@ visible: true,
 impl LiveRegister for App {
     fn live_register(cx: &mut Cx) {
         makepad_widgets::live_design(cx);
+        #[cfg(target_arch = "wasm32")]
+        cx.link(live_id!(theme), live_id!(crawrad_theme_light));
+        #[cfg(not(target_arch = "wasm32"))]
+        cx.link(live_id!(theme), live_id!(crawrad_theme_dark));
         crawrad_runtime_makepad::live_design(cx);
     }
 }
@@ -759,6 +766,8 @@ impl AppMain for App {
     fn handle_event(&mut self, cx: &mut Cx, event: &Event) {
         if self.initial_sync {
             self.initial_sync = false;
+            #[cfg(target_arch = "wasm32")]
+            crawrad_runtime_makepad::look::light_page(cx, &self.ui);
             self.sync_ui(cx);
         }
         if crawrad_runtime_makepad::dialogs::handle_dialog_key(cx, &self.ui.view(id!(crawrad_message_dialog)), event) {
@@ -808,7 +817,7 @@ impl AppMain for App {
         }
         self.match_event(cx, event);
         self.ui.handle_event(cx, event, &mut Scope::empty());
-        // #667: the Cursor of the control under the pointer, or the form's
+        // the Cursor of the control under the pointer, or the form's
         if let Event::MouseMove(e) = event {
             let mut cursor: Option<&str> = None;
             if cursor.is_none() && self.form.grid1.visible && self.form.grid1.enabled && self.ui.widget(id!(grid1)).area().rect(cx).contains(e.abs) {

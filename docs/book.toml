@@ -12,8 +12,9 @@ create-missing = false
 default-theme = "navy"
 preferred-dark-theme = "navy"
 no-section-label = false
+site-url = "/crawrad/manual/"
 git-repository-url = "https://github.com/ModernRustWorks/crawrad"
-edit-url-template = "https://github.com/ModernRustWorks/crawrad/edit/main/docs/{path}"
+edit-url-template = "https://github.com/ModernRustWorks/crawrad/edit/main/docs/src/{path}"
 
 [output.html.search]
 enable = true

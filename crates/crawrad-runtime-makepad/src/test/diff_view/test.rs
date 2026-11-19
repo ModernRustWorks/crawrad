@@ -1,15 +1,16 @@
 use super::*;
 
 #[test]
-fn diff_row_tints_match_approved_spec() {
-    assert_eq!(diff_row_tint(DiffRowKind::Same), "#181825");
+fn diff_row_tints_follow_the_ide_theme() {
+    // The History page follows the IDE theme tokens, not a palette of its own (owner, 19/11).
+    assert_eq!(diff_row_tint(DiffRowKind::Same), "#1d1f20");
     assert_eq!(diff_row_tint(DiffRowKind::Removed), "#2a1c24");
     assert_eq!(diff_row_tint(DiffRowKind::Added), "#1c2a24");
-    assert_eq!(diff_row_tint(DiffRowKind::Changed), "#1d2236");
+    assert_eq!(diff_row_tint(DiffRowKind::Changed), "#1d2d3d");
     assert_eq!(diff_row_accent(DiffRowKind::Same), None);
-    assert_eq!(diff_row_accent(DiffRowKind::Removed), Some("#f38ba8"));
-    assert_eq!(diff_row_accent(DiffRowKind::Added), Some("#a6e3a1"));
-    assert_eq!(diff_row_accent(DiffRowKind::Changed), Some("#89b4fa"));
+    assert_eq!(diff_row_accent(DiffRowKind::Removed), Some("#e2726b"));
+    assert_eq!(diff_row_accent(DiffRowKind::Added), Some("#7cb46b"));
+    assert_eq!(diff_row_accent(DiffRowKind::Changed), Some("#b3dcff"));
 }
 
 #[test]

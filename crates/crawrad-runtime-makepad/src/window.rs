@@ -49,6 +49,35 @@ pub fn centre_in_physical_pixels(
     (r.x + r.width / 2.0, r.y + r.height / 2.0)
 }
 
+/// A window moved or sized from OUTSIDE its title-bar button — dragged, snapped,
+/// Win+arrow, another program: its new "maximized" state, when it changed.
+///
+/// Maximized means covering the work area of the monitor under the window's
+/// centre (2 px of DPI rounding allowed). Maximized from outside, Restore goes
+/// back to the rectangle the window had just before; restored, there is
+/// nothing to go back to.
+#[note("window-followed")]
+pub fn followed(event: &Event, maximized: &mut bool, restore_to: &mut Option<ScreenRect>) -> bool {
+    let Event::WindowGeomChange(change) = event else {
+        return false;
+    };
+    let now = on_screen(&change.new_geom);
+    let Some(area) = crawrad_os::monitor_at(centre_in_physical_pixels(&change.new_geom)) else {
+        return false;
+    };
+    let (work, near) = (area.work, |a: f64, b: f64| (a - b).abs() <= 2.0);
+    let covers = near(now.x, work.x)
+        && near(now.y, work.y)
+        && near(now.width, work.width)
+        && near(now.height, work.height);
+    if covers == *maximized {
+        return false;
+    }
+    *maximized = covers;
+    *restore_to = covers.then(|| on_screen(&change.old_geom));
+    true
+}
+
 #[cfg(test)]
 #[path = "test/window/test.rs"]
 mod tests;

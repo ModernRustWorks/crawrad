@@ -407,7 +407,7 @@ live_design! {
 
             history_container = <View> {
                 visible: false,
-                width: Fill, height: Fill,
+                width: Fill, height: Fill, margin: { left: 1.0, right: 1.0, top: 1.0 },
                 history_panel = <CrawradHistoryPanel> {}
             }
 
@@ -419,13 +419,13 @@ live_design! {
 
             sizes_container = <View> {
                 visible: false,
-                width: Fill, height: Fill,
+                width: Fill, height: Fill, margin: { left: 1.0, right: 1.0, top: 1.0 },
                 sizes_panel = <SizePreviewView> {}
             }
 
             translations_container = <View> {
                 visible: false,
-                width: Fill, height: Fill,
+                width: Fill, height: Fill, margin: { left: 1.0, right: 1.0, top: 1.0 },
                 translations_panel = <TranslationsView> {}
             }
         }

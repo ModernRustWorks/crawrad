@@ -20,7 +20,7 @@ vulnerability.** Public disclosure before a fix is available puts users at risk.
 
 Report privately through **GitHub Private Vulnerability Reporting**:
 
-1. Go to the CrawRAD repository: [github.com/isaquepinheiro/CrawRAD](https://github.com/isaquepinheiro/CrawRAD).
+1. Go to the CrawRAD repository: [github.com/ModernRustWorks/crawrad](https://github.com/ModernRustWorks/crawrad).
 2. Click on the **Security** tab.
 3. Select **Report a vulnerability** to open an advisory draft.
 

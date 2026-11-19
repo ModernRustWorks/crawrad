@@ -141,7 +141,7 @@
         },
         "text": {
           "t": "Str",
-          "v": "Form1"
+          "v": "Contacts"
         },
         "theme": {
           "t": "Enum",
