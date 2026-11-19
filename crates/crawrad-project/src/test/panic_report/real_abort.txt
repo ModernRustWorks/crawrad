@@ -1,0 +1,33 @@
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.58s
+     Running `target\debug\meu_app.exe`
+
+thread 'main' (34176) panicked at src\form_main.rs:13:21:
+attempt to divide by zero
+stack backtrace:
+   0: std::panicking::panic_handler
+             at /rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library\std\src\panicking.rs:689
+   1: core::panicking::panic_fmt
+             at /rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library\core\src\panicking.rs:80
+   2: core::panicking::panic_const::panic_const_div_by_zero
+             at /rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library\core\src\panicking.rs:175
+   3: meu_app::form_main_designer::FormMain::btn_ok_click
+             at .\src\form_main.rs:13
+   4: meu_app::form_main_designer::impl$24::handle_actions
+             at .\src\form_main.designer.rs:1355
+   5: makepad_draw::match_event::MatchEvent::match_event<meu_app::form_main_designer::App>
+             at C:\Users\User\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\makepad-draw-1.0.0\src\match_event.rs:80
+   6: meu_app::form_main_designer::impl$25::handle_event
+             at .\src\form_main.designer.rs:1694
+   7: meu_app::form_main_designer::app_main::closure$0
+             at C:\Users\User\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\makepad-platform-1.0.0\src\app_main.rs:37
+   8: makepad_platform::cx::Cx::inner_call_event_handler
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+
+thread 'main' (34176) panicked at /rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library\core\src\panicking.rs:225:5:
+panic in a function that cannot unwind
+stack backtrace:
+   0: std::panicking::panic_handler
+             at /rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library\std\src\panicking.rs:689
+   1: meu_app::form_main_designer::FormMain::btn_ok_click
+             at .\src\form_main.rs:13
+thread caused non-unwinding panic. aborting.

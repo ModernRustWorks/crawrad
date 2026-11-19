@@ -1,0 +1,21 @@
+[package]
+name = "crawrad-runtime-egui"
+version = "0.1.0"
+description = "RXP — o runtime em egui: superfície de design fora do Windows (ADR 0007) e alvo de geração (ADR 0004)"
+edition.workspace = true
+license = "MIT OR Apache-2.0"
+authors.workspace = true
+
+[dependencies]
+crawrad-note = { workspace = true }
+datagrid.workspace = true
+crawrad-component.workspace = true
+crawrad-ir.workspace = true
+crawrad-runtime.workspace = true
+egui = "0.36.1"
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+crawrad-registry.workspace = true

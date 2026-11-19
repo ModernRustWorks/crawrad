@@ -1,0 +1,17 @@
+[package]
+name = "crawrad-settings"
+version = "0.1.0"
+description = "SQLite-backed settings and recent folders store for the CrawRAD IDE"
+edition.workspace = true
+license.workspace = true
+publish = false
+authors.workspace = true
+
+[dependencies]
+crawrad-note = { workspace = true }
+portadb = { path = "../../components/portadb", features = ["rusqlite"] }
+tokio = { version = "1.43", features = ["rt"] }
+thiserror.workspace = true
+
+[lints]
+workspace = true

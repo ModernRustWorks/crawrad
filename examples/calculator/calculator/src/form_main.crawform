@@ -1,0 +1,2401 @@
+{
+  "format": 2,
+  "root": "form_main",
+  "nodes": {
+    "button1": {
+      "id": "button1",
+      "class": "Button",
+      "props": {
+        "action": {
+          "t": "Ref",
+          "v": ""
+        },
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 16.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "name": {
+          "t": "Str",
+          "v": "btn_7"
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": false
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 12.0,
+            "y": 64.0,
+            "w": 54.0,
+            "h": 54.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "tab_order": {
+          "t": "Int",
+          "v": 1
+        },
+        "tab_stop": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "7"
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      },
+      "events": {
+        "on_click": "btn_7_click"
+      }
+    },
+    "button10": {
+      "id": "button10",
+      "class": "Button",
+      "props": {
+        "action": {
+          "t": "Ref",
+          "v": ""
+        },
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 16.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "name": {
+          "t": "Str",
+          "v": "btn_2"
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": false
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 74.0,
+            "y": 188.0,
+            "w": 54.0,
+            "h": 54.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "tab_order": {
+          "t": "Int",
+          "v": 10
+        },
+        "tab_stop": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "2"
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      },
+      "events": {
+        "on_click": "btn_2_click"
+      }
+    },
+    "button11": {
+      "id": "button11",
+      "class": "Button",
+      "props": {
+        "action": {
+          "t": "Ref",
+          "v": ""
+        },
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 16.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "name": {
+          "t": "Str",
+          "v": "btn_3"
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": false
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 136.0,
+            "y": 188.0,
+            "w": 54.0,
+            "h": 54.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "tab_order": {
+          "t": "Int",
+          "v": 11
+        },
+        "tab_stop": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "3"
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      },
+      "events": {
+        "on_click": "btn_3_click"
+      }
+    },
+    "button12": {
+      "id": "button12",
+      "class": "Button",
+      "props": {
+        "action": {
+          "t": "Ref",
+          "v": ""
+        },
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 16.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "name": {
+          "t": "Str",
+          "v": "btn_subtract"
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": false
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 198.0,
+            "y": 188.0,
+            "w": 54.0,
+            "h": 54.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "tab_order": {
+          "t": "Int",
+          "v": 12
+        },
+        "tab_stop": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "-"
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      },
+      "events": {
+        "on_click": "btn_subtract_click"
+      }
+    },
+    "button13": {
+      "id": "button13",
+      "class": "Button",
+      "props": {
+        "action": {
+          "t": "Ref",
+          "v": ""
+        },
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 16.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "name": {
+          "t": "Str",
+          "v": "btn_clear"
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": false
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 12.0,
+            "y": 250.0,
+            "w": 54.0,
+            "h": 54.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "tab_order": {
+          "t": "Int",
+          "v": 13
+        },
+        "tab_stop": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "C"
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      },
+      "events": {
+        "on_click": "btn_clear_click"
+      }
+    },
+    "button14": {
+      "id": "button14",
+      "class": "Button",
+      "props": {
+        "action": {
+          "t": "Ref",
+          "v": ""
+        },
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 16.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "name": {
+          "t": "Str",
+          "v": "btn_0"
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": false
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 74.0,
+            "y": 250.0,
+            "w": 54.0,
+            "h": 54.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "tab_order": {
+          "t": "Int",
+          "v": 14
+        },
+        "tab_stop": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "0"
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      },
+      "events": {
+        "on_click": "btn_0_click"
+      }
+    },
+    "button15": {
+      "id": "button15",
+      "class": "Button",
+      "props": {
+        "action": {
+          "t": "Ref",
+          "v": ""
+        },
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 16.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "name": {
+          "t": "Str",
+          "v": "btn_equals"
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": false
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 136.0,
+            "y": 250.0,
+            "w": 54.0,
+            "h": 54.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "tab_order": {
+          "t": "Int",
+          "v": 15
+        },
+        "tab_stop": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "="
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      },
+      "events": {
+        "on_click": "btn_equals_click"
+      }
+    },
+    "button16": {
+      "id": "button16",
+      "class": "Button",
+      "props": {
+        "action": {
+          "t": "Ref",
+          "v": ""
+        },
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 16.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "name": {
+          "t": "Str",
+          "v": "btn_add"
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": false
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 198.0,
+            "y": 250.0,
+            "w": 54.0,
+            "h": 54.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "tab_order": {
+          "t": "Int",
+          "v": 16
+        },
+        "tab_stop": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "+"
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      },
+      "events": {
+        "on_click": "btn_add_click"
+      }
+    },
+    "button2": {
+      "id": "button2",
+      "class": "Button",
+      "props": {
+        "action": {
+          "t": "Ref",
+          "v": ""
+        },
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 16.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "name": {
+          "t": "Str",
+          "v": "btn_8"
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": false
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 74.0,
+            "y": 64.0,
+            "w": 54.0,
+            "h": 54.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "tab_order": {
+          "t": "Int",
+          "v": 2
+        },
+        "tab_stop": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "8"
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      },
+      "events": {
+        "on_click": "btn_8_click"
+      }
+    },
+    "button3": {
+      "id": "button3",
+      "class": "Button",
+      "props": {
+        "action": {
+          "t": "Ref",
+          "v": ""
+        },
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 16.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "name": {
+          "t": "Str",
+          "v": "btn_9"
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": false
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 136.0,
+            "y": 64.0,
+            "w": 54.0,
+            "h": 54.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "tab_order": {
+          "t": "Int",
+          "v": 3
+        },
+        "tab_stop": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "9"
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      },
+      "events": {
+        "on_click": "btn_9_click"
+      }
+    },
+    "button4": {
+      "id": "button4",
+      "class": "Button",
+      "props": {
+        "action": {
+          "t": "Ref",
+          "v": ""
+        },
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 16.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "name": {
+          "t": "Str",
+          "v": "btn_divide"
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": false
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 198.0,
+            "y": 64.0,
+            "w": 54.0,
+            "h": 54.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "tab_order": {
+          "t": "Int",
+          "v": 4
+        },
+        "tab_stop": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "/"
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      },
+      "events": {
+        "on_click": "btn_divide_click"
+      }
+    },
+    "button5": {
+      "id": "button5",
+      "class": "Button",
+      "props": {
+        "action": {
+          "t": "Ref",
+          "v": ""
+        },
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 16.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "name": {
+          "t": "Str",
+          "v": "btn_4"
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": false
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 12.0,
+            "y": 126.0,
+            "w": 54.0,
+            "h": 54.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "tab_order": {
+          "t": "Int",
+          "v": 5
+        },
+        "tab_stop": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "4"
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      },
+      "events": {
+        "on_click": "btn_4_click"
+      }
+    },
+    "button6": {
+      "id": "button6",
+      "class": "Button",
+      "props": {
+        "action": {
+          "t": "Ref",
+          "v": ""
+        },
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 16.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "name": {
+          "t": "Str",
+          "v": "btn_5"
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": false
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 74.0,
+            "y": 126.0,
+            "w": 54.0,
+            "h": 54.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "tab_order": {
+          "t": "Int",
+          "v": 6
+        },
+        "tab_stop": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "5"
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      },
+      "events": {
+        "on_click": "btn_5_click"
+      }
+    },
+    "button7": {
+      "id": "button7",
+      "class": "Button",
+      "props": {
+        "action": {
+          "t": "Ref",
+          "v": ""
+        },
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 16.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "name": {
+          "t": "Str",
+          "v": "btn_6"
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": false
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 136.0,
+            "y": 126.0,
+            "w": 54.0,
+            "h": 54.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "tab_order": {
+          "t": "Int",
+          "v": 7
+        },
+        "tab_stop": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "6"
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      },
+      "events": {
+        "on_click": "btn_6_click"
+      }
+    },
+    "button8": {
+      "id": "button8",
+      "class": "Button",
+      "props": {
+        "action": {
+          "t": "Ref",
+          "v": ""
+        },
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 16.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "name": {
+          "t": "Str",
+          "v": "btn_multiply"
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": false
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 198.0,
+            "y": 126.0,
+            "w": 54.0,
+            "h": 54.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "tab_order": {
+          "t": "Int",
+          "v": 8
+        },
+        "tab_stop": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "*"
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      },
+      "events": {
+        "on_click": "btn_multiply_click"
+      }
+    },
+    "button9": {
+      "id": "button9",
+      "class": "Button",
+      "props": {
+        "action": {
+          "t": "Ref",
+          "v": ""
+        },
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 16.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "name": {
+          "t": "Str",
+          "v": "btn_1"
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": false
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 12.0,
+            "y": 188.0,
+            "w": 54.0,
+            "h": 54.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "tab_order": {
+          "t": "Int",
+          "v": 9
+        },
+        "tab_stop": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "1"
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      },
+      "events": {
+        "on_click": "btn_1_click"
+      }
+    },
+    "edit1": {
+      "id": "edit1",
+      "class": "Edit",
+      "props": {
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "alignment": {
+          "t": "Enum",
+          "v": "taRightJustify"
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "char_case": {
+          "t": "Enum",
+          "v": "ecNormal"
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 16.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "max_length": {
+          "t": "Int",
+          "v": 0
+        },
+        "name": {
+          "t": "Str",
+          "v": "display"
+        },
+        "numbers_only": {
+          "t": "Bool",
+          "v": false
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": false
+        },
+        "password_char": {
+          "t": "Str",
+          "v": ""
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "readonly": {
+          "t": "Bool",
+          "v": true
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 12.0,
+            "y": 12.0,
+            "w": 240.0,
+            "h": 40.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "tab_order": {
+          "t": "Int",
+          "v": 0
+        },
+        "tab_stop": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "0"
+        },
+        "text_hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      }
+    },
+    "form_main": {
+      "id": "form_main",
+      "class": "Form",
+      "props": {
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 0.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "name": {
+          "t": "Str",
+          "v": "form_main"
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "position": {
+          "t": "Enum",
+          "v": "poDesigned"
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 0.0,
+            "y": 0.0,
+            "w": 264.0,
+            "h": 330.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "Calculator"
+        },
+        "theme": {
+          "t": "Enum",
+          "v": "thSystem"
+        },
+        "window_state": {
+          "t": "Enum",
+          "v": "wsNormal"
+        }
+      },
+      "children": [
+        "edit1",
+        "button1",
+        "button2",
+        "button3",
+        "button4",
+        "button5",
+        "button6",
+        "button7",
+        "button8",
+        "button9",
+        "button10",
+        "button11",
+        "button12",
+        "button13",
+        "button14",
+        "button15",
+        "button16"
+      ]
+    }
+  }
+}

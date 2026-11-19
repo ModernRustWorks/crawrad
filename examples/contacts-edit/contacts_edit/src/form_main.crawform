@@ -1,0 +1,1976 @@
+{
+  "format": 2,
+  "root": "form_main",
+  "nodes": {
+    "acl1": {
+      "id": "acl1",
+      "class": "ActionList",
+      "props": {
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "images": {
+          "t": "Ref",
+          "v": ""
+        },
+        "name": {
+          "t": "Str",
+          "v": "acl1"
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 168.0,
+            "y": 16.0,
+            "w": 28.0,
+            "h": 28.0
+          }
+        }
+      },
+      "children": [
+        "act_insert",
+        "act_post",
+        "act_delete",
+        "act_cancel"
+      ]
+    },
+    "act_cancel": {
+      "id": "act_cancel",
+      "class": "Action",
+      "props": {
+        "category": {
+          "t": "Str",
+          "v": ""
+        },
+        "checked": {
+          "t": "Bool",
+          "v": false
+        },
+        "dataset": {
+          "t": "Ref",
+          "v": "dst1"
+        },
+        "dataset_operation": {
+          "t": "Enum",
+          "v": "Cancel"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "image_index": {
+          "t": "Int",
+          "v": -1
+        },
+        "name": {
+          "t": "Str",
+          "v": "act_cancel"
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 0.0,
+            "y": 0.0,
+            "w": 28.0,
+            "h": 28.0
+          }
+        },
+        "shortcut": {
+          "t": "Shortcut",
+          "v": ""
+        },
+        "text": {
+          "t": "Str",
+          "v": "Cancel"
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      }
+    },
+    "act_delete": {
+      "id": "act_delete",
+      "class": "Action",
+      "props": {
+        "category": {
+          "t": "Str",
+          "v": ""
+        },
+        "checked": {
+          "t": "Bool",
+          "v": false
+        },
+        "dataset": {
+          "t": "Ref",
+          "v": "dst1"
+        },
+        "dataset_operation": {
+          "t": "Enum",
+          "v": "Delete"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "image_index": {
+          "t": "Int",
+          "v": -1
+        },
+        "name": {
+          "t": "Str",
+          "v": "act_delete"
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 0.0,
+            "y": 0.0,
+            "w": 28.0,
+            "h": 28.0
+          }
+        },
+        "shortcut": {
+          "t": "Shortcut",
+          "v": ""
+        },
+        "text": {
+          "t": "Str",
+          "v": "Delete"
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      }
+    },
+    "act_insert": {
+      "id": "act_insert",
+      "class": "Action",
+      "props": {
+        "category": {
+          "t": "Str",
+          "v": ""
+        },
+        "checked": {
+          "t": "Bool",
+          "v": false
+        },
+        "dataset": {
+          "t": "Ref",
+          "v": "dst1"
+        },
+        "dataset_operation": {
+          "t": "Enum",
+          "v": "Insert"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "image_index": {
+          "t": "Int",
+          "v": -1
+        },
+        "name": {
+          "t": "Str",
+          "v": "act_insert"
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 0.0,
+            "y": 0.0,
+            "w": 28.0,
+            "h": 28.0
+          }
+        },
+        "shortcut": {
+          "t": "Shortcut",
+          "v": ""
+        },
+        "text": {
+          "t": "Str",
+          "v": "Insert"
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      }
+    },
+    "act_post": {
+      "id": "act_post",
+      "class": "Action",
+      "props": {
+        "category": {
+          "t": "Str",
+          "v": ""
+        },
+        "checked": {
+          "t": "Bool",
+          "v": false
+        },
+        "dataset": {
+          "t": "Ref",
+          "v": "dst1"
+        },
+        "dataset_operation": {
+          "t": "Enum",
+          "v": "Post"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "image_index": {
+          "t": "Int",
+          "v": -1
+        },
+        "name": {
+          "t": "Str",
+          "v": "act_post"
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 0.0,
+            "y": 0.0,
+            "w": 28.0,
+            "h": 28.0
+          }
+        },
+        "shortcut": {
+          "t": "Shortcut",
+          "v": ""
+        },
+        "text": {
+          "t": "Str",
+          "v": "Save"
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      }
+    },
+    "btn_cancel": {
+      "id": "btn_cancel",
+      "class": "Button",
+      "props": {
+        "action": {
+          "t": "Ref",
+          "v": "act_cancel"
+        },
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 0.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "name": {
+          "t": "Str",
+          "v": "btn_cancel"
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": true
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 336.0,
+            "y": 400.0,
+            "w": 96.0,
+            "h": 28.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "tab_order": {
+          "t": "Int",
+          "v": 7
+        },
+        "tab_stop": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "btn_cancel"
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      }
+    },
+    "btn_delete": {
+      "id": "btn_delete",
+      "class": "Button",
+      "props": {
+        "action": {
+          "t": "Ref",
+          "v": "act_delete"
+        },
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 0.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "name": {
+          "t": "Str",
+          "v": "btn_delete"
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": true
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 232.0,
+            "y": 400.0,
+            "w": 96.0,
+            "h": 28.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "tab_order": {
+          "t": "Int",
+          "v": 6
+        },
+        "tab_stop": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "btn_delete"
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      }
+    },
+    "btn_insert": {
+      "id": "btn_insert",
+      "class": "Button",
+      "props": {
+        "action": {
+          "t": "Ref",
+          "v": "act_insert"
+        },
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 0.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "name": {
+          "t": "Str",
+          "v": "btn_insert"
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": true
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 24.0,
+            "y": 400.0,
+            "w": 96.0,
+            "h": 28.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "tab_order": {
+          "t": "Int",
+          "v": 4
+        },
+        "tab_stop": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "btn_insert"
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      }
+    },
+    "btn_post": {
+      "id": "btn_post",
+      "class": "Button",
+      "props": {
+        "action": {
+          "t": "Ref",
+          "v": "act_post"
+        },
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 0.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "name": {
+          "t": "Str",
+          "v": "btn_post"
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": true
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 128.0,
+            "y": 400.0,
+            "w": 96.0,
+            "h": 28.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "tab_order": {
+          "t": "Int",
+          "v": 5
+        },
+        "tab_stop": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "btn_post"
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      }
+    },
+    "conn1": {
+      "id": "conn1",
+      "class": "Connection",
+      "props": {
+        "connect_timeout": {
+          "t": "Int",
+          "v": 30000
+        },
+        "connected": {
+          "t": "Bool",
+          "v": false
+        },
+        "max_connections": {
+          "t": "Int",
+          "v": 10
+        },
+        "name": {
+          "t": "Str",
+          "v": "conn1"
+        },
+        "provider": {
+          "t": "Ref",
+          "v": "sqlite1"
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 72.0,
+            "y": 16.0,
+            "w": 28.0,
+            "h": 28.0
+          }
+        },
+        "url": {
+          "t": "Str",
+          "v": "sqlite:contacts.db"
+        }
+      }
+    },
+    "dst1": {
+      "id": "dst1",
+      "class": "Dataset",
+      "props": {
+        "active": {
+          "t": "Bool",
+          "v": false
+        },
+        "connection": {
+          "t": "Ref",
+          "v": "conn1"
+        },
+        "name": {
+          "t": "Str",
+          "v": "dst1"
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 120.0,
+            "y": 16.0,
+            "w": 28.0,
+            "h": 28.0
+          }
+        },
+        "sql": {
+          "t": "Str",
+          "v": ""
+        },
+        "table": {
+          "t": "Str",
+          "v": "contacts"
+        }
+      }
+    },
+    "edt_city": {
+      "id": "edt_city",
+      "class": "Edit",
+      "props": {
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "alignment": {
+          "t": "Enum",
+          "v": "taLeftJustify"
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "char_case": {
+          "t": "Enum",
+          "v": "ecNormal"
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 0.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "max_length": {
+          "t": "Int",
+          "v": 0
+        },
+        "name": {
+          "t": "Str",
+          "v": "edt_city"
+        },
+        "numbers_only": {
+          "t": "Bool",
+          "v": false
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": true
+        },
+        "password_char": {
+          "t": "Str",
+          "v": ""
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "readonly": {
+          "t": "Bool",
+          "v": false
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 104.0,
+            "y": 352.0,
+            "w": 320.0,
+            "h": 24.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "tab_order": {
+          "t": "Int",
+          "v": 3
+        },
+        "tab_stop": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "edt_city"
+        },
+        "text_hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      },
+      "bindings": {
+        "text": {
+          "source": "dst1",
+          "field": "city",
+          "mode": "two_way"
+        }
+      }
+    },
+    "edt_email": {
+      "id": "edt_email",
+      "class": "Edit",
+      "props": {
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "alignment": {
+          "t": "Enum",
+          "v": "taLeftJustify"
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "char_case": {
+          "t": "Enum",
+          "v": "ecNormal"
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 0.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "max_length": {
+          "t": "Int",
+          "v": 0
+        },
+        "name": {
+          "t": "Str",
+          "v": "edt_email"
+        },
+        "numbers_only": {
+          "t": "Bool",
+          "v": false
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": true
+        },
+        "password_char": {
+          "t": "Str",
+          "v": ""
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "readonly": {
+          "t": "Bool",
+          "v": false
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 104.0,
+            "y": 316.0,
+            "w": 320.0,
+            "h": 24.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "tab_order": {
+          "t": "Int",
+          "v": 2
+        },
+        "tab_stop": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "edt_email"
+        },
+        "text_hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      },
+      "bindings": {
+        "text": {
+          "source": "dst1",
+          "field": "email",
+          "mode": "two_way"
+        }
+      }
+    },
+    "edt_name": {
+      "id": "edt_name",
+      "class": "Edit",
+      "props": {
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "alignment": {
+          "t": "Enum",
+          "v": "taLeftJustify"
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "char_case": {
+          "t": "Enum",
+          "v": "ecNormal"
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 0.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "max_length": {
+          "t": "Int",
+          "v": 0
+        },
+        "name": {
+          "t": "Str",
+          "v": "edt_name"
+        },
+        "numbers_only": {
+          "t": "Bool",
+          "v": false
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": true
+        },
+        "password_char": {
+          "t": "Str",
+          "v": ""
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "readonly": {
+          "t": "Bool",
+          "v": false
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 104.0,
+            "y": 280.0,
+            "w": 320.0,
+            "h": 24.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "tab_order": {
+          "t": "Int",
+          "v": 1
+        },
+        "tab_stop": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "edt_name"
+        },
+        "text_hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      },
+      "bindings": {
+        "text": {
+          "source": "dst1",
+          "field": "name",
+          "mode": "two_way"
+        }
+      }
+    },
+    "form_main": {
+      "id": "form_main",
+      "class": "Form",
+      "props": {
+        "name": {
+          "t": "Str",
+          "v": "form_main"
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 0.0,
+            "y": 0.0,
+            "w": 640.0,
+            "h": 480.0
+          }
+        },
+        "text": {
+          "t": "Str",
+          "v": "Contacts"
+        }
+      },
+      "children": [
+        "sqlite1",
+        "conn1",
+        "dst1",
+        "acl1",
+        "grid1",
+        "lbl_name",
+        "edt_name",
+        "lbl_email",
+        "edt_email",
+        "lbl_city",
+        "edt_city",
+        "btn_insert",
+        "btn_post",
+        "btn_delete",
+        "btn_cancel"
+      ]
+    },
+    "grid1": {
+      "id": "grid1",
+      "class": "Grid",
+      "props": {
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "cell_text": {
+          "t": "Str",
+          "v": ""
+        },
+        "col_count": {
+          "t": "Int",
+          "v": 5
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "data_source": {
+          "t": "Ref",
+          "v": "dst1"
+        },
+        "default_col_width": {
+          "t": "Int",
+          "v": 80
+        },
+        "default_row_height": {
+          "t": "Int",
+          "v": 24
+        },
+        "design_rows": {
+          "t": "Enum",
+          "v": "8"
+        },
+        "editing": {
+          "t": "Bool",
+          "v": false
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "fixed_cols": {
+          "t": "Int",
+          "v": 0
+        },
+        "fixed_rows": {
+          "t": "Int",
+          "v": 1
+        },
+        "grid_lines": {
+          "t": "Bool",
+          "v": true
+        },
+        "group_bar": {
+          "t": "Bool",
+          "v": false
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "name": {
+          "t": "Str",
+          "v": "grid1"
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 24.0,
+            "y": 64.0,
+            "w": 592.0,
+            "h": 200.0
+          }
+        },
+        "row_count": {
+          "t": "Int",
+          "v": 5
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "tab_order": {
+          "t": "Int",
+          "v": 0
+        },
+        "tab_stop": {
+          "t": "Bool",
+          "v": true
+        },
+        "table_name": {
+          "t": "Str",
+          "v": ""
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      }
+    },
+    "lbl_city": {
+      "id": "lbl_city",
+      "class": "Label",
+      "props": {
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "alignment": {
+          "t": "Enum",
+          "v": "taLeftJustify"
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "auto_size": {
+          "t": "Bool",
+          "v": false
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "focus_control": {
+          "t": "Ref",
+          "v": "edt_city"
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 0.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "layout": {
+          "t": "Enum",
+          "v": "tlTop"
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "name": {
+          "t": "Str",
+          "v": "lbl_city"
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": true
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 24.0,
+            "y": 356.0,
+            "w": 80.0,
+            "h": 20.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "City"
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        },
+        "word_wrap": {
+          "t": "Bool",
+          "v": false
+        }
+      }
+    },
+    "lbl_email": {
+      "id": "lbl_email",
+      "class": "Label",
+      "props": {
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "alignment": {
+          "t": "Enum",
+          "v": "taLeftJustify"
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "auto_size": {
+          "t": "Bool",
+          "v": false
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "focus_control": {
+          "t": "Ref",
+          "v": "edt_email"
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 0.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "layout": {
+          "t": "Enum",
+          "v": "tlTop"
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "name": {
+          "t": "Str",
+          "v": "lbl_email"
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": true
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 24.0,
+            "y": 320.0,
+            "w": 80.0,
+            "h": 20.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "Email"
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        },
+        "word_wrap": {
+          "t": "Bool",
+          "v": false
+        }
+      }
+    },
+    "lbl_name": {
+      "id": "lbl_name",
+      "class": "Label",
+      "props": {
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "alignment": {
+          "t": "Enum",
+          "v": "taLeftJustify"
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "auto_size": {
+          "t": "Bool",
+          "v": false
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "focus_control": {
+          "t": "Ref",
+          "v": "edt_name"
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 0.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "layout": {
+          "t": "Enum",
+          "v": "tlTop"
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "name": {
+          "t": "Str",
+          "v": "lbl_name"
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": true
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 24.0,
+            "y": 284.0,
+            "w": 80.0,
+            "h": 20.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "Name"
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        },
+        "word_wrap": {
+          "t": "Bool",
+          "v": false
+        }
+      }
+    },
+    "sqlite1": {
+      "id": "sqlite1",
+      "class": "SqliteProvider",
+      "props": {
+        "name": {
+          "t": "Str",
+          "v": "sqlite1"
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 24.0,
+            "y": 16.0,
+            "w": 28.0,
+            "h": 28.0
+          }
+        }
+      }
+    }
+  }
+}

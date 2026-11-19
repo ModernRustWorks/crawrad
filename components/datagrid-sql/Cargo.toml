@@ -1,0 +1,22 @@
+[package]
+name = "datagrid-sql"
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+description = "SQL database backend RowSource implementation for datagrid using portadb"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[dependencies]
+datagrid = { path = "../datagrid" }
+portadb = { path = "../portadb", default-features = false, features = ["rusqlite"] }
+tokio = { version = "1.43", features = ["rt"] }
+
+[dev-dependencies]
+criterion = { version = "0.5", default-features = false }
+datagrid = { path = "../datagrid", features = ["test-sources"] }
+
+[[bench]]
+name = "server"
+harness = false

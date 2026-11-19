@@ -1,0 +1,8 @@
+# `cargo ide` builds the IDE together with `crawrad-dbprobe`, the small program the
+# Object Inspector runs (from the IDE's own folder) to list a dataset's columns
+# in Data > Field. `cargo build -p crawrad-ide` alone leaves the probe out, and the
+# Field row then says "Columns not listed". A build.rs cannot do this soundly:
+# it would run a nested cargo on the same target dir while it is locked.
+[alias]
+ide = "build -p crawrad-ide -p crawrad-dbprobe"
+ide-release = "build --release -p crawrad-ide -p crawrad-dbprobe"

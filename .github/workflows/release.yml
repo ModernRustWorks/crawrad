@@ -1,7 +1,8 @@
 name: Release
 
 # A version tag (`v0.1.0`) builds the install bundle and the installers on
-# Windows, Linux and macOS, and attaches them to one DRAFT GitHub release.
+# Windows, Linux and macOS, with a CycloneDX SBOM per distributed binary and a
+# CrawRAD-<version>-SHA256SUMS.txt, and attaches them to one DRAFT GitHub release.
 # Nothing is published until the draft is reviewed and released by hand.
 on:
   push:
@@ -62,6 +63,17 @@ jobs:
       - name: macOS disk image
         if: runner.os == 'macOS'
         run: bash installer/macos/package.sh
+      - name: SBOM (CycloneDX, one per distributed binary)
+        shell: bash
+        run: |
+          cargo install cargo-cyclonedx --version 0.5.10 --locked
+          case "$RUNNER_OS" in Windows) os=windows-x64 ;; Linux) os=linux-x64 ;; macOS) os=macos ;; esac
+          mkdir -p target/installer
+          for bin in crawrad-ide crawrad-dbprobe crawrad-mcp; do
+            name="CrawRAD-$VERSION-$os-$bin.cdx"
+            cargo cyclonedx -q --manifest-path "crates/$bin/Cargo.toml" -f json --spec-version 1.5 --override-filename "$name"
+            mv "crates/$bin/$name.json" target/installer/
+          done
       - uses: actions/upload-artifact@v4
         with:
           name: installer-${{ matrix.os }}
@@ -78,6 +90,10 @@ jobs:
         with:
           path: dist
           merge-multiple: true
+      - name: Checksums
+        run: |
+          sums="CrawRAD-${GITHUB_REF_NAME#v}-SHA256SUMS.txt"
+          cd dist && sha256sum * > "../$sums" && mv "../$sums" . && cat "$sums"
       - name: Create the draft
         env:
           GH_TOKEN: ${{ github.token }}

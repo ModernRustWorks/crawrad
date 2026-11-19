@@ -1,0 +1,17 @@
+[package]
+name = "contacts_edit"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+
+[dependencies]
+datagrid = { version = "0.1.0", path = "../../../components/datagrid" }
+datagrid-sql = { version = "0.1.0", path = "../../../components/datagrid-sql" }
+makepad-widgets = "1.0"
+crawrad-binding = { path = "../../../crates/crawrad-binding", features = ["rusqlite"] }
+portadb-crawrad = { version = "0.1.0", path = "../../../components/portadb-crawrad" }
+crawrad-runtime = { path = "../../../crates/crawrad-runtime" }
+crawrad-runtime-makepad = { path = "../../../crates/crawrad-runtime-makepad" }
+
+[build-dependencies]
+embed-resource = "3.0"

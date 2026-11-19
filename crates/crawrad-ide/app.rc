@@ -1,0 +1,5 @@
+#define RT_MANIFEST 24
+1 RT_MANIFEST "app.manifest"
+// The crab: the IDE's icon, in Explorer and on its windows (the Makepad
+// window class loads icon resource 1 of the exe).
+1 ICON "crawrad.ico"

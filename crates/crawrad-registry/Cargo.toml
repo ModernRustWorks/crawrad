@@ -1,0 +1,20 @@
+[package]
+name = "crawrad-registry"
+version = "0.1.0"
+description = "Component catalog: properties, events, defaults, and which runtimes implement them"
+edition.workspace = true
+license.workspace = true
+publish = false
+authors.workspace = true
+
+[dependencies]
+crawrad-ir.workspace = true
+crawrad-note.workspace = true
+thiserror.workspace = true
+
+[features]
+# Test helpers other crates' tests reuse (e.g. `sample_price_edit`, #934); never in a build.
+test-support = []
+
+[lints]
+workspace = true

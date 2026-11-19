@@ -1,0 +1,2 @@
+# #667: the properties a target still drops (`Class.key target`).
+# This list only shrinks: fix a pair, then delete its line.

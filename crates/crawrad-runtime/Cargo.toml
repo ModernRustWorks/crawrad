@@ -1,0 +1,28 @@
+[package]
+name = "crawrad-runtime"
+version = "0.1.0"
+description = "The boundary between the document and what renders it: the trait honoured by RXP and the mock backend"
+edition.workspace = true
+license = "MIT OR Apache-2.0"
+authors.workspace = true
+
+[dependencies]
+crawrad-note = { workspace = true }
+# The Grid's data layer; pure std.
+datagrid.workspace = true
+# THE BOX, and the direction matters: the property piece belongs to it, and this crate is
+# ABOVE it. Until 18/09/2026 it was the opposite, via relative path.
+crawrad-component.workspace = true
+crawrad-ir.workspace = true
+thiserror.workspace = true
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+# Native file dialogs via rfd. No default features; on Linux (and BSDs) rfd requires
+# an explicit backend feature (xdg-portal).
+rfd = { version = "0.17", default-features = false }
+
+[target.'cfg(all(unix, not(target_os = "macos")))'.dependencies]
+rfd = { version = "0.17", default-features = false, features = ["xdg-portal"] }
+
+[lints]
+workspace = true

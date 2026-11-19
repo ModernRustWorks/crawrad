@@ -1,0 +1,13 @@
+[package]
+name = "calculator"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+
+[dependencies]
+makepad-widgets = "1.0"
+crawrad-runtime = { path = "../../../crates/crawrad-runtime" }
+crawrad-runtime-makepad = { path = "../../../crates/crawrad-runtime-makepad" }
+
+[build-dependencies]
+embed-resource = "3.0"

@@ -1,0 +1,16 @@
+[package]
+name = "crawrad-ir"
+version = "0.1.0"
+description = "CrawRAD document model: component tree, typed values, and the property contract across runtimes"
+edition.workspace = true
+license = "MIT OR Apache-2.0"
+authors.workspace = true
+
+[dependencies]
+crawrad-note = { workspace = true }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+
+[lints]
+workspace = true

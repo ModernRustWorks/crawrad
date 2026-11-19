@@ -1,0 +1,15 @@
+[package]
+name = "portadb-redis"
+version = "0.1.0"
+edition = "2024"
+authors = ["PortaDB Contributors"]
+description = "PortaDB provider: Redis"
+license = "MIT OR Apache-2.0"
+keywords = ["database", "sql", "portadb"]
+categories = ["database"]
+
+[dependencies]
+portadb-core = { path = "../portadb-core" }
+
+[dev-dependencies]
+tokio = { version = "1.43", features = ["full"] }

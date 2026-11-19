@@ -1,0 +1,133 @@
+{
+  "$doc": "This file is generated from the Rust source. Change the struct that carries #[derive(Component)], then run `CRAWRAD_BLESS=1 cargo test` to rewrite it. It stays in the repository because the IDE reads it WITHOUT running anything.",
+  "sdk": 2,
+  "package": {
+    "name": "gauge-crawrad",
+    "version": "0.1.0",
+    "description": "A gauge that draws itself from the manifest, with no Rust"
+  },
+  "components": [
+    {
+      "class": "Gauge",
+      "display": "Gauge",
+      "palette": "Additional",
+      "prefix": "gau",
+      "default_size": [140.0, 48.0],
+      "private_state": false,
+      "targets": ["*"],
+      "doc": "A meter: a caption and a value inside a range.\n\n# The range is clamped, not refused\n\nA `value` outside `min..=max` is not an error: [`Self::fraction`] returns\n`0.0` or `1.0`. A meter that refuses a value is a meter that stops showing\nanything exactly when something left the expected range — which is when\nsomebody is looking at it.",
+      "props": [
+        {
+          "key": "name",
+          "display": "Name",
+          "category": "identity",
+          "kind": "text",
+          "default": "",
+          "doc": "The instance name. Every component has one, so the derive writes it."
+        },
+        {
+          "key": "rect",
+          "display": "Rect",
+          "category": "layout",
+          "kind": "rect",
+          "default": { "x": 0.0, "y": 0.0, "w": 140.0, "h": 48.0 },
+          "doc": "Where the instance sits. The size comes from `size` on the struct."
+        },
+        {
+          "key": "text",
+          "display": "Caption",
+          "category": "appearance",
+          "kind": "text",
+          "default": "Gauge",
+          "doc": "The caption, written over the bar."
+        },
+        {
+          "key": "value",
+          "display": "Value",
+          "category": "behavior",
+          "kind": "int",
+          "default": 65,
+          "min": 0,
+          "max": 100,
+          "doc": "The value right now.\n\nA meter that shows no value is a box with a caption, which is why this\nproperty is what broke the five-verb vocabulary open."
+        },
+        {
+          "key": "min",
+          "display": "Min",
+          "category": "behavior",
+          "kind": "int",
+          "default": 0,
+          "min": -1000000,
+          "max": 1000000,
+          "doc": "The start of the range.\n\nIt used to exist here and NOT in the manifest, and that missing half was\na small lie of an expensive family: changing `min` at run time moved the\ncomponent's `fraction()` and left the painted bar alone, because the\ndrawing declared `min = 0.0` as a fixed number. While the values were the\ndefaults the two agreed — right until somebody used it."
+        },
+        {
+          "key": "max",
+          "display": "Max",
+          "category": "behavior",
+          "kind": "int",
+          "default": 100,
+          "min": -1000000,
+          "max": 1000000,
+          "doc": "The end of the range."
+        },
+        {
+          "key": "visible",
+          "display": "Visible",
+          "category": "behavior",
+          "kind": "bool",
+          "default": true,
+          "doc": "Shows on screen.\n\nThe generated code already guarded the drawing with this field before the\nmanifest declared it — so the application honoured a property the Object\nInspector could not set."
+        },
+        {
+          "key": "enabled",
+          "display": "Enabled",
+          "category": "behavior",
+          "kind": "bool",
+          "default": true,
+          "doc": "Responds to interaction."
+        }
+      ],
+      "events": [
+        {
+          "name": "on_click",
+          "display": "OnClick",
+          "signature": "fn(&mut self)"
+        }
+      ],
+      "draw": [
+        {
+          "verb": "box",
+          "fill": "surface",
+          "border": "border",
+          "radius": 4.0
+        },
+        {
+          "verb": "box",
+          "fill": "accent",
+          "area": { "fraction_of": "value", "axis": "x", "min": "min", "max": "max" }
+        },
+        {
+          "verb": "frame",
+          "color": "accent",
+          "thickness": 2.0
+        },
+        {
+          "verb": "text",
+          "prop": "text",
+          "color": "text",
+          "centered": true
+        }
+      ],
+      "icon": [
+        { "step": "circle", "x": 8.0, "y": 9.0, "r": 6.0 },
+        { "step": "stroke" },
+        { "step": "move_to", "x": 8.0, "y": 9.0 },
+        { "step": "line_to", "x": 11.5, "y": 5.5 },
+        { "step": "stroke" },
+        { "step": "circle", "x": 8.0, "y": 9.0, "r": 1.2 },
+        { "step": "fill" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+[package]
+name = "crawrad-actions"
+version = "0.1.0"
+description = "The IDE action catalogue: the same list serves menu, keyboard, and MCP tools"
+edition.workspace = true
+license.workspace = true
+publish = false
+authors.workspace = true
+
+[dependencies]
+crawrad-note = { workspace = true }
+crawrad-ir.workspace = true
+crawrad-os.workspace = true
+crawrad-doc.workspace = true
+crawrad-registry.workspace = true
+crawrad-designer.workspace = true
+crawrad-extension-api.workspace = true
+thiserror.workspace = true
+serde_json.workspace = true
+
+[lints]
+workspace = true

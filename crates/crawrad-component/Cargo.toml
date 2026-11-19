@@ -1,0 +1,21 @@
+[package]
+name = "crawrad-component"
+version = "0.1.0"
+description = "A CAIXA: as pecas com que se escreve um componente do CrawRAD"
+edition.workspace = true
+license = "MIT OR Apache-2.0"
+authors.workspace = true
+
+# **NENHUMA dependencia, e isso e restricao dura.**
+#
+# O ADR 0033 §3 ja dizia: se a caixa depender de Makepad, de egui ou de qualquer
+# coisa pesada, cada componente instalado custa MINUTOS de build em vez de
+# segundos — e a promessa de "instala como pacote" morre na primeira instalacao.
+#
+# Aqui isso e mais forte ainda, porque esta caixa entra no binario de QUEM USA o
+# componente. Uma dependencia aqui e uma dependencia no aplicativo de alguem que
+# so arrastou um icone.
+[dependencies]
+
+[lints]
+workspace = true

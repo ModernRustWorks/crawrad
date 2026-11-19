@@ -1,0 +1,27 @@
+[template]
+id = "gui_app"
+name = "GUI Application"
+version = "1.0.0"
+category = "desktop"
+description = "Creates a new Rust application with a graphical user interface using the Makepad framework. This template includes a basic window, an App struct, and a simple UI to get you started quickly."
+icon = "🗔"
+platforms = ["windows", "linux", "macos"]
+author = "CrawRAD Team"
+
+[options]
+include_example = { label = "Include example UI (counter app)", default = true }
+live_reload = { label = "Use Makepad live-reload (dev mode)", default = true }
+add_menu = { label = "Add basic application menu", default = false }
+enable_tracing = { label = "Enable tracing (logging)", default = false }
+
+[structure]
+tree = """
+{nome}/
+├── Cargo.toml
+├── src/
+│   ├── main.rs
+│   └── app.rs
+└── assets/
+    ├── icons/
+    └── styles/
+"""

@@ -1,0 +1,51 @@
+{
+  "id": "crawrad.formatter",
+  "name": "CrawRAD Code Formatter",
+  "version": "1.0.0",
+  "publisher": "CrawRAD Team",
+  "description": "Automatic formatting of Rust code and form contracts in the editor",
+  "activation_events": [
+    "onCommand:crawrad_format.format_file"
+  ],
+  "contributions": {
+    "actions": [
+      {
+        "id": "crawrad_format.format_file",
+        "label": "Format Code",
+        "description": "Formats the code of the active file in the CrawRAD editor",
+        "shortcut": "Ctrl+Shift+F"
+      }
+    ],
+    "menus": [
+      {
+        "target": "Tools",
+        "action_id": "crawrad_format.format_file",
+        "position": "bottom"
+      }
+    ],
+    "tools": [
+      {
+        "name": "crawrad_format_format_file",
+        "description": "Formats the source code of the document open in the CrawRAD editor",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string",
+              "description": "Optional path of the file to format. If omitted, the active file in the editor is formatted"
+            }
+          }
+        }
+      }
+    ],
+    "templates": [
+      {
+        "id": "crawrad.template.formatter",
+        "name": "Extension: Code Formatter Template",
+        "description": "Starter template for new CrawRAD tools and formatters",
+        "icon": "✨",
+        "category": "Extensions"
+      }
+    ]
+  }
+}

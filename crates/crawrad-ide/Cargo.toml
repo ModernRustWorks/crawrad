@@ -1,0 +1,162 @@
+[package]
+name = "crawrad-ide"
+version = "0.1.0"
+description = "The CrawRAD IDE: a Makepad shell hosting the native design surface"
+edition.workspace = true
+license.workspace = true
+publish = false
+authors.workspace = true
+build = "build.rs"
+
+[dependencies]
+crawrad-note = { workspace = true }
+makepad-widgets = "1.0.0"
+makepad-code-editor = "1.0.0"
+# `eframe`, `egui`, and `raw-window-handle` LEFT on 2026-09-17, with the
+# egui shell (ADR 0032). `crawrad-runtime-egui` left THIS crate as well and
+# remains in the workspace: its `desenho_comum.rs` is embedded by
+# `crawrad-codegen` into every generated egui application, which is the TARGET — and the target stays.
+# The NATIVE folder picker dialog (ADR 0017). Two decisions live here, and the
+# second exists because the first, alone, did not compile outside Windows.
+#
+# 1. No `default-features`, to STATE the backend instead of inheriting it: rfd's
+#    default enables `xdg-portal` and `wayland`, and the choice of Linux backend
+#    belongs to the `cfg(unix)` section down below. On Windows it uses COM's
+#    `IFileOpenDialog` via `windows-sys`, which eframe's winit already brings in —
+#    measured: the dependency tree did not gain a single package. The same applies
+#    to macOS: there rfd's `build.rs` only enables AppKit and requires no features.
+#
+#    Here it was previously written that the default "drags in `pollster`, `wayland-client`,
+#    and `wayland-protocols`". Half of that is false, and the false half spoke
+#    against rfd without reason. MEASURED with
+#    `cargo tree --target x86_64-unknown-linux-gnu`: the `wayland-*` crates come from
+#    `winit`, inside `eframe`, and are in the tree whether rfd is present or not; what rfd
+#    adds on Linux is ONE package, `pollster 0.4.0` — and `pollster 1.0.1` was already
+#    brought in by `eframe` itself. The backend choice is cheaper than the
+#    comment claimed.
+#
+# 2. But on Linux (and BSDs) rfd REQUIRES a backend, and without one its
+#    `build.rs` panics BEFORE compiling the first line:
+#    `You need to choose at least one backend: gtk3 or xdg-portal`. This is why
+#    ADR 0007's portability CI never passed — the promise of three platforms was
+#    written but was not standing. See the `cfg(unix)` section down below, where
+#    the backend enters.
+#
+# And this is verified from Windows, without CI: `build.rs` decides by TARGET, and
+# compiling `--target` runs build scripts with target variables. The local gate's
+# two per-target steps handle this, and the exact command lives **only** there,
+# assembled from `$TARGETS` in `gate.ps1`:
+#
+#     .\gate.ps1
+#
+# HERE WAS THE COMMAND WRITTEN IN FULL, with `cargo check`, and it rotted the day
+# the gate swapped `check` for `cargo clippy -- -D warnings`
+# (2026-09-07). Anyone following this comment would run the command that PRINTS
+# warnings and exits with 0 — measured: with a dirty `#[cfg(target_os = "linux")]`
+# planted, `check --target` returns rc=0 with warnings on screen and
+# `clippy --target -- -D warnings` returns rc=101. And ADR 0007 forbids this
+# written repetition, thirty lines above where it was made: the list had already
+# been in three places and all three diverged.
+#
+# It does not return by accident, and this is code, not a promise:
+# `crates/crawrad-doc/src/target_command_gate.rs` scans the entire tree and
+# fails on any line combining a target from `$TARGETS` with a `cargo` that JUDGES
+# code (`check`, `build`, `clippy`, `test`, `run`). `cargo tree` and
+# `cargo metadata` pass because they give no verdict — and they are what sign the
+# measurements in this file.
+#
+# Measured: with the backend line below commented out, the Linux target fails in
+# rfd's `build.rs` in seconds; with it, the whole workspace passes in 1 min.
+# It is not `build`, deliberately: without linking, no system library of the
+# other OS needs to exist here.
+rfd = { version = "0.17", default-features = false }
+# THE BOUNDARY WITH THE SYSTEM, and the only internal crate allowed to say `unsafe`
+# (ADR 0009). This shell asks it one thing only: where the taskbar ends.
+# See `src/ide_app/maximize.rs`.
+crawrad-os.workspace = true
+crawrad-splash.workspace = true
+crawrad-ir.workspace = true
+crawrad-doc.workspace = true
+crawrad-registry.workspace = true
+# The IDE reads the `crawrad.toml` of installed packages (ADR 0033 §9).
+crawrad-package.workspace = true
+
+crawrad-designer.workspace = true
+crawrad-actions.workspace = true
+crawrad-extension-api.workspace = true
+crawrad-audio.workspace = true
+crawrad-lsp.workspace = true
+crawrad-insight.workspace = true
+crawrad-terminal.workspace = true
+crawrad-extension-host.workspace = true
+crawrad-mcp.workspace = true
+crawrad-agent.workspace = true
+crawrad-project.workspace = true
+crawrad-host.workspace = true
+crawrad-dap.workspace = true
+crawrad-dap-rust.workspace = true
+crawrad-runtime.workspace = true
+crawrad-runtime-makepad.workspace = true
+crawrad-codegen.workspace = true
+# The build panel reads `cargo build --message-format=json`. Derived `serde`, not
+# manually traversed `Value`: a renamed field becomes a compile error instead
+# of a silent `None` in the middle of the list.
+serde.workspace = true
+serde_json.workspace = true
+# The `Cargo.toml` of an installed package -- the MANIFEST became JSON, this one did not.
+toml.workspace = true
+
+# THE LINUX DIALOG BACKEND, and only Linux: `all(unix, not(macos))` covers
+# Linux and the BSDs, which are exactly the targets where rfd's `build.rs` requires
+# a backend. Windows and macOS continue without any features, as above.
+#
+# `xdg-portal` and not `gtk3`, and the calculation has THREE columns, because the cost of a
+# dependency does not end when the build ends:
+#
+# | backend      | what enters the tree     | to COMPILE                | to RUN                            |
+# |--------------|--------------------------|---------------------------|-----------------------------------|
+# | `xdg-portal` | +1 package (`pollster`)  | nothing                   | an `xdg-desktop-portal` on D-Bus  |
+# | `gtk3`       | +16 packages (`gtk-sys`…)| `libgtk-3-dev`, pkg-config | the GTK libs, already linked      |
+#
+# Everything here is MEASURED on this machine, changing the feature on the line below and
+# running `cargo tree --target x86_64-unknown-linux-gnu`: 282 packages with
+# `xdg-portal`, 297 with `gtk3` — 16 enter (`gtk-sys`, `gdk-sys`, `glib-sys`,
+# `gobject-sys`, `gio-sys`, `pango-sys`, `cairo-sys-rs`, `atk-sys`,
+# `gdk-pixbuf-sys`, `system-deps`, `cfg-expr`, `toml`, `serde_spanned`,
+# `target-lexicon`, `version-compare`, `heck`) and 1 leaves (`pollster`).
+#
+# And `gtk3` would not even reach the merits: with it, compiling `crawrad-ide` for the
+# Linux target from Windows FAILS in `glib-sys`'s `build.rs` with
+# `pkg-config has not been configured to support cross-compilation` — meaning
+# the ADR 0007 gate this file just gained would cease to exist
+# in exchange for the backend. That decides on its own.
+#
+# THE THIRD COLUMN IS THE DEBT THIS CHOICE CREATES, and it was not written down:
+# `xdg-portal` trades a COMPILE-TIME dependency for a RUNTIME contract.
+# It talks to the desktop portal over D-Bus, and on a Linux machine
+# without `xdg-desktop-portal` running — a bare X11 server, a container,
+# a minimal WM — the folder picker dialog FAILS at runtime, where `gtk3`
+# would have opened a window. It does not change the choice: `gtk3` does not survive
+# the paragraph above. It changes what we know we owe.
+#
+# This was DEDUCED, and became measured on 2026-09-07: the IDE ran on real Linux
+# (WSL Ubuntu-24.04 with WSLg) and `Open Folder…` OPENED — `xdg-desktop-portal`
+# and `-gtk` came up on demand over D-Bus. Where there is a full desktop, the
+# execution contract is fulfilled on its own; the debt remains standing where
+# there isn't one (container, bare X11, minimal WM). The same round found
+# something else, and bigger: on the Wayland path the IDE aborts — issue #39,
+# `null pointer dereference` on the `smithay-clipboard` thread. That was a manual action,
+# not a gate step (ADR 0007).
+#
+# `default-features = false` repeated on purpose: the two entries of the same
+# dependency combine, and without this the entry below would restore the defaults
+# (including `wayland`) that the entry above just turned off.
+[target.'cfg(all(unix, not(target_os = "macos")))'.dependencies]
+rfd = { version = "0.17", default-features = false, features = ["xdg-portal"] }
+
+# embed-resource only exists and compiles on Windows.
+[target.'cfg(target_os = "windows")'.build-dependencies]
+embed-resource = "3.0"
+
+[lints]
+workspace = true

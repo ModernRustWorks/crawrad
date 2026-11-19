@@ -1,0 +1,25 @@
+[package]
+name = "crawrad-note-format"
+version = "0.1.0"
+description = "The CrawRAD note file: YAML front matter + markdown body, shared by the IDE, the #[note] macro and the CLI"
+edition.workspace = true
+license = "MIT OR Apache-2.0"
+authors.workspace = true
+repository = "https://github.com/ModernRustWorks/crawrad"
+keywords = ["rustdoc", "documentation", "notes", "ide"]
+categories = ["development-tools"]
+
+[dependencies]
+# Only for `item_signature`: the macro and the CLI read the item as tokens.
+proc-macro2 = "1.0"
+quote = { version = "1.0", optional = true }
+syn = { version = "2.0", features = ["full"], optional = true }
+
+[dev-dependencies]
+quote = "1.0"
+
+[features]
+syn = ["dep:syn", "dep:quote"]
+
+[lints]
+workspace = true

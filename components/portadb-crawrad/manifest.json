@@ -1,0 +1,484 @@
+{
+  "$doc": "This file is generated from the Rust source. Change the struct that carries #[derive(Component)], then run `CRAWRAD_BLESS=1 cargo test` to rewrite it. It stays in the repository because the IDE reads it WITHOUT running anything.",
+  "sdk": 2,
+  "package": {
+    "name": "portadb-crawrad",
+    "version": "0.1.0",
+    "description": "The connection components for CrawRAD — the native providers and the abstraction over them"
+  },
+  "components": [
+    {
+      "class": "MemoryProvider",
+      "display": "Memory Provider",
+      "palette": "Data",
+      "prefix": "mem",
+      "default_size": [28.0, 28.0],
+      "visual": false,
+      "private_state": false,
+      "targets": ["*"],
+      "provides": ["DbProvider"],
+      "doc": "The in-memory provider — allows a form to run without a server.",
+      "props": [
+        {
+          "key": "name",
+          "display": "Name",
+          "category": "identity",
+          "kind": "text",
+          "default": "",
+          "doc": "The instance name. Every component has one, so the derive writes it."
+        },
+        {
+          "key": "rect",
+          "display": "Rect",
+          "category": "layout",
+          "kind": "rect",
+          "default": { "x": 0.0, "y": 0.0, "w": 28.0, "h": 28.0 },
+          "doc": "Where the instance sits. The size comes from `size` on the struct."
+        },
+        {
+          "key": "persistent",
+          "display": "Persistent",
+          "category": "behavior",
+          "kind": "bool",
+          "default": false,
+          "doc": "Rows survive a reconnection."
+        }
+      ],
+      "icon": [
+        { "step": "move_to", "x": 10.0, "y": 1.0 },
+        { "step": "line_to", "x": 10.0, "y": 8.0 },
+        { "step": "line_to", "x": 3.5, "y": 9.5 },
+        { "step": "close_path" },
+        { "step": "fill" },
+        { "step": "move_to", "x": 6.0, "y": 15.0 },
+        { "step": "line_to", "x": 6.0, "y": 8.0 },
+        { "step": "line_to", "x": 12.5, "y": 6.5 },
+        { "step": "close_path" },
+        { "step": "fill" }
+      ],
+      "requires": [
+        {
+          "crate": "portadb",
+          "version": "0.1",
+          "features": ["memory"]
+        }
+      ]
+    },
+    {
+      "class": "SqliteProvider",
+      "display": "SQLite Provider (rusqlite)",
+      "palette": "Data",
+      "prefix": "sqlite",
+      "default_size": [28.0, 28.0],
+      "visual": false,
+      "private_state": false,
+      "targets": ["*"],
+      "provides": ["DbProvider"],
+      "doc": "SQLite via `rusqlite` — embedded driver, serverless.",
+      "props": [
+        {
+          "key": "name",
+          "display": "Name",
+          "category": "identity",
+          "kind": "text",
+          "default": "",
+          "doc": "The instance name. Every component has one, so the derive writes it."
+        },
+        {
+          "key": "rect",
+          "display": "Rect",
+          "category": "layout",
+          "kind": "rect",
+          "default": { "x": 0.0, "y": 0.0, "w": 28.0, "h": 28.0 },
+          "doc": "Where the instance sits. The size comes from `size` on the struct."
+        }
+      ],
+      "icon": [
+        { "step": "move_to", "x": 10.0, "y": 1.0 },
+        { "step": "line_to", "x": 10.0, "y": 8.0 },
+        { "step": "line_to", "x": 3.5, "y": 9.5 },
+        { "step": "close_path" },
+        { "step": "fill" },
+        { "step": "move_to", "x": 6.0, "y": 15.0 },
+        { "step": "line_to", "x": 6.0, "y": 8.0 },
+        { "step": "line_to", "x": 12.5, "y": 6.5 },
+        { "step": "close_path" },
+        { "step": "fill" }
+      ],
+      "requires": [
+        {
+          "crate": "portadb",
+          "version": "0.1",
+          "features": ["rusqlite"]
+        }
+      ]
+    },
+    {
+      "class": "SqliteSqlxProvider",
+      "display": "SQLite Provider (sqlx)",
+      "palette": "Data",
+      "prefix": "sxlt",
+      "default_size": [28.0, 28.0],
+      "visual": false,
+      "private_state": false,
+      "targets": ["*"],
+      "provides": ["DbProvider"],
+      "doc": "SQLite via `sqlx` — the same database, the alternative client.\n\nBoth exist on purpose: the **database** and the **provider** are independent\naxes, and switching clients without switching databases is a choice the user\nmust be able to make.",
+      "props": [
+        {
+          "key": "name",
+          "display": "Name",
+          "category": "identity",
+          "kind": "text",
+          "default": "",
+          "doc": "The instance name. Every component has one, so the derive writes it."
+        },
+        {
+          "key": "rect",
+          "display": "Rect",
+          "category": "layout",
+          "kind": "rect",
+          "default": { "x": 0.0, "y": 0.0, "w": 28.0, "h": 28.0 },
+          "doc": "Where the instance sits. The size comes from `size` on the struct."
+        }
+      ],
+      "icon": [
+        { "step": "move_to", "x": 10.0, "y": 1.0 },
+        { "step": "line_to", "x": 10.0, "y": 8.0 },
+        { "step": "line_to", "x": 3.5, "y": 9.5 },
+        { "step": "close_path" },
+        { "step": "fill" },
+        { "step": "move_to", "x": 6.0, "y": 15.0 },
+        { "step": "line_to", "x": 6.0, "y": 8.0 },
+        { "step": "line_to", "x": 12.5, "y": 6.5 },
+        { "step": "close_path" },
+        { "step": "fill" }
+      ],
+      "requires": [
+        {
+          "crate": "portadb",
+          "version": "0.1",
+          "features": ["sqlx-sqlite"]
+        }
+      ]
+    },
+    {
+      "class": "PostgresProvider",
+      "display": "PostgreSQL Provider (sqlx)",
+      "palette": "Data",
+      "prefix": "pg",
+      "default_size": [28.0, 28.0],
+      "visual": false,
+      "private_state": false,
+      "targets": ["*"],
+      "provides": ["DbProvider"],
+      "doc": "PostgreSQL via `sqlx`.",
+      "props": [
+        {
+          "key": "name",
+          "display": "Name",
+          "category": "identity",
+          "kind": "text",
+          "default": "",
+          "doc": "The instance name. Every component has one, so the derive writes it."
+        },
+        {
+          "key": "rect",
+          "display": "Rect",
+          "category": "layout",
+          "kind": "rect",
+          "default": { "x": 0.0, "y": 0.0, "w": 28.0, "h": 28.0 },
+          "doc": "Where the instance sits. The size comes from `size` on the struct."
+        },
+        {
+          "key": "host",
+          "display": "Host",
+          "category": "behavior",
+          "kind": "text",
+          "default": "localhost",
+          "doc": "Where the server is located."
+        },
+        {
+          "key": "port",
+          "display": "Port",
+          "category": "behavior",
+          "kind": "int",
+          "default": 5432,
+          "min": 1,
+          "max": 65535,
+          "doc": "The server port."
+        }
+      ],
+      "icon": [
+        { "step": "move_to", "x": 10.0, "y": 1.0 },
+        { "step": "line_to", "x": 10.0, "y": 8.0 },
+        { "step": "line_to", "x": 3.5, "y": 9.5 },
+        { "step": "close_path" },
+        { "step": "fill" },
+        { "step": "move_to", "x": 6.0, "y": 15.0 },
+        { "step": "line_to", "x": 6.0, "y": 8.0 },
+        { "step": "line_to", "x": 12.5, "y": 6.5 },
+        { "step": "close_path" },
+        { "step": "fill" }
+      ],
+      "requires": [
+        {
+          "crate": "portadb",
+          "version": "0.1",
+          "features": ["sqlx-postgres"]
+        }
+      ]
+    },
+    {
+      "class": "RedisProvider",
+      "display": "Redis Provider",
+      "palette": "Data",
+      "prefix": "rds",
+      "default_size": [28.0, 28.0],
+      "visual": false,
+      "private_state": false,
+      "targets": ["*"],
+      "provides": ["DbProvider"],
+      "doc": "Redis.\n\n**Without `features`**, and not by omission: `redis` is the only one not\ngated in today's `portadb` crate. The manifest reflects the truth about the\ncrate, rather than what would be symmetrical.",
+      "props": [
+        {
+          "key": "name",
+          "display": "Name",
+          "category": "identity",
+          "kind": "text",
+          "default": "",
+          "doc": "The instance name. Every component has one, so the derive writes it."
+        },
+        {
+          "key": "rect",
+          "display": "Rect",
+          "category": "layout",
+          "kind": "rect",
+          "default": { "x": 0.0, "y": 0.0, "w": 28.0, "h": 28.0 },
+          "doc": "Where the instance sits. The size comes from `size` on the struct."
+        },
+        {
+          "key": "host",
+          "display": "Host",
+          "category": "behavior",
+          "kind": "text",
+          "default": "localhost",
+          "doc": "Where the server is located."
+        }
+      ],
+      "icon": [
+        { "step": "move_to", "x": 10.0, "y": 1.0 },
+        { "step": "line_to", "x": 10.0, "y": 8.0 },
+        { "step": "line_to", "x": 3.5, "y": 9.5 },
+        { "step": "close_path" },
+        { "step": "fill" },
+        { "step": "move_to", "x": 6.0, "y": 15.0 },
+        { "step": "line_to", "x": 6.0, "y": 8.0 },
+        { "step": "line_to", "x": 12.5, "y": 6.5 },
+        { "step": "close_path" },
+        { "step": "fill" }
+      ],
+      "requires": [
+        {
+          "crate": "portadb",
+          "version": "0.1"
+        }
+      ]
+    },
+    {
+      "class": "Connection",
+      "display": "Connection",
+      "palette": "Data",
+      "prefix": "conn",
+      "default_size": [28.0, 28.0],
+      "visual": false,
+      "private_state": false,
+      "targets": ["*"],
+      "provides": ["DbConnection", "DbRowSource"],
+      "doc": "**The connection declared by the form** — connection of a classic RAD form.\n\nIt does not connect and does not know which provider exists: it **points** to one,\nand whichever offers the `DbProvider` capability responds.",
+      "props": [
+        {
+          "key": "name",
+          "display": "Name",
+          "category": "identity",
+          "kind": "text",
+          "default": "",
+          "doc": "The instance name. Every component has one, so the derive writes it."
+        },
+        {
+          "key": "rect",
+          "display": "Rect",
+          "category": "layout",
+          "kind": "rect",
+          "default": { "x": 0.0, "y": 0.0, "w": 28.0, "h": 28.0 },
+          "doc": "Where the instance sits. The size comes from `size` on the struct."
+        },
+        {
+          "key": "provider",
+          "display": "Provider",
+          "category": "behavior",
+          "kind": "reference",
+          "default": "",
+          "ref_class": "DbProvider",
+          "doc": "**The native provider managed by this connection.**\n\nEmpty indicates an unassigned connection — the state in which it is born,\nbecause the provider is a component someone will drop on the canvas."
+        },
+        {
+          "key": "url",
+          "display": "Url",
+          "category": "behavior",
+          "kind": "text",
+          "default": "",
+          "doc": "Database location, in the format understood by the chosen provider."
+        },
+        {
+          "key": "max_connections",
+          "display": "Max connections",
+          "category": "behavior",
+          "kind": "int",
+          "default": 10,
+          "min": 1,
+          "max": 1000,
+          "doc": "The pool ceiling."
+        },
+        {
+          "key": "connect_timeout",
+          "display": "Connect timeout",
+          "category": "behavior",
+          "kind": "int",
+          "default": 30000,
+          "min": 100,
+          "max": 600000,
+          "doc": "How long to wait for a connection in milliseconds — the same unit and\nreasoning as `Timer`'s `interval`."
+        },
+        {
+          "key": "connected",
+          "display": "Connected",
+          "category": "behavior",
+          "kind": "bool",
+          "default": false,
+          "doc": "**The designer requests the connection, it does not establish it.**\n\nIn a classic RAD IDE, enabling connection at design time connects for\nreal, which is how query components show data in designer. Here it is,\nfor now, what the form stored — see module doc."
+        }
+      ],
+      "events": [
+        {
+          "name": "on_connect",
+          "display": "OnConnect",
+          "signature": "fn(&mut self)"
+        },
+        {
+          "name": "on_error",
+          "display": "OnError",
+          "signature": "fn(&mut self, message: &str)"
+        }
+      ],
+      "icon": [
+        { "step": "box", "x": 3.0, "y": 1.5, "w": 10.0, "h": 3.0, "r": 1.5 },
+        { "step": "stroke" },
+        { "step": "move_to", "x": 3.0, "y": 3.0 },
+        { "step": "line_to", "x": 3.0, "y": 13.0 },
+        { "step": "line_to", "x": 5.0, "y": 14.5 },
+        { "step": "line_to", "x": 11.0, "y": 14.5 },
+        { "step": "line_to", "x": 13.0, "y": 13.0 },
+        { "step": "line_to", "x": 13.0, "y": 3.0 },
+        { "step": "stroke" },
+        { "step": "move_to", "x": 3.0, "y": 8.0 },
+        { "step": "line_to", "x": 5.0, "y": 9.5 },
+        { "step": "line_to", "x": 11.0, "y": 9.5 },
+        { "step": "line_to", "x": 13.0, "y": 8.0 },
+        { "step": "stroke" }
+      ]
+    },
+    {
+      "class": "Dataset",
+      "display": "Dataset",
+      "palette": "Data",
+      "prefix": "dst",
+      "default_size": [28.0, 28.0],
+      "visual": false,
+      "private_state": false,
+      "targets": ["*"],
+      "provides": ["DbDataset", "DbRowSource"],
+      "doc": "**The dataset that ordinary UI components bind to.**\n\nIt is the layer between a database connection and ordinary components\n(ADR 0041: there are no special DB controls — standard controls like an Edit\nor a Grid bind directly to a dataset).\n\n`table` and `sql` are mutually exclusive data sources, matching\n`portadb::DatasetSource`: specifying a `table` creates an editable,\nCRUD-capable dataset, whereas providing an `sql` query creates a read-only\ndataset.\n\nLike every component in this crate, this struct represents the designer\n**state**, not the runtime engine: it stores what the user configured in the\ndesigner without executing database operations.",
+      "props": [
+        {
+          "key": "name",
+          "display": "Name",
+          "category": "identity",
+          "kind": "text",
+          "default": "",
+          "doc": "The instance name. Every component has one, so the derive writes it."
+        },
+        {
+          "key": "rect",
+          "display": "Rect",
+          "category": "layout",
+          "kind": "rect",
+          "default": { "x": 0.0, "y": 0.0, "w": 28.0, "h": 28.0 },
+          "doc": "Where the instance sits. The size comes from `size` on the struct."
+        },
+        {
+          "key": "connection",
+          "display": "Connection",
+          "category": "behavior",
+          "kind": "reference",
+          "default": "",
+          "ref_class": "DbConnection",
+          "doc": "**The connection component that this dataset points to.**\n\nEmpty is a dataset that has not yet chosen its connection. It binds to\nany component offering the `DbConnection` capability."
+        },
+        {
+          "key": "table",
+          "display": "Table",
+          "category": "behavior",
+          "kind": "text",
+          "default": "",
+          "doc": "The database table this dataset edits with full CRUD capabilities.\n\nWhen set, the dataset operates in editable mode over the specified table.\nThis is an alternative to [`sql`](Self::sql)."
+        },
+        {
+          "key": "sql",
+          "display": "SQL",
+          "category": "behavior",
+          "kind": "multiline",
+          "default": "",
+          "multiline": true,
+          "doc": "A custom SQL query that provides a read-only dataset.\n\nWhen set instead of [`table`](Self::table), the dataset executes this query\nin read-only mode."
+        },
+        {
+          "key": "active",
+          "display": "Active",
+          "category": "behavior",
+          "kind": "bool",
+          "default": false,
+          "doc": "**The designer asks for an active dataset, it does not open it.**\n\nFollowing the same reasoning as [`Connection::connected`], toggling this\nflag in the designer records the desired state without opening live\ndatabase cursors at design time."
+        }
+      ],
+      "events": [
+        {
+          "name": "on_after_post",
+          "display": "OnAfterPost",
+          "signature": "fn(&mut self)"
+        },
+        {
+          "name": "on_error",
+          "display": "OnError",
+          "signature": "fn(&mut self, message: &str)"
+        }
+      ],
+      "icon": [
+        { "step": "box", "x": 2.0, "y": 2.5, "w": 12.0, "h": 11.0, "r": 1.5 },
+        { "step": "stroke" },
+        { "step": "move_to", "x": 2.0, "y": 6.0 },
+        { "step": "line_to", "x": 14.0, "y": 6.0 },
+        { "step": "stroke" },
+        { "step": "move_to", "x": 6.5, "y": 6.0 },
+        { "step": "line_to", "x": 6.5, "y": 13.5 },
+        { "step": "stroke" }
+      ],
+      "requires": [
+        {
+          "crate": "portadb",
+          "version": "0.1"
+        }
+      ]
+    }
+  ]
+}

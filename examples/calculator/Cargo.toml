@@ -1,0 +1,7 @@
+[workspace]
+resolver = "2"
+members = ["calculator"]
+default-members = ["calculator"]
+
+[patch.crates-io]
+makepad-platform = { path = "../../vendor/makepad-platform" }

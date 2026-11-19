@@ -1,0 +1,17 @@
+[package]
+name = "portadb-rusqlite"
+version = "0.1.0"
+edition = "2024"
+authors = ["PortaDB Contributors"]
+description = "PortaDB provider: SQLite through rusqlite"
+license = "MIT OR Apache-2.0"
+keywords = ["database", "sql", "portadb"]
+categories = ["database"]
+
+[dependencies]
+portadb-core = { path = "../portadb-core" }
+rusqlite = { version = "0.31", features = ["bundled"] }
+tokio = { version = "1.43", features = ["sync", "rt", "time"] }
+
+[dev-dependencies]
+tokio = { version = "1.43", features = ["full"] }

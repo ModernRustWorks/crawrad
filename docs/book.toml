@@ -1,0 +1,20 @@
+[book]
+title = "CrawRAD Manual"
+description = "How to build Rust desktop, web and mobile apps visually with CrawRAD."
+language = "en"
+src = "src"
+
+[build]
+build-dir = "book"
+create-missing = false
+
+[output.html]
+default-theme = "navy"
+preferred-dark-theme = "navy"
+no-section-label = false
+site-url = "/crawrad/manual/"
+git-repository-url = "https://github.com/ModernRustWorks/crawrad"
+edit-url-template = "https://github.com/ModernRustWorks/crawrad/edit/main/docs/src/{path}"
+
+[output.html.search]
+enable = true

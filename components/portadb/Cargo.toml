@@ -1,0 +1,39 @@
+[package]
+name = "portadb"
+version = "0.1.0"
+edition = "2024"
+authors = ["PortaDB Contributors"]
+description = "A decoupled, driver-agnostic database connection engine abstraction for Rust"
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/example/portadb"
+keywords = ["database", "sql", "abstraction", "engine", "driver"]
+categories = ["database", "asynchronous"]
+
+[features]
+default = ["pool", "memory"]
+memory = ["dep:portadb-memory"]
+pool = ["dep:tokio"]
+rusqlite = ["dep:portadb-rusqlite", "dep:tokio"]
+sqlx-sqlite = ["dep:portadb-sqlite", "dep:tokio"]
+sqlx-postgres = ["dep:portadb-postgres", "dep:tokio"]
+
+[dependencies]
+portadb-core = { path = "../portadb-core" }
+portadb-redis = { path = "../portadb-redis" }
+portadb-memory = { path = "../portadb-memory", optional = true }
+portadb-rusqlite = { path = "../portadb-rusqlite", optional = true }
+portadb-sqlite = { path = "../portadb-sqlite", optional = true }
+portadb-postgres = { path = "../portadb-postgres", optional = true }
+thiserror = "2.0"
+tokio = { version = "1.43", features = ["sync", "rt", "time"], optional = true }
+
+[dev-dependencies]
+rusqlite = { version = "0.31", features = ["bundled"] }
+tokio = { version = "1.43", features = ["full"] }
+criterion = { version = "0.5", default-features = false }
+
+[[bench]]
+name = "query_rows"
+harness = false
+required-features = ["rusqlite", "sqlx-sqlite"]

@@ -1,0 +1,287 @@
+//! The target command gate: **the command that compiles for the targets of ADR
+//! 0007 exists in ONE place only, and that place is `gate.ps1`.**
+//!
+//! # The disease this module cures
+//!
+//! ADR 0007 already forbade this repetition, in writing:
+//!
+//! > *"Do not repeat them here: this list has already been written in three places (here,
+//! > in `ci.yml`, and in the head of whoever was typing), and all three diverged."*
+//!
+//! Thirty lines **below** that sentence, in the very same commit, the list was repeated
+//! again — and in a fifth place, `crates/crawrad-ide/Cargo.toml`, which nobody
+//! checked when the gate changed `cargo check --target` to
+//! `cargo clippy --target -- -D warnings` on 07/09/2026. The comment kept
+//! instructing to run the **wrong** command, and wrong is not a cosmetic detail:
+//! `check --target` **prints** warnings and exits with **0**; only
+//! `clippy --target -- -D warnings` exits with 101. Anyone following the comment
+//! would bring to the gate a failure that the canonical command claimed did not exist.
+//!
+//! A prohibition written in prose is a request. This module is the prohibition in
+//! the form of a test — it enforces it in `cargo test`, in the commit that writes the copy.
+//!
+//! # The rule, and why it is this way
+//!
+//! A target command is only dangerous when it is **executable**: when someone
+//! can select it, paste it into the terminal, and receive a verdict. For that it
+//! needs two things on the same line — a **literal target** and a **`cargo`
+//! judging code**. That is exactly the pair this gate rejects, in any
+//! file across the tree.
+//!
+//! - The targets are not written here: they come from `$TARGETS` in `gate.ps1`, read
+//!   from disk on every run. A new target in the gate is checked automatically, and
+//!   this file does not need to know about it. (This is also what keeps the gate from
+//!   **flagging itself**: it never contains a literal target.)
+//! - The verbs that **judge** are not enumerated; the opposite is enumerated,
+//!   namely [`INSPECT_ONLY_VERBS`], and it has two names. It follows the design of `LEXICO`
+//!   in `portao_ingles`, and for the same reason: forbidden lists rot
+//!   silently — anyone writing `cargo miri --target <target>` tomorrow will not
+//!   remember to add it to any list. An allowlist fails on the
+//!   safe side: a new verb is flagged until someone explicitly writes,
+//!   visible in the diff, that this verb gives no verdict.
+//!
+//! `cargo tree` and `cargo metadata` pass because they do not judge code — they
+//! list the graph. And this is not a convenience exception: they sign the
+//! dependency measurements in `crates/crawrad-ide/Cargo.toml` (282 packages with
+//! `xdg-portal`, 297 with `gtk3`), which need to name the target to convey anything.
+//!
+//! # What it does NOT check, stated in full
+//!
+//! 1. **Prose with the target as a placeholder.** `cargo clippy --target <target> --
+//!    -D warnings` — as found in `ci.yml`, ADR 0007, and `README.md` —
+//!    passes, and must pass: it is not pasteable, it is a description of the step. What the
+//!    ADR forbids is the repeated **list of targets**, and that is what the gate hunts down.
+//! 2. **A command split across two lines.** A line with the verb and the
+//!    next with the target escapes. Nobody writes like that intentionally, and catching
+//!    it would require joining lines — creating false positives in every paragraph
+//!    of prose that mentions a target near a `cargo`.
+//! 3. **Commands typed in an issue, PR, or chat.** The gate scans the
+//!    repository; whatever lives outside cannot be enforced by any test.
+//! 4. **Whether the command in `gate.ps1` is CORRECT.** This gate guarantees that
+//!    it is unique, not that it is correct. Content correctness is enforced by running the gate.
+
+use std::path::{Path, PathBuf};
+
+/// The repository root, from `crawrad-doc`.
+///
+/// Why the gate lives in this crate: by the same reasoning already written in
+/// `portao_ingles` — it has to live somewhere, reading file text does not
+/// create a link in the dependency graph, and this is the lowest crate that already
+/// had a reason to read other sources. The difference is the root: that one scans `crates/`,
+/// while this one scans the entire repository, because the stale copy was in a
+/// `Cargo.toml` and the other four are in a `.yml`, a `.md`, a `.ps1`, and
+/// another `.md`.
+fn repo_root() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("../..")
+}
+
+/// The `cargo` subcommands that may name a target anywhere.
+///
+/// Two, and the list is deliberately short: the criterion for inclusion here is **not
+/// giving a verdict on the code**. `tree` graphs dependencies and
+/// `metadata` prints it as JSON; neither compiles a single line, and neither
+/// can be mistaken for "I ran the gate".
+const INSPECT_ONLY_VERBS: &[&str] = &["tree", "metadata"];
+
+/// Directories into which the scan does not descend.
+///
+/// `target/` because projects generated by the two gates live there, and
+/// generated code is not anyone's comment. `.git/` because git objects are
+/// not text. And `.claude/` because **that is where worktrees of agents here
+/// live**: descending into them would scan OTHER branches and flag this commit for
+/// a copy that does not belong to it.
+///
+/// `.project/` holds dated records of what was measured, not instructions: a
+/// record that cites a command is not running it. The limit, declared: any
+/// instruction file kept there is not scanned either.
+const EXCLUDED_DIRS: &[&str] = &["target", ".git", ".claude", ".project", "node_modules"];
+
+/// The targets of ADR 0007, read from `$TARGETS` in `gate.ps1`.
+///
+/// The source is the script, rather than a constant here, for two cumulative reasons:
+/// a new target is checked without anyone having to remember this file, and the
+/// gate cannot flag itself — it never writes a literal target.
+fn gate_targets(source: &str) -> Vec<String> {
+    for line in source.lines() {
+        let Some(rest) = line.trim_start().strip_prefix("$TARGETS") else {
+            continue;
+        };
+        // `@('a', 'b')`: content between single quotes, alternating.
+        return rest
+            .split('\'')
+            .skip(1)
+            .step_by(2)
+            .map(str::to_string)
+            .collect();
+    }
+    Vec::new()
+}
+
+/// Is this line a pasteable command that gives a verdict on a target?
+///
+/// Requires both halves: a target written in full **and** a `cargo`
+/// followed by a verb that is not among those that only inspect. Either half without the other passes — that is
+/// what allows `deny.toml` to name targets and `README.md` to mention
+/// `cargo clippy --target` without specifying which.
+///
+/// Scans ALL occurrences of `cargo ` on the line, not just the first: a
+/// line starting with `cargo tree` and ending with the real command must
+/// not slip through because of the start.
+fn is_pasteable_command(line: &str, targets: &[String]) -> bool {
+    if !targets.iter().any(|a| line.contains(a.as_str())) {
+        return false;
+    }
+    let mut rest = line;
+    while let Some(pos) = rest.find("cargo ") {
+        rest = &rest[pos + "cargo ".len()..];
+        let verb: String = rest
+            .chars()
+            .take_while(|c| c.is_ascii_alphanumeric() || *c == '-' || *c == '_')
+            .collect();
+        if !verb.is_empty() && !INSPECT_ONLY_VERBS.contains(&verb.as_str()) {
+            return true;
+        }
+    }
+    false
+}
+
+/// Every file in the repository, descending into subdirectories except those in
+/// [`EXCLUDED_DIRS`].
+fn walk_dir(dir: &Path, found: &mut Vec<PathBuf>) {
+    let Ok(entries) = std::fs::read_dir(dir) else {
+        return;
+    };
+    for e in entries.flatten() {
+        let p = e.path();
+        if p.is_dir() {
+            if p.file_name()
+                .and_then(|n| n.to_str())
+                .is_some_and(|n| EXCLUDED_DIRS.contains(&n))
+            {
+                continue;
+            }
+            walk_dir(&p, found);
+        } else {
+            found.push(p);
+        }
+    }
+}
+
+/// How many files the scan must find, at a minimum.
+///
+/// Measured on 07/09/2026: 327 files tracked by git, and **330** seen by
+/// this scan, which also sees untracked files outside the directories
+/// above. The floor is loose on purpose — new files are everyday life, and this
+/// number must not become yet another count to keep updated — and what it
+/// guards against is a **blind** scan: root moved elsewhere, `read_dir` failing
+/// to open, or a gate that finds nothing and stays green because of it.
+const MIN_MEASURED_FILES: usize = 200;
+
+#[test]
+fn target_command_lives_only_in_gate() {
+    let root = repo_root();
+    let script = root.join("gate.ps1");
+    let gate_source = std::fs::read_to_string(&script)
+        .expect("`gate.ps1` opens — it is the single source of the command by target");
+
+    let targets = gate_targets(&gate_source);
+    assert!(
+        targets.len() >= 2 && targets.iter().all(|a| a.split('-').count() >= 3),
+        "`$TARGETS` from `gate.ps1` was not read ({targets:?}) — without targets this \
+         gate has nothing to search for and stays green forever"
+    );
+
+    let mut files = Vec::new();
+    walk_dir(&root, &mut files);
+    assert!(
+        files.len() >= MIN_MEASURED_FILES,
+        "the scan found {} file(s) — repository root moved, \
+         and a gate that finds nothing to enforce stays green forever",
+        files.len()
+    );
+
+    let mut complaints: Vec<String> = Vec::new();
+    for file in &files {
+        // Whatever is not UTF-8 is binary, and binaries have no comments.
+        let Ok(source) = std::fs::read_to_string(file) else {
+            continue;
+        };
+        let name = file
+            .strip_prefix(&root)
+            .unwrap_or(file)
+            .display()
+            .to_string()
+            .replace('\\', "/");
+        for (i, line) in source.lines().enumerate() {
+            if is_pasteable_command(line, &targets) {
+                complaints.push(format!("{name}:{}: {}", i + 1, line.trim()));
+            }
+        }
+    }
+
+    assert!(
+        complaints.is_empty(),
+        "the target command was copied outside `gate.ps1`, and copies are what \
+         diverge: ADR 0007 already recorded three divergences, and the fourth was \
+         a comment telling to run `cargo check --target`, which prints the \
+         warning and exits with 0. Delete the copy and point to `.\\gate.ps1`; if the \
+         verb here does not judge code, add it to `INSPECT_ONLY_VERBS` with \
+         the reason written down.\n{}",
+        complaints.join("\n")
+    );
+}
+
+/// **The gate's gate.** The scan above is only valid if the recognizer
+/// sees properly.
+///
+/// The needle is ASSEMBLED using the target read from `gate.ps1`, rather than written out: writing it
+/// would cause this file to violate its own rule and the gate would flag itself forever
+/// — the same precaution as `e_este_arquivo` in `portao_ingles`.
+///
+/// Mutation proof, measured: replacing `!INSPECT_ONLY_VERBS.contains(...)`
+/// with `true` in [`is_pasteable_command`] fails the `cargo tree` line; replacing it
+/// with `false` fails the first three.
+#[test]
+fn recognizer_detects_command_and_allows_prose() {
+    let root = repo_root();
+    let source = std::fs::read_to_string(root.join("gate.ps1")).expect("`gate.ps1` opens");
+    let targets = gate_targets(&source);
+    let target = targets.first().expect("at least one target").as_str();
+
+    let cases: &[(String, bool)] = &[
+        (
+            format!("#     cargo check --workspace --all-targets --target {target}"),
+            true,
+        ),
+        (
+            format!("cargo clippy --workspace --all-targets --target {target} -- -D warnings"),
+            true,
+        ),
+        (
+            format!("`cargo build -p crawrad-ide --target {target}`"),
+            true,
+        ),
+        // Inspects the graph, does not judge code.
+        (
+            format!("running `cargo tree --target {target}`: 282 packages"),
+            false,
+        ),
+        // Prose: the verb without the list of targets.
+        (
+            "the two `cargo clippy --target <target> -- -D warnings` of ADR 0007".to_string(),
+            false,
+        ),
+        // The list of targets without any verb — that is `deny.toml`.
+        (format!("    {{ triple = \"{target}\" }},"), false),
+    ];
+
+    let mismatched: Vec<&str> = cases
+        .iter()
+        .filter(|(line, expected)| is_pasteable_command(line, &targets) != *expected)
+        .map(|(line, _)| line.as_str())
+        .collect();
+    assert!(
+        mismatched.is_empty(),
+        "the recognizer answered the opposite of what these lines deserve: {mismatched:?}"
+    );
+}

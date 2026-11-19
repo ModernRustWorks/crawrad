@@ -1,0 +1,25 @@
+
+running 1 test
+test src\lib.rs - double (line 4) ... FAILED
+
+failures:
+
+---- src\lib.rs - double (line 4) stdout ----
+Test executable failed (exit status: 101).
+
+stderr:
+
+thread 'main' (29644) panicked at C:\Users\User\AppData\Local\Temp\rustdoctestW1bKGR\doctest_bundle_2024.rs:6:1:
+assertion `left == right` failed
+  left: 4
+ right: 5
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+
+failures:
+    src\lib.rs - double (line 4)
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+all doctests ran in 0.75s; merged doctests compilation took 0.59s

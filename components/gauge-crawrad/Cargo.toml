@@ -1,0 +1,32 @@
+[package]
+name = "gauge-crawrad"
+version = "0.1.0"
+edition = "2024"
+description = "A gauge that draws itself from the manifest, with no Rust"
+license = "MIT OR Apache-2.0"
+
+# **TWO dependencies, and they are the two halves of a classic RAD package.**
+#
+# `crawrad-component` is THE BOX -- the pieces. It is tiny and has no dependency of
+# its own on purpose (ADR 0033 §3), because it lands in the binary of somebody
+# who only dragged an icon onto a form. It is the runtime half.
+#
+# `crawrad-component-derive` is the design-time half: a compiler plugin that emits
+# `crawrad.toml` from the struct. It is not linked into anybody's application --
+# it runs during the build and disappears, the way a classic RAD IDE's design-time package
+# never ships with the finished program.
+#
+# A classic RAD application carries the component-library code it uses either way: statically
+# linked by default, or through `rtl.bpl` when the project is built with runtime
+# packages. Rust only has the first shape, and that is the one this matches.
+#
+# **And neither of them is the IDE.** No Makepad here, no egui, no `Document`,
+# no `Registry`: a component does not paint -- it declares verbs, and the IDE
+# paints them (ADR 0036). `cargo add gauge-crawrad` still works in any program,
+# with CrawRAD nowhere in sight.
+[dependencies]
+crawrad-component.workspace = true
+crawrad-component-derive.workspace = true
+
+[lints.rust]
+unsafe_code = "forbid"

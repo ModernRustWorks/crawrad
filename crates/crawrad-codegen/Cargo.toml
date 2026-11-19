@@ -1,0 +1,51 @@
+[package]
+name = "crawrad-codegen"
+version = "0.1.0"
+description = "IR -> compilable Cargo project. One trait, one generator per target (ADR 0004)"
+edition.workspace = true
+license.workspace = true
+publish = false
+authors.workspace = true
+
+[dependencies]
+crawrad-note = { workspace = true }
+crawrad-ir.workspace = true
+crawrad-registry.workspace = true
+crawrad-component.workspace = true
+thiserror.workspace = true
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+crawrad-registry = { workspace = true, features = ["test-support"] }
+# The anchor gate runs the actual designer rule, not a copy of it
+# written in the test: `Anchors::ajustar` is the exact same function the canvas calls
+# when the user drags the form border.
+crawrad-designer.workspace = true
+# The property map (#667) lays the form out as the IDE does before it
+# generates, so a property the layout folds into the rect is measured there.
+crawrad-doc.workspace = true
+# `gate_desenho_comparado` draws the SAME document from three sides. Two
+# of them are the live arm and the RXP drawing surface, and they run inside
+# the test process; the third is the emitted application, which runs in another
+# process because it cannot depend on our crates.
+#
+# This is a TEST dependency, not a product one: `crawrad-codegen` continues to
+# depend only on `crawrad-ir` and `thiserror`, and the test
+# `o_projeto_gerado_nao_depende_de_nenhum_crate_nosso` continues to hold for
+# what comes out of here.
+crawrad-runtime.workspace = true
+crawrad-runtime-egui.workspace = true
+# `geometria_compartilhada` enforces that the designer canvas and the generated code
+# use the SAME constant — the canvas drew the `ListBox` line with 18.0 and the
+# generator emitted 20.0. Production DOES NOT depend on this crate: it reaches
+# `shared_geometry.rs` via `include!` in the path. The guard needs both
+# sides, which is why it is the only one bringing it in.
+crawrad-runtime-makepad.workspace = true
+egui = "0.36.1"
+# The `Connection` gate reads the REAL `crawrad.toml` — the same file that
+# would go to crates.io — instead of an `ExternalComponent` written in the test.
+# Fake components prove a fake generator.
+crawrad-package.workspace = true
+serde_json.workspace = true

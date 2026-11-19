@@ -1,0 +1,8 @@
+# Força fim de linha LF para todos os arquivos de texto no repositório e working tree
+* text=auto eol=lf
+*.rs text eol=lf
+*.md text eol=lf
+*.toml text eol=lf
+*.json text eol=lf
+*.crawform text eol=lf
+*.ps1 text eol=lf
