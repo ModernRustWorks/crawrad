@@ -1,0 +1,147 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/makepad-code-editor",
+    "crates/crawrad-doc",
+    "crates/crawrad-os",
+    "crates/crawrad-splash",
+    "crates/crawrad-ir",
+    "crates/crawrad-registry",
+    "crates/crawrad-runtime",
+    "crates/crawrad-designer",
+    "crates/crawrad-actions",
+    "crates/crawrad-runtime-mock",
+    "crates/crawrad-runtime-egui",
+    "crates/crawrad-runtime-makepad",
+    "crates/crawrad-codegen",
+    "crates/crawrad-component",
+    "crates/crawrad-component-derive",
+    "crates/crawrad-note",
+    "crates/crawrad-note-format",
+    "crates/crawrad-manifest-gen",
+    "crates/crawrad-cli",
+    "crates/crawrad-package",
+    "crates/crawrad-binding",
+    "crates/crawrad-extension-api",
+    "crates/crawrad-audio",
+    "crates/crawrad-lsp",
+    "crates/crawrad-insight",
+    "crates/crawrad-framing",
+    "crates/crawrad-dap",
+    "crates/crawrad-dap-rust",
+    "crates/crawrad-terminal",
+    "crates/crawrad-extension-host",
+    "crates/crawrad-ext-todo",
+    "crates/crawrad-mcp",
+    "crates/crawrad-agent",
+    "crates/crawrad-settings",
+    "crates/crawrad-project",
+    "crates/crawrad-host",
+    "crates/crawrad-ide",
+    "crates/crawrad-dbprobe",
+
+    # A SUITE DE COMPONENTES — a "biblioteca de componentes" desta casa. Ver `components/README.md`.
+    "components/datagrid",
+    "components/datagrid-sql",
+    "components/portadb",
+    "components/portadb-core",
+    "components/portadb-memory",
+    "components/portadb-postgres",
+    "components/portadb-redis",
+    "components/portadb-rusqlite",
+    "components/portadb-sqlite",
+    "components/portadb-crawrad",
+    "components/gauge-crawrad",
+    "source",
+]
+# O antigo `attic/` foi apagado em 29/09/2026 (#267). O núcleo de 2025 está na
+# tag `v0-archive` e na branch `archive/v0`; a casca egui e o RCL estão no
+# histórico do git (o último commit com eles é `02efc67`).
+
+[workspace.package]
+edition = "2024"
+license = "GPL-3.0-only"
+authors = ["Isaque Pinheiro"]
+
+[workspace.dependencies]
+crawrad-ir = { path = "crates/crawrad-ir", version = "0.1.0" }
+crawrad-registry = { path = "crates/crawrad-registry", version = "0.1.0" }
+crawrad-doc = { path = "crates/crawrad-doc", version = "0.1.0" }
+crawrad-os = { path = "crates/crawrad-os", version = "0.1.0" }
+crawrad-splash = { path = "crates/crawrad-splash", version = "0.1.0" }
+crawrad-runtime = { path = "crates/crawrad-runtime", version = "0.1.0" }
+crawrad-designer = { path = "crates/crawrad-designer", version = "0.1.0" }
+crawrad-actions = { path = "crates/crawrad-actions", version = "0.1.0" }
+crawrad-runtime-mock = { path = "crates/crawrad-runtime-mock", version = "0.1.0" }
+crawrad-runtime-egui = { path = "crates/crawrad-runtime-egui", version = "0.1.0" }
+crawrad-runtime-makepad = { path = "crates/crawrad-runtime-makepad", version = "0.1.0" }
+crawrad-codegen = { path = "crates/crawrad-codegen", version = "0.1.0" }
+crawrad-component = { path = "crates/crawrad-component", version = "0.1.0" }
+crawrad-component-derive = { path = "crates/crawrad-component-derive", version = "0.1.0" }
+crawrad-note = { path = "crates/crawrad-note", version = "0.1.0" }
+crawrad-note-format = { path = "crates/crawrad-note-format", version = "0.1.0" }
+crawrad-manifest-gen = { path = "crates/crawrad-manifest-gen", version = "0.1.0" }
+crawrad-package = { path = "crates/crawrad-package", version = "0.1.0" }
+crawrad-binding = { path = "crates/crawrad-binding", version = "0.1.0" }
+crawrad-extension-api = { path = "crates/crawrad-extension-api", version = "0.1.0" }
+crawrad-audio = { path = "crates/crawrad-audio", version = "0.1.0" }
+crawrad-lsp = { path = "crates/crawrad-lsp", version = "0.1.0" }
+crawrad-insight = { path = "crates/crawrad-insight", version = "0.1.0" }
+crawrad-framing = { path = "crates/crawrad-framing", version = "0.1.0" }
+crawrad-dap = { path = "crates/crawrad-dap", version = "0.1.0" }
+crawrad-dap-rust = { path = "crates/crawrad-dap-rust", version = "0.1.0" }
+crawrad-terminal = { path = "crates/crawrad-terminal", version = "0.1.0" }
+crawrad-extension-host = { path = "crates/crawrad-extension-host", version = "0.1.0" }
+crawrad-mcp = { path = "crates/crawrad-mcp", version = "0.1.0" }
+crawrad-agent = { path = "crates/crawrad-agent", version = "0.1.0" }
+crawrad-settings = { path = "crates/crawrad-settings", version = "0.1.0" }
+crawrad-project = { path = "crates/crawrad-project", version = "0.1.0" }
+crawrad-host = { path = "crates/crawrad-host", version = "0.1.0" }
+datagrid = { path = "components/datagrid", version = "0.1.0" }
+rustls-graviola = "0.3"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+# The system clipboard, READ: the editor's Paste from its menu (#257). Makepad
+# only writes the clipboard (`Cx::copy_to_clipboard`); a paste by key arrives
+# as an OS event, a paste from a menu item has to ask. Windows, macOS and
+# Linux (X11) in one crate. No default features: they bring the `image` crate
+# for picture data, and only text is read.
+arboard = { version = "3.6", default-features = false }
+base64 = "0.22"
+# Reading the program's own debug info (DWARF) — the debugger's Rust
+# presenter gets type layouts from it (ADR 0048 §3.3). Read-only features.
+gimli = { version = "0.34", default-features = false, features = ["read", "std"] }
+notify = "8"
+object = { version = "0.40", default-features = false, features = ["read", "std", "pe", "elf", "macho", "coff"] }
+pdb2 = "0.10"
+png = "0.17"
+rustc-demangle = "0.1"
+sha2 = "0.10"
+similar = "2"
+thiserror = "2.0"
+toml = "1.1"
+toml_edit = "0.25"
+ureq = { version = "3", default-features = false, features = ["rustls-no-provider", "rustls-webpki-roots"] }
+uuid = { version = "1.26.1", features = ["v4"] }
+
+[workspace.lints.rust]
+unsafe_op_in_unsafe_fn = "warn"
+# Set only by `gate.ps1` for the Apple cross-check from Windows (crawrad-audio).
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(crawrad_cross_check)"] }
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+
+[patch.crates-io]
+makepad-code-editor = { path = "crates/makepad-code-editor" }
+# #396: Alt+Enter killed the IDE (DXGI full-screen toggle); one call in
+# `vendor/makepad-platform/src/os/windows/d3d11.rs`, marked "CrawRAD patch";
+# third-party code, so it lives under `vendor/`, outside our gates.
+# #733: compiled HLSL shaders kept on disk (`src/os/windows/shader_cache.rs`),
+# 13.5 s -> 1.5 s from the second start of the IDE.
+makepad-platform = { path = "vendor/makepad-platform" }
+
+# Crash reports name the file and line of each frame (the `.pdb` beside the exe).
+# Line tables only: no slower code, only a larger `.pdb`.
+[profile.release]
+debug = "line-tables-only"

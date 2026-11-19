@@ -1,0 +1,21 @@
+[package]
+name = "crawrad-host"
+version = "0.1.0"
+description = "IDE state model and non-visual Host API for CrawRAD Studio (ADR 0044)"
+edition.workspace = true
+license.workspace = true
+publish = false
+authors.workspace = true
+
+[dependencies]
+crawrad-note = { workspace = true }
+crawrad-doc = { workspace = true }
+crawrad-ir = { workspace = true }
+crawrad-dap = { workspace = true }
+crawrad-os = { workspace = true }
+crawrad-project = { workspace = true }
+serde_json = { workspace = true }
+sha2 = { workspace = true }
+similar = { workspace = true }
+
+[dev-dependencies]

@@ -1,0 +1,110 @@
+# Licence shield. CrawRAD itself is GPL-3.0-only; the runtime that ships inside
+# every user's app is MIT OR Apache-2.0 and must never pull in copyleft code.
+# The policy is an allowlist: anything not listed here fails the CI and becomes
+# a conscious decision instead of a late discovery.
+
+[graph]
+# THE THREE PLATFORMS OF ADR 0007, and not just the developer's machine.
+#
+# Cargo-deny's `targets` is not decorative: it PRUNES the graph. A dependency
+# that only enters under `cfg(unix)` does not exist for license checking while
+# the only listed target is Windows — and the list had a single target since the day
+# it was born, when the product was still Windows-only and no one missed it.
+#
+# What settled the matter: the product's first LINUX-ONLY dependency just
+# entered — `pollster 0.4.0`, via rfd's `xdg-portal` backend, in
+# `crates/crawrad-ide/Cargo.toml`. The commit that promises Linux cannot leave the
+# license gate without looking at it; it would be an allowlist valid only on
+# the machine of whoever wrote it.
+#
+# Measured with `cargo deny list --layout crate`: with a single target, 202 crates
+# were judged; with all three, 348. The 146 additional crates are Linux and macOS, which
+# until now entered the product without passing through the allowlist. `licenses ok` on
+# all three — no new license required a decision.
+targets = [
+    { triple = "x86_64-pc-windows-msvc" },
+    { triple = "x86_64-unknown-linux-gnu" },
+    { triple = "aarch64-apple-darwin" },
+]
+all-features = false
+
+[licenses]
+version = 2
+# Our own IDE crates are GPL-3.0 and `publish = false`: they are not dependencies of
+# anyone, so the allowlist below judges only what we depend on.
+private = { ignore = true }
+confidence-threshold = 0.9
+# Do not complain about an allowed license that nobody used (pure noise).
+unused-allowed-license = "allow"
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Zlib",
+    "BSL-1.0",
+    "CC0-1.0",
+    "Unlicense",
+    "Unicode-3.0",
+    "MIT-0",
+    "NCSA",
+    "CDLA-Permissive-2.0",
+
+    # --- fonts embedded in egui (epaint_default_fonts crate) ---
+    # FONT licenses, not code: permissive, but with a condition to
+    # rename if the font is modified. Included by conscious decision.
+    # To revisit: turn off egui's `default_fonts` feature and use system
+    # fonts (Segoe UI) — in a native Windows app this is even more correct,
+    # and dismisses the issue.
+    "OFL-1.1",
+    "Ubuntu-font-1.0",
+]
+# GPL, AGPL, LGPL, and SSPL are left out on purpose: dependencies cannot
+# impose copyleft on the runtime, which is MIT OR Apache-2.0 and ships inside the user's app.
+# resvg and usvg enter as dependencies of Makepad's vector rendering pipeline
+# (makepad-vector -> makepad-draw -> makepad-widgets). MPL-2.0 is file-level copyleft,
+# permitting linking and closed commercial use without contaminating the rest of CrawRAD's code.
+[[licenses.exceptions]]
+allow = ["MPL-2.0"]
+crate = "resvg@0.42.0"
+
+[[licenses.exceptions]]
+allow = ["MPL-2.0"]
+crate = "usvg@0.42.0"
+
+[bans]
+multiple-versions = "allow"   # the graphics ecosystem duplicates heavily; not the target here
+wildcards = "deny"
+
+# THE THREE TARGETS OPENED THE EYES OF THIS CHECK TOO, and what it saw is
+# RED. Measured on 2026-09-07, in this order:
+#
+#     targets = [windows]              -> `cargo deny check advisories` ok
+#     targets = [windows, linux, macos] -> advisories FAILED, 3 findings
+#
+# All three come from the Linux/macOS graph, which until then was uninspected,
+# and none of them is ours or can be fixed by us:
+#
+# - RUSTSEC-2026-0194 and RUSTSEC-2026-0195, `quick-xml` 0.36.2 and 0.37.5
+#   (two DoS; the fix is `quick-xml >= 0.41`, and the version is selected by
+#   a third-party dependency);
+# - RUSTSEC-2026-0192, `ttf-parser` 0.25.1 unmaintained.
+#
+# They are NOT ignored here on purpose. Ignoring a vulnerability is an owner's
+# decision, with date and rationale, not a quick patch by a passerby. Until it is
+# made, they are shown by CI's `Security advisories` step, marked
+# `continue-on-error`: it PRINTS them in full and leaves the job GREEN, with
+# an annotation — the earlier `deny` job, which would turn red **due to third-party
+# debt, and not our own code**, ceased to exist on 2026-09-07. That is the same
+# reason the local gate (`gate.ps1`) only runs `check licenses`: a gate
+# that is born red from something no one can fix stops being read in a week.
+[advisories]
+version = 2
+yanked = "deny"
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]

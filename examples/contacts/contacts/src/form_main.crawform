@@ -1,0 +1,319 @@
+{
+  "format": 2,
+  "root": "form_main",
+  "nodes": {
+    "conn1": {
+      "id": "conn1",
+      "class": "Connection",
+      "props": {
+        "connect_timeout": {
+          "t": "Int",
+          "v": 30000
+        },
+        "connected": {
+          "t": "Bool",
+          "v": false
+        },
+        "max_connections": {
+          "t": "Int",
+          "v": 10
+        },
+        "name": {
+          "t": "Str",
+          "v": "conn1"
+        },
+        "provider": {
+          "t": "Ref",
+          "v": "sqlite1"
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 72.0,
+            "y": 16.0,
+            "w": 28.0,
+            "h": 28.0
+          }
+        },
+        "url": {
+          "t": "Str",
+          "v": "sqlite:contacts.db"
+        }
+      }
+    },
+    "dst1": {
+      "id": "dst1",
+      "class": "Dataset",
+      "props": {
+        "active": {
+          "t": "Bool",
+          "v": false
+        },
+        "connection": {
+          "t": "Ref",
+          "v": "conn1"
+        },
+        "name": {
+          "t": "Str",
+          "v": "dst1"
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 120.0,
+            "y": 16.0,
+            "w": 28.0,
+            "h": 28.0
+          }
+        },
+        "sql": {
+          "t": "Str",
+          "v": "SELECT name, email, city FROM contacts ORDER BY name"
+        },
+        "table": {
+          "t": "Str",
+          "v": ""
+        }
+      }
+    },
+    "form_main": {
+      "id": "form_main",
+      "class": "Form",
+      "props": {
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 0.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "name": {
+          "t": "Str",
+          "v": "form_main"
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "position": {
+          "t": "Enum",
+          "v": "poDesigned"
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 0.0,
+            "y": 0.0,
+            "w": 640.0,
+            "h": 420.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "Form1"
+        },
+        "theme": {
+          "t": "Enum",
+          "v": "thSystem"
+        },
+        "window_state": {
+          "t": "Enum",
+          "v": "wsNormal"
+        }
+      },
+      "children": [
+        "sqlite1",
+        "conn1",
+        "dst1",
+        "grid1"
+      ]
+    },
+    "grid1": {
+      "id": "grid1",
+      "class": "Grid",
+      "props": {
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "cell_text": {
+          "t": "Str",
+          "v": ""
+        },
+        "col_count": {
+          "t": "Int",
+          "v": 5
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "data_source": {
+          "t": "Ref",
+          "v": "dst1"
+        },
+        "default_col_width": {
+          "t": "Int",
+          "v": 80
+        },
+        "default_row_height": {
+          "t": "Int",
+          "v": 24
+        },
+        "design_rows": {
+          "t": "Enum",
+          "v": "8"
+        },
+        "editing": {
+          "t": "Bool",
+          "v": false
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "fixed_cols": {
+          "t": "Int",
+          "v": 0
+        },
+        "fixed_rows": {
+          "t": "Int",
+          "v": 1
+        },
+        "grid_lines": {
+          "t": "Bool",
+          "v": true
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "name": {
+          "t": "Str",
+          "v": "grid1"
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 24.0,
+            "y": 64.0,
+            "w": 592.0,
+            "h": 280.0
+          }
+        },
+        "row_count": {
+          "t": "Int",
+          "v": 5
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "tab_order": {
+          "t": "Int",
+          "v": 0
+        },
+        "tab_stop": {
+          "t": "Bool",
+          "v": true
+        },
+        "table_name": {
+          "t": "Str",
+          "v": ""
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      }
+    },
+    "sqlite1": {
+      "id": "sqlite1",
+      "class": "SqliteProvider",
+      "props": {
+        "name": {
+          "t": "Str",
+          "v": "sqlite1"
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 24.0,
+            "y": 16.0,
+            "w": 28.0,
+            "h": 28.0
+          }
+        }
+      }
+    }
+  }
+}

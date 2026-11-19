@@ -1,0 +1,15 @@
+[package]
+name = "crawrad-splash"
+version = "0.1.0"
+description = "The IDE's splash screen: the start's steps, the shader counter and the picture"
+edition.workspace = true
+license.workspace = true
+publish = false
+authors.workspace = true
+
+[dependencies]
+crawrad-note = { workspace = true }
+crawrad-os.workspace = true
+
+[lints]
+workspace = true

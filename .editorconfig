@@ -1,0 +1,24 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.rs]
+indent_style = space
+indent_size = 4
+
+[*.{toml,yml,yaml,json,crawform,crawrad}]
+indent_style = space
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+# Windows PowerShell (5.1) reads a .ps1 without BOM as ANSI, and the gate's output
+# (em dashes, arrows) turns to garbage on screen. The BOM here is a declared
+# exception, not editor carelessness.
+[*.ps1]
+charset = utf-8-bom

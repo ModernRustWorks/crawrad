@@ -1,2 +1,13 @@
-/target/
-**/target/
+target/
+**/*.rs.bk
+.DS_Store
+Thumbs.db
+*.stackdump
+.mcp.json
+**/.mcp.json
+
+# Keep docs/ (the manual) even where a global gitignore drops it.
+!docs/
+# mdBook output is not versioned.
+docs/book/
+

@@ -1,0 +1,39 @@
+[package]
+name = "crawrad-component-derive"
+version = "0.1.0"
+description = "The #[derive(Component)]: a component manifest is emitted from the struct, not written by hand"
+edition.workspace = true
+license = "MIT OR Apache-2.0"
+authors.workspace = true
+
+[lib]
+proc-macro = true
+
+# **This crate is COMPILE-TIME ONLY, and that is why it is not inside the box.**
+#
+# `crawrad-component` (the box) has an empty `[dependencies]` and a gate that fails
+# if it ever gains a line, because the box is linked into the binary of somebody
+# who only dragged an icon. A proc-macro crate is not linked into that binary at
+# all -- it is a compiler plugin.
+#
+# So the honest reading is that the gate, as written, measures the wrong thing
+# for this case. Teaching it to tell a proc-macro dependency apart from a real
+# one is a decision on its own, and weakening a gate to let my own change
+# through is exactly how a gate stops being worth anything. The box keeps its
+# empty section, this crate stays separate, and a component author adds both.
+#
+# The classic RAD parallel holds and is the reason this feels right: design-time and
+# runtime packages are separate there too, for the same reason -- what the IDE
+# needs at build time is not what the application needs at run time.
+[dependencies]
+proc-macro2 = "1.0"
+quote = "1.0"
+crawrad-manifest-gen.workspace = true
+syn = { version = "2.0", features = ["full", "extra-traits"] }
+
+[dev-dependencies]
+crawrad-component.workspace = true
+serde_json.workspace = true
+
+[lints]
+workspace = true

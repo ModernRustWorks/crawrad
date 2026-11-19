@@ -1,0 +1,31 @@
+[package]
+name = "crawrad-manifest-gen"
+version = "0.1.0"
+description = "Le a struct Rust de um componente e escreve o manifesto dele"
+edition.workspace = true
+license = "MIT OR Apache-2.0"
+authors.workspace = true
+
+# **DUAS dependencias, e as duas sao de LEITURA DE RUST.**
+#
+# Este crate existe porque o `#[derive(Component)]` e o `crawrad manifest` fazem
+# a MESMA coisa a partir da mesma fonte, e um deles e um proc-macro -- que o
+# Cargo nao deixa ninguem usar como biblioteca comum. Enquanto o codigo morou la
+# dentro, o CLI era impossivel.
+#
+# O que NAO entra aqui e o que o `crawrad-package` tem: `serde`, `toml`, o catalogo,
+# o `crawrad-ir`. O `crawrad-package` LE o manifesto na maquina de quem instala; este
+# aqui o ESCREVE na maquina de quem publica, e ele e carregado pelo compilador
+# toda vez que alguem compila um componente. Peso aqui e segundo a mais em cada
+# build de terceiro -- o que o ADR 0033 §3 diz para nao fazer.
+[dependencies]
+proc-macro2 = "1.0"
+syn = { version = "2.0", features = ["full", "extra-traits"] }
+
+# So o teste precisa: ele confere que o texto que saiu e um documento JSON de
+# verdade, e nao JSON a olho nu.
+[dev-dependencies]
+serde_json = "1.0"
+
+[lints]
+workspace = true

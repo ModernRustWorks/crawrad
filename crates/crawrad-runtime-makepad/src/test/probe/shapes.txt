@@ -1,0 +1,208 @@
+Action Badge 10.0 10.0 200.0 120.0 #d0e0e8ff border #406080ff
+Action BadgeText 106.5 63.0 7.0 14.0 #204060ff "A"
+Action BadgeText 92.5 132.0 35.0 14.0 #a6adc8ff "probe"
+ActionList Badge 10.0 10.0 200.0 120.0 #d0e0e8ff border #406080ff
+ActionList BadgeText 103.0 63.0 14.0 14.0 #204060ff "AL"
+ActionList BadgeText 92.5 132.0 35.0 14.0 #a6adc8ff "probe"
+Badge Box 10.0 10.0 200.0 120.0 #3b598cff border #00000000
+Badge Text 99.5 63.0 21.0 14.0 #f2f2faff "New"
+Bevel Stroke 10.0 10.0 200.0 1.0 #00000073
+Bevel Stroke 10.0 10.0 1.0 120.0 #00000073
+Bevel Stroke 10.0 129.0 200.0 1.0 #ffffff40
+Bevel Stroke 209.0 10.0 1.0 120.0 #ffffff40
+BitBtn Box 10.0 10.0 200.0 120.0 #3b3b54ff border #9297b5ff
+BitBtn Text 92.5 63.0 35.0 14.0 #cdd6f4ff "probe"
+Breadcrumb Text 10.0 63.0 28.0 14.0 #89b4faff "Home"
+Breadcrumb Text 44.0 63.0 7.0 14.0 #6c7086ff "›"
+Breadcrumb Text 57.0 63.0 56.0 14.0 #89b4faff "Projects"
+Breadcrumb Text 119.0 63.0 7.0 14.0 #6c7086ff "›"
+Breadcrumb Text 132.0 63.0 49.0 14.0 #cdd6f4ff "CrawRAD"
+Button Box 10.0 10.0 200.0 120.0 #3b3b54ff border #9297b5ff
+Button Text 92.5 63.0 35.0 14.0 #cdd6f4ff "probe"
+Card Box 10.0 11.5 200.0 118.5 #00000026 border #00000000
+Card Box 10.0 10.0 200.0 120.0 #2f2f45ff border #9297b5ff
+Card Text 22.0 17.0 28.0 14.0 #cdd6f4ff "Card"
+Card Stroke 10.0 38.0 200.0 1.0 #9297b5ff
+CategoryPanel Stroke 10.0 10.0 200.0 1.0 #9297b5ff
+CategoryPanel Stroke 10.0 129.0 200.0 1.0 #9297b5ff
+CategoryPanel Stroke 10.0 10.0 1.0 120.0 #9297b5ff
+CategoryPanel Stroke 209.0 10.0 1.0 120.0 #9297b5ff
+CategoryPanel Box 10.0 10.0 200.0 24.0 #2f2f45ff border #9297b5ff
+CategoryPanel Arrow 16.0 16.0 12.0 12.0 #cdd6f4ff
+CategoryPanel Text 34.0 15.0 91.0 14.0 #cdd6f4ff "CategoryPanel"
+CheckBox Box 10.0 63.0 14.0 14.0 #181825ff border #9297b5ff
+CheckBox Text 30.0 63.0 35.0 14.0 #cdd6f4ff "probe"
+CheckListBox Box 10.0 10.0 200.0 120.0 #181825ff border #9297b5ff
+CheckListBox Box 16.0 14.0 14.0 14.0 #181825ff border #9297b5ff
+CheckListBox Text 36.0 14.0 28.0 14.0 #cdd6f4ff "Rust"
+CheckListBox Box 16.0 36.0 14.0 14.0 #181825ff border #9297b5ff
+CheckListBox Text 36.0 36.0 28.0 14.0 #cdd6f4ff "egui"
+CheckListBox Box 16.0 58.0 14.0 14.0 #181825ff border #9297b5ff
+CheckListBox Text 36.0 58.0 49.0 14.0 #cdd6f4ff "Makepad"
+Chips Box 10.0 10.0 44.0 24.0 #313140ff border #313140ff
+Chips Text 18.0 15.0 28.0 14.0 #cdd6f4ff "Rust"
+Chips Box 60.0 10.0 44.0 24.0 #313140ff border #313140ff
+Chips Text 68.0 15.0 28.0 14.0 #cdd6f4ff "egui"
+Chips Box 110.0 10.0 65.0 24.0 #313140ff border #313140ff
+Chips Text 118.0 15.0 49.0 14.0 #cdd6f4ff "Makepad"
+ColorBox Box 10.0 10.0 200.0 120.0 #181825ff border #9297b5ff
+ColorBox Box 14.0 63.0 14.0 14.0 #000000ff border #9297b5ff
+ColorBox Text 32.0 63.0 35.0 14.0 #cdd6f4ff "Black"
+ColorBox Arrow 194.0 10.0 16.0 120.0 #cdd6f4ff
+ComboBox Box 10.0 10.0 200.0 120.0 #181825ff border #9297b5ff
+ComboBox Box 193.0 11.0 16.0 118.0 #3b3b54ff border #9297b5ff
+ComboBox Arrow 193.0 62.0 16.0 16.0 #cdd6f4ff
+DateTimePicker Box 10.0 10.0 200.0 120.0 #181825ff border #9297b5ff
+DateTimePicker Text 14.0 63.0 70.0 14.0 #cdd6f4ff "01/01/2000"
+Drawer Box 10.0 10.0 200.0 120.0 #2f2f45ff border #9297b5ff
+Drawer Dashed 10.0 10.0 200.0 120.0 #9297b5ff
+Drawer Text 22.0 19.0 105.0 14.0 #cdd6f4ff "Drawer (closed)"
+Drawer Text 190.5 19.0 7.0 14.0 #a6adc8ff "×"
+Drawer Stroke 10.0 42.0 200.0 1.0 #9297b5ff
+Edit Box 10.0 10.0 200.0 120.0 #181825ff border #9297b5ff
+Edit Text 14.0 63.0 35.0 14.0 #cdd6f4ff "probe"
+Form Dashed 10.0 10.0 200.0 120.0 #a6adc8ff
+Form Text 96.0 63.0 28.0 14.0 #a6adc8ff "Form"
+Grid Box 10.0 10.0 200.0 120.0 #181825ff border #9297b5ff
+Grid Box 10.0 10.0 80.0 24.0 #2f2f45ff border #2f2f45ff
+Grid Stroke 89.0 10.0 1.0 24.0 #6e7290ff
+Grid Stroke 10.0 33.0 80.0 1.0 #6e7290ff
+Grid Box 90.0 10.0 80.0 24.0 #2f2f45ff border #2f2f45ff
+Grid Stroke 169.0 10.0 1.0 24.0 #6e7290ff
+Grid Stroke 90.0 33.0 80.0 1.0 #6e7290ff
+Grid Box 170.0 10.0 40.0 24.0 #2f2f45ff border #2f2f45ff
+Grid Stroke 170.0 33.0 40.0 1.0 #6e7290ff
+Grid Stroke 89.0 34.0 1.0 24.0 #6e7290ff
+Grid Stroke 10.0 57.0 80.0 1.0 #6e7290ff
+Grid Stroke 169.0 34.0 1.0 24.0 #6e7290ff
+Grid Stroke 90.0 57.0 80.0 1.0 #6e7290ff
+Grid Stroke 170.0 57.0 40.0 1.0 #6e7290ff
+Grid Stroke 89.0 58.0 1.0 24.0 #6e7290ff
+Grid Stroke 10.0 81.0 80.0 1.0 #6e7290ff
+Grid Stroke 169.0 58.0 1.0 24.0 #6e7290ff
+Grid Stroke 90.0 81.0 80.0 1.0 #6e7290ff
+Grid Stroke 170.0 81.0 40.0 1.0 #6e7290ff
+Grid Stroke 89.0 82.0 1.0 24.0 #6e7290ff
+Grid Stroke 10.0 105.0 80.0 1.0 #6e7290ff
+Grid Stroke 169.0 82.0 1.0 24.0 #6e7290ff
+Grid Stroke 90.0 105.0 80.0 1.0 #6e7290ff
+Grid Stroke 170.0 105.0 40.0 1.0 #6e7290ff
+Grid Stroke 89.0 106.0 1.0 24.0 #6e7290ff
+Grid Stroke 10.0 129.0 80.0 1.0 #6e7290ff
+Grid Stroke 169.0 106.0 1.0 24.0 #6e7290ff
+Grid Stroke 90.0 129.0 80.0 1.0 #6e7290ff
+Grid Stroke 170.0 129.0 40.0 1.0 #6e7290ff
+GroupBox Stroke 10.0 17.0 1.0 113.0 #6e7290ff
+GroupBox Stroke 209.0 17.0 1.0 113.0 #6e7290ff
+GroupBox Stroke 10.0 129.0 200.0 1.0 #6e7290ff
+GroupBox Stroke 10.0 17.0 4.0 1.0 #6e7290ff
+GroupBox Stroke 78.0 17.0 132.0 1.0 #6e7290ff
+GroupBox Text 18.0 10.0 56.0 14.0 #cdd6f4ff "GroupBox"
+Image Box 10.0 10.0 200.0 120.0 #00000000 border #9297b5ff
+ImageList Badge 10.0 10.0 200.0 120.0 #d0e0e8ff border #406080ff
+ImageList BadgeText 103.0 63.0 14.0 14.0 #204060ff "IL"
+ImageList BadgeText 92.5 132.0 35.0 14.0 #a6adc8ff "probe"
+Label Text 10.0 63.0 35.0 14.0 #cdd6f4ff "probe"
+LinkLabel Text 10.0 63.0 35.0 14.0 #89b4faff "probe"
+LinkLabel Stroke 10.0 76.0 35.0 1.0 #89b4faff
+ListBox Box 10.0 10.0 200.0 120.0 #181825ff border #9297b5ff
+ListBox Text 27.0 17.0 35.0 14.0 #cdd6f4ff "Item1"
+ListBox Text 27.0 35.0 35.0 14.0 #cdd6f4ff "Item2"
+ListBox Text 27.0 53.0 35.0 14.0 #cdd6f4ff "Item3"
+ListView Box 10.0 10.0 200.0 120.0 #181825ff border #9297b5ff
+ListView Text 26.0 17.0 140.0 14.0 #cdd6f4ff "Item 1  |  SubItem 1"
+ListView Text 26.0 37.0 140.0 14.0 #cdd6f4ff "Item 2  |  SubItem 2"
+MainMenu Badge 10.0 10.0 200.0 120.0 #d0e0e8ff border #406080ff
+MainMenu BadgeText 103.0 63.0 14.0 14.0 #204060ff "MM"
+MainMenu BadgeText 92.5 132.0 35.0 14.0 #a6adc8ff "probe"
+MaskEdit Box 10.0 10.0 200.0 120.0 #181825ff border #9297b5ff
+Memo Box 10.0 10.0 200.0 120.0 #181825ff border #9297b5ff
+Memo Text 27.0 15.5 35.0 14.0 #cdd6f4ff "Line1"
+Memo Text 27.0 30.5 35.0 14.0 #cdd6f4ff "Line2"
+Memo Text 27.0 45.5 35.0 14.0 #cdd6f4ff "Line3"
+MenuItem Badge 10.0 10.0 200.0 120.0 #d0e0e8ff border #406080ff
+MenuItem BadgeText 103.0 63.0 14.0 14.0 #204060ff "MI"
+MenuItem BadgeText 92.5 132.0 35.0 14.0 #a6adc8ff "probe"
+MessageDialog Badge 10.0 10.0 200.0 120.0 #d0e0e8ff border #406080ff
+MessageDialog BadgeText 103.0 63.0 14.0 14.0 #204060ff "MD"
+MessageDialog BadgeText 92.5 132.0 35.0 14.0 #a6adc8ff "probe"
+MultiSelect Box 10.0 10.0 200.0 120.0 #181825ff border #9297b5ff
+MultiSelect Arrow 190.0 60.0 20.0 20.0 #cdd6f4ff
+MultiSelect Text 18.0 63.0 49.0 14.0 #cdd6f4ff "Select…"
+OpenDialog Badge 10.0 10.0 200.0 120.0 #d0e0e8ff border #406080ff
+OpenDialog BadgeText 103.0 63.0 14.0 14.0 #204060ff "OD"
+OpenDialog BadgeText 92.5 132.0 35.0 14.0 #a6adc8ff "probe"
+PageControl Box 10.0 34.0 200.0 96.0 #2f2f45ff border #6e7290ff
+PageControl Box 188.0 10.0 22.0 24.0 #3b3b54ff border #9297b5ff
+PageControl Text 195.5 15.0 7.0 14.0 #cdd6f4ff "+"
+Pagination Box 10.0 56.0 28.0 28.0 #00000000 border #42475aff
+Pagination Text 20.5 63.0 7.0 14.0 #6c7086ff "‹"
+Pagination Box 42.0 56.0 28.0 28.0 #345a95ff border #345a95ff
+Pagination Text 52.5 63.0 7.0 14.0 #eef1f6ff "1"
+Pagination Box 74.0 56.0 28.0 28.0 #00000000 border #42475aff
+Pagination Text 84.5 63.0 7.0 14.0 #cdd6f4ff "2"
+Pagination Box 106.0 56.0 28.0 28.0 #00000000 border #42475aff
+Pagination Text 116.5 63.0 7.0 14.0 #cdd6f4ff "3"
+Pagination Box 138.0 56.0 28.0 28.0 #00000000 border #42475aff
+Pagination Text 148.5 63.0 7.0 14.0 #cdd6f4ff "4"
+Pagination Box 170.0 56.0 28.0 28.0 #00000000 border #42475aff
+Pagination Text 180.5 63.0 7.0 14.0 #cdd6f4ff "5"
+PaintBox Dashed 10.0 10.0 200.0 120.0 #9297b5ff
+PaintBox Text 92.5 63.0 35.0 14.0 #cdd6f4ff "probe"
+Panel Box 10.0 10.0 200.0 120.0 #2f2f45ff border #6e7290ff
+PopupMenu Badge 10.0 10.0 200.0 120.0 #d0e0e8ff border #406080ff
+PopupMenu BadgeText 103.0 63.0 14.0 14.0 #204060ff "PM"
+PopupMenu BadgeText 92.5 132.0 35.0 14.0 #a6adc8ff "probe"
+ProgressBar Box 10.0 10.0 200.0 120.0 #181825ff border #9297b5ff
+RadioButton Box 10.0 63.0 14.0 14.0 #181825ff border #9297b5ff
+RadioButton Text 30.0 63.0 35.0 14.0 #cdd6f4ff "probe"
+RadioGroup Stroke 10.0 17.0 1.0 113.0 #6e7290ff
+RadioGroup Stroke 209.0 17.0 1.0 113.0 #6e7290ff
+RadioGroup Stroke 10.0 129.0 200.0 1.0 #6e7290ff
+RadioGroup Stroke 10.0 17.0 4.0 1.0 #6e7290ff
+RadioGroup Stroke 92.0 17.0 118.0 1.0 #6e7290ff
+RadioGroup Text 18.0 10.0 70.0 14.0 #cdd6f4ff "RadioGroup"
+RadioGroup Box 18.0 33.0 12.0 12.0 #181825ff border #9297b5ff
+RadioGroup Text 36.0 32.0 56.0 14.0 #cdd6f4ff "Option 1"
+RadioGroup Box 18.0 55.0 12.0 12.0 #181825ff border #9297b5ff
+RadioGroup Text 36.0 54.0 56.0 14.0 #cdd6f4ff "Option 2"
+RadioGroup Box 18.0 77.0 12.0 12.0 #181825ff border #9297b5ff
+RadioGroup Text 36.0 76.0 56.0 14.0 #cdd6f4ff "Option 3"
+SaveDialog Badge 10.0 10.0 200.0 120.0 #d0e0e8ff border #406080ff
+SaveDialog BadgeText 103.0 63.0 14.0 14.0 #204060ff "SD"
+SaveDialog BadgeText 92.5 132.0 35.0 14.0 #a6adc8ff "probe"
+ScrollBar Box 10.0 10.0 200.0 120.0 #181825ff border #9297b5ff
+ScrollBar Box 10.0 10.0 16.0 120.0 #3b3b54ff border #9297b5ff
+ScrollBar Box 194.0 10.0 16.0 120.0 #3b3b54ff border #9297b5ff
+ScrollBar Arrow 10.0 62.0 16.0 16.0 #cdd6f4ff
+ScrollBar Arrow 194.0 62.0 16.0 16.0 #cdd6f4ff
+ScrollBar Box 26.0 12.0 50.4 116.0 #6e7290ff border #9297b5ff
+ScrollBox Box 10.0 10.0 200.0 120.0 #181825ff border #9297b5ff
+Shape Box 10.0 10.0 200.0 120.0 #ffffffff border #000000ff
+SpeedButton Box 10.0 10.0 200.0 120.0 #3b3b54ff border #9297b5ff
+SpeedButton Text 92.5 63.0 35.0 14.0 #cdd6f4ff "probe"
+SpinEdit Box 10.0 10.0 200.0 120.0 #181825ff border #9297b5ff
+SpinEdit Text 14.0 63.0 7.0 14.0 #cdd6f4ff "0"
+SpinEdit Box 192.0 12.0 16.0 57.5 #3b3b54ff border #3b3b54ff
+SpinEdit Arrow 192.0 12.0 16.0 57.5 #cdd6f4ff
+SpinEdit Box 192.0 70.0 16.0 57.5 #3b3b54ff border #3b3b54ff
+SpinEdit Arrow 192.0 70.0 16.0 57.5 #cdd6f4ff
+Splitter Box 10.0 10.0 200.0 120.0 #2f2f45ff border #6e7290ff
+StatusBar Box 10.0 10.0 200.0 120.0 #2f2f45ff border #6e7290ff
+TabSheet Box 10.0 10.0 200.0 120.0 #2f2f45ff border #6e7290ff
+Timer Badge 10.0 10.0 200.0 120.0 #d0e0e8ff border #406080ff
+Timer BadgeText 106.5 63.0 7.0 14.0 #204060ff "T"
+Timer BadgeText 92.5 132.0 35.0 14.0 #a6adc8ff "probe"
+Toggle Box 12.0 62.0 32.0 16.0 #3b3b54ff border #9297b5ff
+Toggle Box 14.0 64.0 12.0 12.0 #cdd6f4ff border #cdd6f4ff
+Toggle Text 50.0 63.0 42.0 14.0 #cdd6f4ff "Toggle"
+ToolBar Box 10.0 10.0 200.0 120.0 #2f2f45ff border #6e7290ff
+TrackBar Stroke 10.0 127.0 200.0 2.0 #3b3b54ff
+TrackBar Text 201.0 61.0 7.0 14.0 #a6adc8ff "0"
+TreeView Box 10.0 10.0 200.0 120.0 #181825ff border #9297b5ff
+TreeView Box 16.8 19.3 8.4 8.4 #181825ff border #cdd6f4ff
+TreeView Stroke 18.9 23.0 4.2 1.0 #cdd6f4ff
+TreeView Text 27.0 16.5 35.0 14.0 #cdd6f4ff "Node1"
+TreeView Text 42.0 33.5 56.0 14.0 #cdd6f4ff "SubNode1"
+TreeView Text 42.0 50.5 56.0 14.0 #cdd6f4ff "SubNode2"
+TreeView Text 27.0 67.5 35.0 14.0 #cdd6f4ff "Node2"

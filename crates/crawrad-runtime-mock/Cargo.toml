@@ -1,0 +1,21 @@
+[package]
+name = "crawrad-runtime-mock"
+version = "0.1.0"
+description = "O backend-fantoche: prova contínua de que a fronteira de runtime não vazou, e a fatia vertical testável sem janela"
+edition.workspace = true
+license = "MIT OR Apache-2.0"
+authors.workspace = true
+
+[dependencies]
+crawrad-note = { workspace = true }
+crawrad-ir.workspace = true
+crawrad-runtime.workspace = true
+
+[dev-dependencies]
+crawrad-actions.workspace = true
+crawrad-doc.workspace = true
+crawrad-designer.workspace = true
+crawrad-registry.workspace = true
+
+[lints]
+workspace = true

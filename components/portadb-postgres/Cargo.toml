@@ -1,0 +1,18 @@
+[package]
+name = "portadb-postgres"
+version = "0.1.0"
+edition = "2024"
+authors = ["PortaDB Contributors"]
+description = "PortaDB provider: PostgreSQL through sqlx"
+license = "MIT OR Apache-2.0"
+keywords = ["database", "sql", "portadb"]
+categories = ["database"]
+
+[dependencies]
+portadb-core = { path = "../portadb-core" }
+sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio", "postgres"] }
+tokio = { version = "1.43", features = ["sync", "rt", "time"] }
+futures-util = { version = "0.3", default-features = false }
+
+[dev-dependencies]
+tokio = { version = "1.43", features = ["full"] }

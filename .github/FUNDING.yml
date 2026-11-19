@@ -1,0 +1,5 @@
+# Renders the "Sponsor" button at the top of the repository page.
+# `custom` takes a list: add `github: [ModernRustWorks]` here once GitHub Sponsors is
+# enabled on the organization (companies need it: Sponsors invoices them).
+custom:
+  - https://link.mercadopago.com.br/aefosai

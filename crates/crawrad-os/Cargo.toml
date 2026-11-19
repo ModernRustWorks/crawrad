@@ -1,0 +1,69 @@
+[package]
+name = "crawrad-os"
+version = "0.1.0"
+description = "The FFI adapter: the one crate allowed to call the operating system"
+edition.workspace = true
+license = "MIT OR Apache-2.0"
+authors.workspace = true
+
+# `windows-sys` AND NOT THE `windows` CRATE, and the reason is measured.
+#
+# `makepad-platform` itself depends on `windows` (the higher level binding with
+# `Result` and RAII handles). Following it would put a SECOND heavy binding
+# tree in front of `cargo build`.
+#
+# `windows-sys 0.61` is already in this workspace's graph — `eframe 0.36.1` and
+# `rfd 0.17.2` both depend on exactly this version, and `crawrad-ide` depends on
+# both. Measured with `cargo tree -p crawrad-ide -i windows-sys@0.61.2`: the two
+# of them are the roots. Asking for two more features of a crate that is
+# already being compiled costs nothing but the two modules below.
+#
+# `Win32_Graphics_Gdi` carries `MonitorFromPoint`, `GetMonitorInfoW` and
+# `MONITORINFO`; `Win32_Foundation` carries the `POINT` and `RECT` they pass
+# around. `Win32_UI_WindowsAndMessaging` carries `MoveWindow`, `PostMessageW`
+# and `EnumThreadWindows`, which put the window where it belongs, and
+# `Win32_System_Threading` carries `GetCurrentThreadId`, which says which
+# windows are ours. `Win32_UI_Controls_Dialogs` carries `ChooseFontW` and
+# `CHOOSEFONTW` for the native typography picker (#556). `Win32_Storage_Xps`
+# carries `PrintWindow` for `view.capture` (#779). `Win32_UI_Shell` carries
+# `SetWindowSubclass` for the maximize fix. Nothing else is asked for.
+[target.'cfg(target_os = "windows")'.dependencies]
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Graphics_Gdi"] }
+
+[dependencies]
+crawrad-note = { workspace = true }
+arboard = { workspace = true, optional = true, features = ["image-data"] }
+notify = { workspace = true, optional = true }
+png = { workspace = true, optional = true }
+
+# **Two sizes of the adapter** (#667). The IDE takes it whole (`full`, the
+# default). The generated Makepad app takes it with `default-features = false`:
+# only `monitor_at` and its two rectangles, so a form whose `Position` is
+# `poScreenCenter` opens centred on its monitor — Makepad 1.0 publishes no
+# screen size (`makepad-platform-1.0.0/src/display_context.rs` carries the
+# window's). The user's app then compiles one function of ours and two
+# features of `windows-sys`, and none of the clipboard, the watcher or the
+# processes.
+[features]
+default = ["full"]
+full = [
+    "dep:arboard",
+    "dep:notify",
+    "dep:png",
+    "windows-sys/Win32_Graphics_Dwm",
+    "windows-sys/Win32_Security",
+    "windows-sys/Win32_Storage_FileSystem",
+    "windows-sys/Win32_Storage_Xps",
+    "windows-sys/Win32_System_IO",
+    "windows-sys/Win32_System_JobObjects",
+    "windows-sys/Win32_System_Pipes",
+    "windows-sys/Win32_System_SystemInformation",
+    "windows-sys/Win32_System_Threading",
+    "windows-sys/Win32_UI_Controls_Dialogs",
+    "windows-sys/Win32_UI_HiDpi",
+    "windows-sys/Win32_UI_Shell",
+    "windows-sys/Win32_UI_WindowsAndMessaging",
+]
+
+[lints]
+workspace = true

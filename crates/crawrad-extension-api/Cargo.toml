@@ -1,0 +1,16 @@
+[package]
+name = "crawrad-extension-api"
+version = "0.1.0"
+description = "CrawRAD Extension API: contracts, traits, and manifest contributions for extending the IDE"
+edition.workspace = true
+license.workspace = true
+publish = false
+authors.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+
+[lints]
+workspace = true

@@ -1,0 +1,22 @@
+
+running 3 tests
+test math::tests::slow_overflow_check ... ignored
+test math::tests::adds_two_numbers ... ok
+test math::tests::divides_by_ten ... FAILED
+
+failures:
+
+---- math::tests::divides_by_ten stdout ----
+
+thread 'math::tests::divides_by_ten' (38492) panicked at src\math.rs:10:9:
+assertion `left == right` failed
+  left: 3
+ right: 4
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    math::tests::divides_by_ten
+
+test result: FAILED. 1 passed; 1 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.40s
+

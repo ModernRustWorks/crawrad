@@ -1,0 +1,656 @@
+{
+  "format": 2,
+  "root": "form_main",
+  "nodes": {
+    "button1": {
+      "id": "button1",
+      "class": "Button",
+      "props": {
+        "action": {
+          "t": "Ref",
+          "v": ""
+        },
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 0.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "name": {
+          "t": "Str",
+          "v": "button1"
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": true
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 280.0,
+            "y": 56.0,
+            "w": 96.0,
+            "h": 32.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "tab_order": {
+          "t": "Int",
+          "v": 1
+        },
+        "tab_stop": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "Greet"
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      },
+      "events": {
+        "on_click": "button1_click"
+      }
+    },
+    "edit1": {
+      "id": "edit1",
+      "class": "Edit",
+      "props": {
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "alignment": {
+          "t": "Enum",
+          "v": "taLeftJustify"
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "char_case": {
+          "t": "Enum",
+          "v": "ecNormal"
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 0.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "max_length": {
+          "t": "Int",
+          "v": 0
+        },
+        "name": {
+          "t": "Str",
+          "v": "edit1"
+        },
+        "numbers_only": {
+          "t": "Bool",
+          "v": false
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": true
+        },
+        "password_char": {
+          "t": "Str",
+          "v": ""
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "readonly": {
+          "t": "Bool",
+          "v": false
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 24.0,
+            "y": 56.0,
+            "w": 240.0,
+            "h": 24.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "tab_order": {
+          "t": "Int",
+          "v": 0
+        },
+        "tab_stop": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": ""
+        },
+        "text_hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        }
+      }
+    },
+    "form_main": {
+      "id": "form_main",
+      "class": "Form",
+      "props": {
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 0.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "name": {
+          "t": "Str",
+          "v": "form_main"
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "position": {
+          "t": "Enum",
+          "v": "poDesigned"
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 0.0,
+            "y": 0.0,
+            "w": 640.0,
+            "h": 420.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "Web Greeter"
+        },
+        "theme": {
+          "t": "Enum",
+          "v": "thSystem"
+        },
+        "window_state": {
+          "t": "Enum",
+          "v": "wsNormal"
+        }
+      },
+      "children": [
+        "label1",
+        "edit1",
+        "button1",
+        "label2"
+      ]
+    },
+    "label1": {
+      "id": "label1",
+      "class": "Label",
+      "props": {
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "alignment": {
+          "t": "Enum",
+          "v": "taLeftJustify"
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "auto_size": {
+          "t": "Bool",
+          "v": false
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "focus_control": {
+          "t": "Ref",
+          "v": "edit1"
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 0.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "layout": {
+          "t": "Enum",
+          "v": "tlTop"
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "name": {
+          "t": "Str",
+          "v": "label1"
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": true
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 24.0,
+            "y": 24.0,
+            "w": 240.0,
+            "h": 20.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": "What is your name?"
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        },
+        "word_wrap": {
+          "t": "Bool",
+          "v": false
+        }
+      }
+    },
+    "label2": {
+      "id": "label2",
+      "class": "Label",
+      "props": {
+        "align": {
+          "t": "Enum",
+          "v": "None"
+        },
+        "align_with_margins": {
+          "t": "Bool",
+          "v": false
+        },
+        "alignment": {
+          "t": "Enum",
+          "v": "taLeftJustify"
+        },
+        "anchors": {
+          "t": "Map",
+          "v": {
+            "bottom": {
+              "t": "Bool",
+              "v": false
+            },
+            "left": {
+              "t": "Bool",
+              "v": true
+            },
+            "right": {
+              "t": "Bool",
+              "v": false
+            },
+            "top": {
+              "t": "Bool",
+              "v": true
+            }
+          }
+        },
+        "auto_size": {
+          "t": "Bool",
+          "v": false
+        },
+        "color": {
+          "t": "Color",
+          "v": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0
+          }
+        },
+        "cursor": {
+          "t": "Cursor",
+          "v": "default"
+        },
+        "enabled": {
+          "t": "Bool",
+          "v": true
+        },
+        "focus_control": {
+          "t": "Ref",
+          "v": ""
+        },
+        "font": {
+          "t": "Font",
+          "v": {
+            "name": "",
+            "size": 0.0,
+            "bold": false,
+            "italic": false,
+            "underline": false,
+            "strike_out": false,
+            "color": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            }
+          }
+        },
+        "hint": {
+          "t": "Str",
+          "v": ""
+        },
+        "layout": {
+          "t": "Enum",
+          "v": "tlTop"
+        },
+        "margins": {
+          "t": "Edges",
+          "v": {
+            "left": 3.0,
+            "top": 3.0,
+            "right": 3.0,
+            "bottom": 3.0
+          }
+        },
+        "name": {
+          "t": "Str",
+          "v": "label2"
+        },
+        "parent_color": {
+          "t": "Bool",
+          "v": true
+        },
+        "parent_font": {
+          "t": "Bool",
+          "v": true
+        },
+        "popup_menu": {
+          "t": "Ref",
+          "v": ""
+        },
+        "rect": {
+          "t": "Rect",
+          "v": {
+            "x": 24.0,
+            "y": 104.0,
+            "w": 400.0,
+            "h": 20.0
+          }
+        },
+        "show_hint": {
+          "t": "Bool",
+          "v": true
+        },
+        "text": {
+          "t": "Str",
+          "v": ""
+        },
+        "visible": {
+          "t": "Bool",
+          "v": true
+        },
+        "word_wrap": {
+          "t": "Bool",
+          "v": false
+        }
+      }
+    }
+  }
+}

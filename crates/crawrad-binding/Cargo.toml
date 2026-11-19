@@ -1,0 +1,28 @@
+[package]
+name = "crawrad-binding"
+version = "0.1.0"
+description = "O nucleo unificado de vinculacao de dados do CrawRAD (ADR 0041)"
+edition.workspace = true
+license = "MIT OR Apache-2.0"
+authors.workspace = true
+
+[dependencies]
+crawrad-note = { workspace = true }
+serde = { workspace = true, optional = true }
+portadb = { path = "../../components/portadb", optional = true }
+tokio = { version = "1.43", features = ["rt", "time"], optional = true }
+
+[dev-dependencies]
+tokio = { version = "1.43", features = ["rt", "time"] }
+
+[features]
+default = ["serde", "portadb"]
+serde = ["dep:serde"]
+portadb = ["dep:portadb", "dep:tokio"]
+# The SQLite driver compiles C, which the workspace's cross-target clippy cannot;
+# like `portadb`'s own drivers, the round trip on real SQLite runs in its own
+# gate step (`gate.ps1`) with this feature on.
+rusqlite = ["portadb", "portadb/rusqlite"]
+
+[lints]
+workspace = true

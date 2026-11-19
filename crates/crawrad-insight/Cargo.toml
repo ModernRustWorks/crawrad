@@ -1,0 +1,19 @@
+[package]
+name = "crawrad-insight"
+version = "0.1.0"
+description = "What the editor knows about a form's components: class, fields as generated, documentation (ADR 0050)"
+edition.workspace = true
+license.workspace = true
+publish = false
+authors.workspace = true
+
+[dependencies]
+crawrad-note = { workspace = true }
+crawrad-codegen.workspace = true
+crawrad-ir.workspace = true
+crawrad-lsp.workspace = true
+crawrad-registry.workspace = true
+serde_json.workspace = true
+
+[lints]
+workspace = true

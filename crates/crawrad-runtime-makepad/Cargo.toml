@@ -1,0 +1,33 @@
+[package]
+name = "crawrad-runtime-makepad"
+version = "0.1.0"
+description = "O runtime em Makepad: superfície e motor visual multi-plataforma para o CrawRAD"
+edition.workspace = true
+license = "MIT OR Apache-2.0"
+authors.workspace = true
+
+[dependencies]
+crawrad-note = { workspace = true }
+datagrid.workspace = true
+crawrad-ir.workspace = true
+crawrad-runtime.workspace = true
+# **A CAIXA.** O canvas pinta a fracao de um desenho declarado com a MESMA
+# conta que a caixa oferece a quem escreve componente — ver
+# `crawrad-component/src/fraction.rs`.
+crawrad-component.workspace = true
+makepad-widgets = "1.0.0"
+# Only `monitor_at`, for a form that opens centred (#667, `window.rs`): without
+# its default features the adapter is that one function and two features of
+# `windows-sys`, which is what the user's app compiles.
+crawrad-os = { path = "../crawrad-os", version = "0.1.0", default-features = false }
+
+[dev-dependencies]
+crawrad-registry.workspace = true
+# Só o EXEMPLO e os testes falam com o designer: o adapter não depende dele
+# (ADR 0027 — o widget traduz gesto, o designer decide).
+crawrad-designer.workspace = true
+crawrad-doc.workspace = true
+crawrad-binding.workspace = true
+
+[lints]
+workspace = true

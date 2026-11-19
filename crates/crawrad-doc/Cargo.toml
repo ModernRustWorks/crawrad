@@ -1,0 +1,22 @@
+[package]
+name = "crawrad-doc"
+version = "0.1.0"
+description = "The live document: reversible commands, transactions, undo/redo, selection, and auditing — the single mutation doorway of the project"
+edition.workspace = true
+license.workspace = true
+publish = false
+authors.workspace = true
+
+[dependencies]
+crawrad-note = { workspace = true }
+crawrad-ir.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+# Gates only: the class dispatch gate ASKS the catalog which classes exist,
+# instead of keeping a copy of the list that goes stale.
+crawrad-registry.workspace = true
+toml = "1.1"
+
+[lints]
+workspace = true

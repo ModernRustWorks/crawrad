@@ -1,0 +1,15 @@
+[package]
+name = "portadb-core"
+version = "0.1.0"
+edition = "2024"
+authors = ["PortaDB Contributors"]
+description = "The types and contracts of PortaDB: values, rows, parameters, dialects and the driver SPI"
+license = "MIT OR Apache-2.0"
+keywords = ["database", "sql", "portadb"]
+categories = ["database"]
+
+[dependencies]
+thiserror = "2.0"
+
+[dev-dependencies]
+tokio = { version = "1.43", features = ["full"] }

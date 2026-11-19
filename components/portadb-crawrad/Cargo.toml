@@ -1,0 +1,26 @@
+[package]
+name = "portadb-crawrad"
+version = "0.1.0"
+edition = "2024"
+description = "The connection components for CrawRAD — the native providers and the abstraction over them"
+license = "MIT OR Apache-2.0"
+
+# **TWO dependencies, and both are the two halves of a classic RAD IDE package.**
+#
+# `crawrad-component` is THE BOX — the parts, and it has no dependencies whatsoever.
+# `crawrad-component-derive` is the design-time half: a compiler plugin that
+# writes the `manifest.json` from the `struct`s and disappears, the way the
+# design-time package of a classic RAD IDE never travels with the finished program.
+#
+# **And it does not yet depend on `portadb`**, which is the actual engine and lives
+# in `components/portadb/`. The engine is PURE and does not know that the IDE exists;
+# wiring the two together is the next step, as documented in `src/lib.rs`.
+#
+# What the engines declare in `requires` is what the USER's project gets —
+# `portadb` with the driver feature —, not what this crate loads.
+[dependencies]
+crawrad-component.workspace = true
+crawrad-component-derive.workspace = true
+
+[lints.rust]
+unsafe_code = "forbid"

@@ -1,0 +1,3 @@
+# Um RAD manipula muita geometria; f32 comparado por igualdade é intencional
+# em vários pontos do designer. O resto fica no padrão.
+too-many-arguments-threshold = 10

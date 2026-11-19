@@ -1,0 +1,19 @@
+{
+  "id": "crawrad.todo",
+  "name": "TODO",
+  "version": "0.1.0",
+  "publisher": "CrawRAD",
+  "description": "TODO, FIXME and HACK comments as line marks and a view; todos.list for agents.",
+  "entrypoint": "crawrad-todo.exe",
+  "activation_events": ["*"],
+  "contributions": {
+    "views": [{ "id": "todos", "title": "TODOs", "icon": "checklist" }],
+    "tools": [
+      {
+        "name": "todos.list",
+        "description": "[Operation: Read] Every TODO, FIXME and HACK comment in the project's Rust sources: file, 1-based line, kind and text",
+        "schema": { "type": "object", "properties": {} }
+      }
+    ]
+  }
+}

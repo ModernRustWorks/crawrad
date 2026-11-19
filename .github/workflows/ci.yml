@@ -56,7 +56,7 @@ jobs:
           tool: cargo-deny
       - name: Gate
         shell: pwsh
-        run: ./portao.ps1 -SemDocker
+        run: ./gate.ps1 -NoDocker
 
   # Behaviour on Linux and macOS: native build, clippy and the whole test suite.
   unix:

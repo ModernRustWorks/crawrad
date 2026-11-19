@@ -1,0 +1,25 @@
+[package]
+name = "datagrid"
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+description = "Columnar in-memory store for large-volume grids: sort, filter, group and locate over row ids"
+
+[features]
+test-sources = []
+serde = ["dep:serde"]
+
+[dependencies]
+serde = { workspace = true, optional = true }
+
+[dev-dependencies]
+criterion = { version = "0.5", default-features = false }
+serde_json = { workspace = true }
+
+[[bench]]
+name = "store"
+harness = false
+
+[[bench]]
+name = "techniques"
+harness = false

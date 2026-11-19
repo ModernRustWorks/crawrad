@@ -1,0 +1,26 @@
+[template]
+id = "mobile_app"
+name = "Mobile App"
+version = "1.0.0"
+category = "mobile"
+description = "A mobile application for Android and iOS using Makepad."
+icon = "📱"
+platforms = ["android", "ios"]
+author = "CrawRAD Team"
+
+[options]
+include_example = { label = "Include example UI (counter app)", default = true }
+live_reload = { label = "Use Makepad live-reload (dev mode)", default = true }
+add_menu = { label = "Add basic application menu", default = false }
+enable_tracing = { label = "Enable tracing (logging)", default = false }
+
+[structure]
+tree = """
+{nome}/
+├── Cargo.toml
+├── src/
+│   ├── main.rs
+│   └── app.rs
+└── res/
+    └── icon.png
+"""

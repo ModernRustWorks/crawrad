@@ -1,0 +1,17 @@
+[package]
+name = "crawrad-dbprobe"
+version = "0.1.0"
+description = "Out-of-process database schema probe for the CrawRAD Object Inspector"
+edition.workspace = true
+license.workspace = true
+publish = false
+authors.workspace = true
+
+[dependencies]
+crawrad-note = { workspace = true }
+portadb = { path = "../../components/portadb", features = ["rusqlite"] }
+tokio = { version = "1.43", features = ["rt", "time"] }
+serde_json.workspace = true
+
+[lints]
+workspace = true

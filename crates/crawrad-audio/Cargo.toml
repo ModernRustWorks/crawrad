@@ -1,0 +1,30 @@
+[package]
+name = "crawrad-audio"
+version = "0.1.0"
+description = "Multiplatform, multilingual audio capture (cpal), STT (Whisper) and TTS (Piper) for CrawRAD"
+edition.workspace = true
+license.workspace = true
+publish = false
+authors.workspace = true
+
+[dependencies]
+crawrad-note = { workspace = true }
+crawrad-os = { workspace = true }
+thiserror = { workspace = true }
+serde = { workspace = true, optional = true }
+serde_json = { workspace = true }
+
+# `crawrad_cross_check` is set ONLY by `gate.ps1` when it clippy-checks the
+# Apple target from Windows: `cpal` pulls `coreaudio-sys`, whose bindgen needs
+# the real macOS SDK, and the Apple SDK licence does not allow it on a non-Apple
+# machine (ADR 0034). On a real Mac, and in every build, `cpal` is here.
+[target.'cfg(not(crawrad_cross_check))'.dependencies]
+cpal = { version = "0.15", optional = true }
+
+[features]
+default = ["cpal"]
+cpal = ["dep:cpal"]
+serde = ["dep:serde"]
+
+[lints]
+workspace = true
