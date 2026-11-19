@@ -742,7 +742,7 @@ pub fn run_menu_rows(
 
 #[note("menu-editor-keys")]
 pub const EDITOR_KEYS: &[(&str, crate::KeymapScheme, &str)] =
-    &[("editor.rename_symbol", crate::KeymapScheme::VsCode, "F2")];
+    &[("editor.rename_symbol", crate::KeymapScheme::Modern, "F2")];
 
 #[note("menu-code-action-rows")]
 pub fn code_action_rows(actions: &[(String, bool)], teach: bool) -> Vec<Row> {

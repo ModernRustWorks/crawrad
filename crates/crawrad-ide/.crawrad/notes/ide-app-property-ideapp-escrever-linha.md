@@ -30,7 +30,7 @@ not keep it on a `Lines` row (#553); written once, and only if it changes.
 
 The panel's own TRIANGLE, not the shell's chevron.
 
-The Explorer follows VS Code and draws a chevron; the Object
+The Explorer follows a modern editor and draws a chevron; the Object
 Inspector follows the egui screenshot, where the fold mark is the
 solid triangle of `CollapsingHeader`. They are two different
 references, and `inspector::icon` is what holds this one.

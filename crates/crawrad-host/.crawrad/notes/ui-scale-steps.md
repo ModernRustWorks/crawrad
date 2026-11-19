@@ -14,7 +14,7 @@ The steps the interface zoom walks, as multiples of the desktop's own DPI.
 
 A list and not a multiplication, for the reason the canvas zoom already
 gives: repeated multiplication drifts, and the user has to land back on
-`100%` exactly. These are the steps of the browser and of VS Code, which is
+`100%` exactly. These are the steps of the browser and of a modern editor, which is
 the hand this key belongs to.
 
 # Examples

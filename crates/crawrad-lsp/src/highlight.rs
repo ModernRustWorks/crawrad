@@ -1,7 +1,7 @@
 //! **Occurrences** of the name under the caret — `textDocument/documentHighlight`.
 //!
 //! With the caret on a function, a variable or a type, every place in the file
-//! that names THE SAME symbol gets a background, as VS Code and the classic RAD
+//! that names THE SAME symbol gets a background, as a modern editor and the classic RAD
 //! IDEs show it. The server answers by symbol, not by text: a `total` in
 //! another function is another variable and is not lit, and a write
 //! (`total = …`) is told apart from a read.

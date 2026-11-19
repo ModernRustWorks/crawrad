@@ -10,11 +10,11 @@
 //! It redid the text, on the chord the catalogue gives `edit.redo`. He tried it
 //! and ruled:
 //!
-//! > *"Ctrl+Y does not do it, but the VSCode standard doesn't either, that's only in [the classic one] which
+//! > *"Ctrl+Y does not do it, but the [modern scheme] standard doesn't either, that's only in [the classic one] which
 //! > deletes the line. So Ctrl+Y should only work when we have the switch
 //! > keymap scheme option and select [the classic one]."*
 //!
-//! So in the VS Code scheme the key is **deliberately silent**; in the Classic
+//! So in the Modern scheme the key is **deliberately silent**; in the Classic
 //! scheme it is *delete line*, not redo. Silent is not dangerous: the chord is in
 //! the catalogue's `Edit` group, so with the cursor in a file
 //! `crawrad_actions::key_routing` keeps it away from the FORM's history. Redo in
@@ -57,7 +57,7 @@ pub enum Command {
     Fold,
     Unfold,
     Complete,
-    /// VS Code's F2 with the code editor focused; elsewhere F2 is
+    /// Modern F2 with the code editor focused; elsewhere F2 is
     /// the Explorer's rename.
     RenameSymbol,
     /// Numbered bookmark: `set` toggles it on the caret's line, else go to it.
@@ -219,10 +219,10 @@ pub fn shortcuts_reference_markdown() -> String {
          Tools > Options.\n\n## Code editor\n\n",
     );
     out.push_str("| Action | Modern | Classic |\n|---|---|---|\n");
-    for (what, vscode, classic) in &rows {
+    for (what, modern, classic) in &rows {
         out.push_str(&format!(
             "| {what} | {} | {} |\n",
-            keys(vscode),
+            keys(modern),
             keys(classic)
         ));
     }

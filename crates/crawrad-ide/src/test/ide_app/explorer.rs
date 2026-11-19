@@ -791,7 +791,7 @@ fn the_click_dispatch_knows_nothing_about_kinds_of_row() {
     );
 }
 
-/// Additional card sections in VS Code style (Ref 29) appear in the list
+/// Additional card sections in the modern-editor style (Ref 29) appear in the list
 /// and fold independently.
 #[test]
 fn the_explorer_has_independent_card_sections() {

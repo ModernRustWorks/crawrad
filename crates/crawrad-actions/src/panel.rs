@@ -2,7 +2,7 @@
 //!
 //! # Why the panel list lives in the catalogue and not in a shell
 //!
-//! [ADR 0014, Amendment 9] made every panel the same thing: a dockable tab.
+//! ADR 0014 (Amendment 9) made every panel the same thing: a dockable tab.
 //! Explorer, Components, Object Inspector, Package Manager, Design and Chat
 //! stopped being regions with an owner and became **items with an identity**,
 //! and the owner's rule of 15/09/2026 says what that identity is for:
@@ -198,7 +198,7 @@ pub enum LayoutCommand {
     /// command that bring it back.
     Hide(Panel),
     /// Show it if it is not the visible tab, hide it if it is — the gesture of
-    /// the activity rail, and the same one VS Code has.
+    /// the activity rail, and the same one a modern editor has.
     Toggle(Panel),
     /// Dock the panel against one edge of the window.
     ///

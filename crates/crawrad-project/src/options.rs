@@ -476,7 +476,7 @@ impl OptionsSearchMatches {
             || q.contains("shortcut")
             || q.contains("scheme")
             || (!scheme_id.is_empty() && q.contains(scheme_id))
-            || q.contains("vscode")
+            || q.contains("modern")
             || q.contains("teclado");
         Self {
             font,

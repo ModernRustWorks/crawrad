@@ -313,7 +313,7 @@ live_design! {
             text_style: <THEME_FONT_CODE> {}
         }
 
-        // A diagnostic's message after the end of its line (as VS Code's
+        // A diagnostic's message after the end of its line (as a modern editor's
         // Error Lens): its colour is set per message, by severity.
         draw_message: {
             text_style: <THEME_FONT_CODE> {}
@@ -413,7 +413,7 @@ live_design! {
         }
 
         // The occurrences of the name under the caret, behind the text: a
-        // read in grey, a write in blue — VS Code's dark theme colours.
+        // read in grey, a write in blue — a modern editor's dark theme colours.
         draw_occurrence: {
             color: #575757b8
         }
@@ -455,7 +455,7 @@ live_design! {
             text_style: <THEME_FONT_BOLD> { font_size: 7.5 }
         }
 
-        // The dot the mouse would add, faint, as VS Code shows it.
+        // The dot the mouse would add, faint, as a modern editor shows it.
         draw_breakpoint_hint: {
             draw_depth: 1.1,
             color: #E5140066,
@@ -1884,7 +1884,7 @@ impl CodeEditor {
                 cx.set_key_focus(self.scroll_bars.area());
                 let ((cursor, affinity), is_in_gutter) = self.pick(session, abs);
                 // A click on the glyph margin toggles the line's breakpoint and
-                // leaves the selection alone, as in classic RAD IDEs and VS Code.
+                // leaves the selection alone, as in classic RAD IDEs and a modern editor.
                 if is_in_gutter && self.is_in_glyph_margin(abs) {
                     if let Some((id, _, _)) = self
                         .note_icon_rects

@@ -600,7 +600,7 @@ fn the_view_menu_lists_every_panel() {
             Menu::View,
             "Panels",
             ctx,
-            crawrad_actions::KeymapScheme::VsCode,
+            crawrad_actions::KeymapScheme::Modern,
         )
     });
     let listed: Vec<&str> = rows
@@ -638,7 +638,7 @@ fn every_panel_row_carries_its_own_argument() {
             Menu::View,
             "Panels",
             ctx,
-            crawrad_actions::KeymapScheme::VsCode,
+            crawrad_actions::KeymapScheme::Modern,
         )
     });
     for row in rows {
@@ -825,7 +825,7 @@ fn menu_contributions_injection_and_positioning() {
         menu::rows_with_scheme_and_contributions(
             Menu::Edit,
             ctx,
-            crawrad_actions::KeymapScheme::VsCode,
+            crawrad_actions::KeymapScheme::Modern,
             Some(&registry),
             &manifest.contributions.menus,
         )
@@ -1003,7 +1003,7 @@ fn editor_menu(
 /// unit.
 #[test]
 fn the_editor_menu_is_its_groups_in_order() {
-    let vs = crawrad_actions::KeymapScheme::VsCode;
+    let vs = crawrad_actions::KeymapScheme::Modern;
     let ids: Vec<String> = editor_menu(true, vs).into_iter().map(|(i, _)| i).collect();
     assert_eq!(
         ids,
@@ -1048,7 +1048,7 @@ fn the_editor_menu_is_its_groups_in_order() {
 
 #[test]
 fn the_editor_menu_ai_rows_follow_the_selection() {
-    let vs = crawrad_actions::KeymapScheme::VsCode;
+    let vs = crawrad_actions::KeymapScheme::Modern;
     let row_enabled = |rows: &[menu::Row], id: &str| {
         rows.iter()
             .find(|r| r.action.as_deref() == Some(id))
@@ -1072,7 +1072,7 @@ fn the_editor_menu_ai_rows_follow_the_selection() {
 }
 
 /// **The shortcut column is the active scheme's**: switching to the classic
-/// scheme switches the keys; VS Code's F2 (an editor key) shows for Rename.
+/// scheme switches the keys; a modern editor's F2 (an editor key) shows for Rename.
 #[test]
 fn the_editor_menu_shows_the_active_schemes_keys() {
     let key = |scheme, id: &str| {
@@ -1082,7 +1082,7 @@ fn the_editor_menu_shows_the_active_schemes_keys() {
             .map(|(_, k)| k)
             .unwrap()
     };
-    let vs = crawrad_actions::KeymapScheme::VsCode;
+    let vs = crawrad_actions::KeymapScheme::Modern;
     let classic = *crawrad_actions::KeymapScheme::ALL
         .iter()
         .find(|s| **s != vs)

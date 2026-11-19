@@ -17,6 +17,6 @@ Keyboard shortcut schemes supported by the IDE.
 ```rust
 use crawrad_actions::KeymapScheme;
 
-let scheme = KeymapScheme::VsCode;
-assert_eq!(scheme.id(), "vscode");
+let scheme = KeymapScheme::Modern;
+assert_eq!(scheme.id(), "modern");
 ```

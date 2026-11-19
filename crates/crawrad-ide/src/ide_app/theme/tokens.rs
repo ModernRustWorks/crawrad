@@ -107,7 +107,7 @@ live_design! {
     pub CRAWRAD_RODAPE_ALTURA = 26.0
     pub CRAWRAD_DOCA_LARGURA = 300.0
     pub CRAWRAD_CHAT_LARGURA = 390.0
-    pub CRAWRAD_LINHA_ALTURA = 19.0 // list/tree rows on VS Code's 22 px pitch: a fixed-height row...
+    pub CRAWRAD_LINHA_ALTURA = 19.0 // list/tree rows on a modern editor's 22 px pitch: a fixed-height row...
     pub CRAWRAD_LINHA_RESPIRO = 3.0 // ...or a content-height one, with this above and below its text
 
     pub CRAWRAD_LINHA_INSPECTOR = 21.0

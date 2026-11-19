@@ -12,7 +12,7 @@ signature: "pub fn badge (& self) -> & 'static str"
 
 Returns the Codicons font glyph associated with this item kind.
 
-The row's mark: VS Code's Codicons symbol for the kind
+The row's mark: the Codicons symbol for the kind
 (`symbol-field`, `symbol-method`, `symbol-class`, `symbol-keyword`,
 `symbol-snippet`, `loading`), code points read from `codicon.ttf`.
 The shell draws them in a family where the code font falls back to

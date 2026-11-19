@@ -774,7 +774,7 @@ fn run_generates_beforehand_and_is_thus_a_single_action() {
     assert_eq!(
         a.shortcut,
         Some("F5"),
-        "default scheme is VS Code (ADR 0011)"
+        "default scheme is Modern (ADR 0011)"
     );
     // `Run`, not `File`: decision of owner on 15/09/2026 — menu follows
     // classic RAD IDE, where Run lives in Run menu.
@@ -1319,7 +1319,7 @@ fn f12_switches_view_and_touches_no_file() {
 
 #[test]
 fn welcome_is_in_help_switches_view_and_does_not_touch_document() {
-    // The `Help ▸ Welcome` of VS Code, and it is a catalogue action for a reason of
+    // The `Help ▸ Welcome` of modern editors, and it is a catalogue action for a reason of
     // reach: the welcome screen had NO way back at all — the
     // center only draws it without a document, and IDE reopens the last folder by itself.
     // Entering through catalogue (ADR 0005), it is born with menu, label, hint and shortcut
@@ -1337,7 +1337,7 @@ fn welcome_is_in_help_switches_view_and_does_not_touch_document() {
     let (d, r, a) = scenario();
     let c = ctx(&d, &r, &a);
     let action = by_id("help.welcome").expect("`Welcome` must be in catalogue");
-    assert_eq!(action.group, "Help", "VS Code puts it in Help menu");
+    assert_eq!(action.group, "Help", "modern editors put it in Help menu");
 
     let e = (action.execute)(&c);
     assert_eq!(e.view, Some(ViewEffect::ToggleWelcome));
@@ -3030,7 +3030,7 @@ fn set_property_allows_target_prefixed_key_through() {
 }
 
 #[test]
-fn classic_and_vscode_keymap_schemes_maintain_parity_without_conflict() {
+fn classic_and_modern_keymap_schemes_maintain_parity_without_conflict() {
     for &scheme in KeymapScheme::ALL {
         let cat = catalogue_with_scheme(scheme);
         let mut seen = Vec::new();
@@ -3070,23 +3070,24 @@ fn classic_and_vscode_keymap_schemes_maintain_parity_without_conflict() {
     }
 
     // Specific differences between schemes
-    let run_vs = by_id_with_scheme("project.run", KeymapScheme::VsCode).and_then(|a| a.shortcut);
+    let run_modern =
+        by_id_with_scheme("project.run", KeymapScheme::Modern).and_then(|a| a.shortcut);
     let run_classic =
         by_id_with_scheme("project.run", KeymapScheme::Classic).and_then(|a| a.shortcut);
-    assert_eq!(run_vs, Some("F5"));
+    assert_eq!(run_modern, Some("F5"));
     assert_eq!(run_classic, Some("F9"));
 
-    let bld_vs =
-        by_id_with_scheme("project.build_manager", KeymapScheme::VsCode).and_then(|a| a.shortcut);
+    let bld_modern =
+        by_id_with_scheme("project.build_manager", KeymapScheme::Modern).and_then(|a| a.shortcut);
     let bld_classic =
         by_id_with_scheme("project.build_manager", KeymapScheme::Classic).and_then(|a| a.shortcut);
-    assert_eq!(bld_vs, Some("Ctrl+Shift+B"));
+    assert_eq!(bld_modern, Some("Ctrl+Shift+B"));
     assert_eq!(bld_classic, Some("Shift+F9"));
 
-    let redo_vs = by_id_with_scheme("edit.redo", KeymapScheme::VsCode).and_then(|a| a.shortcut);
+    let redo_modern = by_id_with_scheme("edit.redo", KeymapScheme::Modern).and_then(|a| a.shortcut);
     let redo_classic =
         by_id_with_scheme("edit.redo", KeymapScheme::Classic).and_then(|a| a.shortcut);
-    assert_eq!(redo_vs, Some("Ctrl+Y"));
+    assert_eq!(redo_modern, Some("Ctrl+Y"));
     assert_eq!(redo_classic, Some("Ctrl+Shift+Z"));
 }
 
@@ -3477,10 +3478,10 @@ fn every_submenu_has_at_least_two_rows() {
     let (d, r, a) = scenario();
     let c = ctx(&d, &r, &a);
     for &m in Menu::ALL {
-        let top = menu::rows_with_scheme(m, &c, KeymapScheme::VsCode);
+        let top = menu::rows_with_scheme(m, &c, KeymapScheme::Modern);
         for row in top {
             if let Some(sub) = row.submenu {
-                let sub_rows = menu::submenu_rows(m, &sub, &c, KeymapScheme::VsCode);
+                let sub_rows = menu::submenu_rows(m, &sub, &c, KeymapScheme::Modern);
                 let command_count = sub_rows.iter().filter(|r| !r.separator).count();
                 assert!(
                     command_count >= 2,
@@ -3496,7 +3497,7 @@ fn every_submenu_has_at_least_two_rows() {
 fn view_menu_top_rows_section_order() {
     let (d, r, a) = scenario();
     let c = ctx(&d, &r, &a);
-    let rows = menu::rows_with_scheme(Menu::View, &c, KeymapScheme::VsCode);
+    let rows = menu::rows_with_scheme(Menu::View, &c, KeymapScheme::Modern);
 
     // exactly one Panels and one Zoom row and no zoom/panel item left at the top level
     let panels_count = rows
@@ -3561,7 +3562,7 @@ fn submenu_rows_panels_and_scale() {
     let (d, r, a) = scenario();
     let c = ctx(&d, &r, &a);
 
-    let panels = menu::submenu_rows(Menu::View, "Panels", &c, KeymapScheme::VsCode);
+    let panels = menu::submenu_rows(Menu::View, "Panels", &c, KeymapScheme::Modern);
     assert_eq!(
         panels.len(),
         Panel::ALL.len(),
@@ -3572,7 +3573,7 @@ fn submenu_rows_panels_and_scale() {
         assert_eq!(panels[i].action.as_deref(), Some("layout.toggle_panel"));
     }
 
-    let scale = menu::submenu_rows(Menu::View, "Zoom", &c, KeymapScheme::VsCode);
+    let scale = menu::submenu_rows(Menu::View, "Zoom", &c, KeymapScheme::Modern);
     assert_eq!(scale.len(), 7, "Zoom should have 6 commands and 1 rule");
     let commands = scale.iter().filter(|r| !r.separator).count();
     let rules = scale.iter().filter(|r| r.separator).count();
@@ -3597,7 +3598,7 @@ fn go_refactor_and_file_changed_on_disk() {
     // section 2: editor.navigate_back, editor.navigate_forward
     // section 3: editor.show_hover, editor.parameter_hints, editor.context_menu
     // section 4: form.open_base
-    let go_rows = menu::rows_with_scheme(Menu::Go, &c, KeymapScheme::VsCode);
+    let go_rows = menu::rows_with_scheme(Menu::Go, &c, KeymapScheme::Modern);
     let go_sections: Vec<&[Row]> = go_rows.split(|r| r.separator).collect();
     assert_eq!(go_sections.len(), 4);
     let sec0: Vec<&str> = go_sections[0]
@@ -3638,7 +3639,7 @@ fn go_refactor_and_file_changed_on_disk() {
     // section 1: editor.rename_symbol, editor.code_actions, chat.fix_explain (apply_code_action skipped)
     // section 2: editor.format_document
     // section 3: ai.add_selection_to_chat
-    let ref_rows = menu::rows_with_scheme(Menu::Refactor, &c, KeymapScheme::VsCode);
+    let ref_rows = menu::rows_with_scheme(Menu::Refactor, &c, KeymapScheme::Modern);
     let ref_sections: Vec<&[Row]> = ref_rows.split(|r| r.separator).collect();
     assert_eq!(ref_sections.len(), 3);
     let rsec0: Vec<&str> = ref_sections[0]
@@ -3673,12 +3674,12 @@ fn go_refactor_and_file_changed_on_disk() {
     );
 
     // File ends with Changed on Disk row:
-    let file_rows = menu::rows_with_scheme(Menu::File, &c, KeymapScheme::VsCode);
+    let file_rows = menu::rows_with_scheme(Menu::File, &c, KeymapScheme::Modern);
     let last_row = file_rows.last().expect("File menu has rows");
     assert_eq!(last_row.submenu.as_deref(), Some("Changed on Disk"));
     assert_eq!(last_row.label, "Changed on Disk");
 
-    let disk_rows = menu::submenu_rows(Menu::File, "Changed on Disk", &c, KeymapScheme::VsCode);
+    let disk_rows = menu::submenu_rows(Menu::File, "Changed on Disk", &c, KeymapScheme::Modern);
     let disk_actions: Vec<&str> = disk_rows
         .iter()
         .filter_map(|r| r.action.as_deref())
@@ -3699,7 +3700,7 @@ fn no_menu_starts_or_ends_with_rule_and_no_adjacent_rules() {
     let c = ctx(&d, &r, &a);
 
     for &m in Menu::ALL {
-        let rows = menu::rows_with_scheme(m, &c, KeymapScheme::VsCode);
+        let rows = menu::rows_with_scheme(m, &c, KeymapScheme::Modern);
         assert!(!rows.is_empty(), "menu {:?} is empty", m);
         assert!(
             !rows.first().unwrap().separator,
@@ -3721,7 +3722,7 @@ fn no_menu_starts_or_ends_with_rule_and_no_adjacent_rules() {
 
         for row in &rows {
             if let Some(sub) = &row.submenu {
-                let sub_rows = menu::submenu_rows(m, sub, &c, KeymapScheme::VsCode);
+                let sub_rows = menu::submenu_rows(m, sub, &c, KeymapScheme::Modern);
                 assert!(!sub_rows.is_empty(), "submenu `{sub}` in {:?} is empty", m);
                 assert!(
                     !sub_rows.first().unwrap().separator,
@@ -4626,7 +4627,7 @@ fn run_menu_rows_follow_the_keymap_scheme() {
         ]
     );
     assert_eq!(
-        keys(KeymapScheme::VsCode),
+        keys(KeymapScheme::Modern),
         [
             ("project.run".into(), "F5".into()),
             ("project.run_without_debugging".into(), "Ctrl+F5".into())
@@ -4639,7 +4640,7 @@ fn run_menu_rows_includes_language_section() {
     let (d, r, a) = scenario();
     let c = ctx(&d, &r, &a);
     let codes = vec!["de".to_string(), "pt-BR".to_string()];
-    let rows = menu::run_menu_rows(&c, KeymapScheme::VsCode, &codes, Some("de"));
+    let rows = menu::run_menu_rows(&c, KeymapScheme::Modern, &codes, Some("de"));
 
     // First two are run actions
     assert_eq!(rows[0].action.as_deref(), Some("project.run"));

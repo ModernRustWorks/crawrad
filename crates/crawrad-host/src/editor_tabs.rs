@@ -4,7 +4,7 @@
 //!
 //! > *"we need tabs for each .RS opened in the editor"*
 //!
-//! He pointed at VS Code, where the strip above the editor carries one tab per
+//! He pointed at a modern editor, where the strip above the editor carries one tab per
 //! open document and disambiguates two files with the same name by showing a
 //! slice of their folder (`inspector.rs  …\ide_app`).
 //!

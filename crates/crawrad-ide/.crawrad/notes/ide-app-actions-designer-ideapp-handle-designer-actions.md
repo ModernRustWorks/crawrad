@@ -15,7 +15,7 @@ Answers the designer bar, the canvas and the Inspector widgets of a frame.
 ## Inside `handle_designer_actions`: `if let Some(inspector::Row::Category { label, .. }) = props.get(i) {`
 
 THE CATEGORY HEADER, which collapses. The entire row is the
-target, not just the chevron: this is what VS Code does with the
+target, not just the chevron: this is what a modern editor does with the
 section header, and aiming for an 18-pixel glyph is the
 opposite of usability.
 

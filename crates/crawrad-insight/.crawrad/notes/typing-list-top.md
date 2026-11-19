@@ -14,7 +14,7 @@ Calculates visible top index when scrolling or moving list selection.
 
 The first row the list shows. The keys move the selection and the
 window follows it; the wheel moves the window (`scrolled`, in rows) and
-leaves the selection where it is — as VS Code's list.
+leaves the selection where it is — as a modern editor's list.
 
 # Examples
 

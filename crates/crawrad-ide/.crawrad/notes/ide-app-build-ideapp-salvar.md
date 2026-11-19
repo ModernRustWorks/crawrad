@@ -44,7 +44,7 @@ would see "not saved" right after saving.
 **THE EDITOR FILE COMES FIRST, AND ALONE.**
 
 With an edited `.rs` in front, `Ctrl+S` means *save this
-file* — that is what it means in VS Code and that is what it means
+file* — that is what it means in a modern editor and that is what it means
 in a classic RAD IDE. Indirectly saving the form and generating the project
 behind it would rewrite `.designer.rs` and prune handlers (ADR
 0025) because of a typed line, which is not what was requested.

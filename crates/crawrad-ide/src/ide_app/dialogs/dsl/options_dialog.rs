@@ -24,7 +24,7 @@ live_design! {
                         <CrawradFiller> {}
                         opt_close = <CrawradCloseButton> {}
                     }
-                    // THE TOP SEARCH BAR AND SCOPE (VS Code / Antigravity style)
+                    // THE TOP SEARCH BAR AND SCOPE (modern-editor style)
                     opt_search_bar = <View> {
                         width: Fill, height: Fit,
                         flow: Down,
@@ -87,7 +87,7 @@ live_design! {
                                 }
                                 text: ""
                             }
-                            // THE COMMONLY USED PAGE (VS CODE STYLE)
+                            // THE COMMONLY USED PAGE (MODERN STYLE)
                             opt_commonly_used = <View> {
                                 visible: false,
                                 width: Fill, height: Fill,

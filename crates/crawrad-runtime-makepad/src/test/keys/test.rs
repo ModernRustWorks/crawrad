@@ -12,6 +12,10 @@ fn key(code: KeyCode, shift: bool) -> KeyEvent {
     }
 }
 
+/// The platform's primary modifier: `Cmd` (logo) on Apple, `Ctrl` elsewhere. Shortcuts
+/// written `Ctrl+...` follow it, so a test that presses one must press the right key.
+const APPLE: bool = cfg!(target_vendor = "apple");
+
 #[test]
 fn enter_in_a_memo_reaches_the_widget_as_the_key_that_breaks_the_line() {
     let got =
@@ -131,7 +135,8 @@ fn digit_of_extracts_bookmark_numbers() {
 fn matches_shortcut_requires_exact_modifiers() {
     use super::matches_shortcut;
     let mods = KeyModifiers {
-        control: true,
+        control: !APPLE,
+        logo: APPLE,
         ..Default::default()
     };
     assert!(matches_shortcut("Ctrl+Z", KeyCode::KeyZ, &mods));

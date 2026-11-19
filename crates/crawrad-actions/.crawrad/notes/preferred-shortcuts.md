@@ -51,7 +51,7 @@ keyboard IS `Shift` + `=`, so whoever presses what reads as `Ctrl +` sends
 `Ctrl+Shift+=`; and whoever uses the numeric keypad sends an entirely
 different key, which in Makepad is `NumpadAdd` (`event/keyboard.rs:247`).
 
-VS Code binds all three, and browsers do too. Binding only one is the chord that
+A modern editor binds all three, and browsers do too. Binding only one is the chord that
 works for whoever wrote the code and for no one else.
 
 # Examples

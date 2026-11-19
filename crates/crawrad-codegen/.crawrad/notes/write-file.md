@@ -15,7 +15,7 @@ Writes a file of the generated project in pure UTF-8 without BOM.
 Writes a file of the generated project. **Pure UTF-8, without BOM.**
 
 The BOM was once here, and for a real reason: UTF-8 without BOM is indistinguishable
-from Windows-1252 for guessers, and a VS Code tab once showed
+from Windows-1252 for guessers, and a modern editor tab once showed
 `formulÃ¡rio`. It is no use removing accents from OUR comments — the user's
 caption goes into the code, and a "Salvar Configurações" button puts accents
 in the literal.
@@ -26,7 +26,7 @@ at offset 0, and because of that the `#![allow(...)]` on the next line is no lon
 in the position of an INNER attribute: it becomes a loose `#` and dies on
 `expected L_BRACK`. Without the `allow`, `mod formPrincipal;` in `main.rs`
 starts reporting `non_snake_case`, and so do the designer fields. An example
-project opened in VS Code with ~30 false errors and 8 warnings because of
+project opened in a modern editor with ~30 false errors and 8 warnings because of
 three bytes. With the BOM removed, the SAME project gives zero diagnostics.
 
 The accent remains correct: the file is valid UTF-8, and that is how any

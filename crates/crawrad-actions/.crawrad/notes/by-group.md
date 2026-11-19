@@ -10,7 +10,7 @@ tags: []
 signature: "pub fn by_group (group : & str) -> Vec < Action >"
 ---
 
-Actions belonging to a group in the default VS Code keymap scheme.
+Actions belonging to a group in the default Modern keymap scheme.
 
 # Examples
 

@@ -32,6 +32,6 @@ let ctx = Context {
     editor_dirty: false,
     text: EditorText::default(),
 };
-let rows = rows_with_scheme_and_contributions(Menu::File, &ctx, KeymapScheme::VsCode, None, &[]);
+let rows = rows_with_scheme_and_contributions(Menu::File, &ctx, KeymapScheme::Modern, None, &[]);
 assert!(!rows.is_empty());
 ```

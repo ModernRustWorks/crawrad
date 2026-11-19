@@ -525,7 +525,7 @@ fn o_clique_esquerdo_no_trilho_troca_de_painel() {
 /// **Lock** — the dock tab bar takes up no height.
 ///
 /// Owner order, repeated several times: the icon rail **already is** the
-/// navigation (ADR 0014, VS Code model), and a tab bar above it is
+/// navigation (ADR 0014, modern-editor model), and a tab bar above it is
 /// duplicated navigation — with one destination per panel, each tab was a
 /// solitary tab stating the name of the panel that was already there.
 ///

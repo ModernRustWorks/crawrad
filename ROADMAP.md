@@ -93,7 +93,7 @@ timeline
 </td><td valign="top">
 
 ### 🖥️ The IDE itself
-- Two keymaps, VS Code and Classic, plus a command palette
+- Two keymaps, Modern and Classic, plus a command palette
   ([commands](docs/src/reference/commands.md),
   [shortcuts](docs/src/reference/shortcuts.md))
 - Welcome page, auto save, recovery of unsaved work

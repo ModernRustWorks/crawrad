@@ -314,7 +314,7 @@ live_design! {
         }
     }
     // Horizontal scrollbar for the editor file tabs.
-    // Thin (3px) and positioned at the base of the tab bar, with breathing room identical to VS Code.
+    // Thin (3px) and positioned at the base of the tab bar, with breathing room identical to a modern editor.
     pub CrawradTabsScrollBar = <ScrollBar> {
         bar_size: 4.0,
         bar_side_margin: 0.0,
@@ -341,7 +341,7 @@ live_design! {
     }
 
     // The USER prompt card. It uses the orange bubble look of CrawRAD (#de5a2b),
-    // rounded corners and a larger left margin to produce the characteristic right-aligned send effect (Ref: Aefos Chat / Antigravity).
+    // rounded corners and a larger left margin to produce the characteristic right-aligned send effect.
     pub CrawradCardUser = <CrawradCard> {
         margin: { left: 44.0, right: 0.0, top: 4.0, bottom: 4.0 },
         draw_bg: {
@@ -493,7 +493,7 @@ live_design! {
         }
     }
 
-    // Floating autocomplete container (classic Code Insight / VS Code).
+    // Floating autocomplete container (classic Code Insight / a modern editor).
     pub CrawradCompletionBox = <View> {
         visible: false,
         width: 480.0, height: Fit,
@@ -520,7 +520,7 @@ live_design! {
         draw_text: { text_style: <CRAWRAD_FONT_CODE_ICONS> { font_size: (CRAWRAD_FONTE_PEQUENO) } }
     }
 
-    // Individual autocomplete / Code Insight list item (classic RAD IDE / VS Code style).
+    // Individual autocomplete / Code Insight list item (classic RAD IDE / modern-editor style).
     // The button under the columns takes the click and the hover.
     pub CrawradCompletionItem = <View> {
         width: Fill, height: 22.0, flow: Overlay,

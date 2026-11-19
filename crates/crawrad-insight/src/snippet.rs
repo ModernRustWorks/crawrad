@@ -10,7 +10,7 @@
 //! `soma(${1:a}, ${2:b})$0`.
 //!
 //! Each line after the first gets the indentation of the line it is written
-//! on, as VS Code does: `match` typed four spaces in keeps its body inside.
+//! on, as a modern editor does: `match` typed four spaces in keeps its body inside.
 
 use crawrad_note::note;
 #[note("snippet-expanded")]

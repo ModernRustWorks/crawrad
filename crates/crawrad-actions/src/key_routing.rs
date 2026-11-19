@@ -15,7 +15,7 @@
 //! `Action` carries `atalho: Option<&'static str>` as TEXT (`"Ctrl+Shift+B"`).
 //! This module only writes the **chord → `KeyCode`** translation, and dispatch
 //! queries the catalog for matches. A shortcut list written here would be the
-//! second maintenance point that [ADR 0011] exists to prevent: tooltip
+//! second maintenance point that ADR 0011 exists to prevent: tooltip
 //! text and `match` keys can diverge without anyone noticing, and that
 //! is exactly how the egui shell started.
 //!
@@ -44,7 +44,6 @@
 //! `edit.delete` even without a selection, and `habilitada` refuses with the
 //! appropriate message in the status bar.
 //!
-
 use crate::KeymapScheme;
 use crawrad_designer::ArrowNudge;
 use crawrad_note::note;
@@ -56,14 +55,14 @@ static ESQUEMA_ATIVO: AtomicU8 = AtomicU8::new(0);
 pub fn active_scheme() -> KeymapScheme {
     match ESQUEMA_ATIVO.load(Ordering::Relaxed) {
         1 => KeymapScheme::Classic,
-        _ => KeymapScheme::VsCode,
+        _ => KeymapScheme::Modern,
     }
 }
 
 #[note("key-routing-set-active-scheme")]
 pub fn set_active_scheme(esquema: KeymapScheme) {
     let val = match esquema {
-        KeymapScheme::VsCode => 0,
+        KeymapScheme::Modern => 0,
         KeymapScheme::Classic => 1,
     };
     ESQUEMA_ATIVO.store(val, Ordering::Relaxed);
@@ -106,8 +105,8 @@ pub fn commands(p: &Press, from_field: bool) -> Vec<Comando> {
     let mut cmds = commands_with_scheme(p, from_field, active);
     if cmds.is_empty() {
         let other = match active {
-            KeymapScheme::VsCode => KeymapScheme::Classic,
-            KeymapScheme::Classic => KeymapScheme::VsCode,
+            KeymapScheme::Modern => KeymapScheme::Classic,
+            KeymapScheme::Classic => KeymapScheme::Modern,
         };
         cmds = commands_with_scheme(p, from_field, other);
     }

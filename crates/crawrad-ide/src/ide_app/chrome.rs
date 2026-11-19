@@ -351,7 +351,7 @@ impl IdeApp {
                 let y = rect.pos.y + rect.size.y - altura;
                 (x, y)
             }
-            // rust-analyzer's menu opens ABOVE its cell, as VS Code's.
+            // rust-analyzer's menu opens ABOVE its cell, as a modern editor's.
             Aberto::LspStatus => {
                 let rect = self
                     .ui

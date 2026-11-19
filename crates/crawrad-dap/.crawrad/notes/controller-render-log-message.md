@@ -13,7 +13,7 @@ signature: "pub fn render_log_message (template : & str , mut value : impl FnMut
 Renders a logpoint template by replacing expressions with their values.
 
 `total = {total}` with each `{expr}` replaced by `value(expr)`. `\{` is a
-literal brace, as in VS Code; an unclosed `{` is kept as written.
+literal brace, as in a modern editor; an unclosed `{` is kept as written.
 
 # Examples
 

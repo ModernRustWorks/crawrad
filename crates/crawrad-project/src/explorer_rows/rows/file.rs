@@ -3,7 +3,7 @@
 //!
 //! # Three carriers for one fact, and each carries a different part
 //!
-//! The reference has nothing like this: VS Code says `M`/`U`, which is git,
+//! The reference has nothing like this: a modern editor says `M`/`U`, which is git,
 //! which everybody already knows. `Rewritten` / `Yours` is the promise of the
 //! generator — that what the user typed survives the next `Generate` — and it
 //! is the most expensive information on this screen, because getting it wrong

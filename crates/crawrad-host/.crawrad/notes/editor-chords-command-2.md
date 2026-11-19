@@ -12,7 +12,7 @@ signature: "pub fn command (is : & dyn Fn (& str) -> bool , classic : bool) -> O
 
 Resolves a pressed key chord into an editor command.
 
-The command of the key pressed in the scheme (`classic` or VS Code), or
+The command of the key pressed in the scheme (`classic` or Modern), or
 `None` when the key belongs to the framework or to the IDE.
 
 # Examples

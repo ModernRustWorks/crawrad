@@ -2,7 +2,7 @@
 //! the breakpoint dot.
 //!
 //! A mark follows the code it was put on while the text is edited, the way a
-//! breakpoint does in classic RAD IDEs and VS Code:
+//! breakpoint does in classic RAD IDEs and a modern editor:
 //!
 //! - lines inserted or deleted **above** move it;
 //! - `Enter` at the very start of its line pushes the line's code down, and

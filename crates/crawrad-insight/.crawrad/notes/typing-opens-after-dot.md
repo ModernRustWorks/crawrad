@@ -13,7 +13,7 @@ signature: "pub fn opens_after_dot (before_caret : & str) -> bool"
 Returns whether typing dot triggers auto-opening of the completion list.
 
 Whether the text before the caret just typed the `.` of a member access —
-`self.`, `btn_ok.`, `name().`, `"text".` — so the list opens by itself, as VS Code's.
+`self.`, `btn_ok.`, `name().`, `"text".` — so the list opens by itself, as a modern editor's.
 A number (`0.`) and a range (`..`) do not.
 
 # Examples

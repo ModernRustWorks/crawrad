@@ -1055,7 +1055,7 @@ fn items_editor_title_comes_from_class() {
 ///
 /// # What this gate locks down
 ///
-/// The owner requested on 2026-09-17, looking at VS Code: *"we need tabs for
+/// The owner requested on 2026-09-17, looking at a modern editor: *"we need tabs for
 /// each open .RS in the editor"*. The model has its own gate and is pure
 /// (`crate::view_models::editor_tabs`) — sixteen tests on name disambiguation,
 /// closing, and the neighbor inheriting the foreground.

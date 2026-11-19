@@ -44,7 +44,7 @@ pub enum ExplorerCommand {
     /// The legend explains `Rewritten` / `Yours` / `active`, which is a
     /// concept of THIS product and of no other IDE — nobody arrives knowing
     /// it, unlike the `M`/`U` of git. So it cannot be deleted; it is folded
-    /// away, closed by default, the way VS Code folds `Outline` and
+    /// away, closed by default, the way a modern editor folds `Outline` and
     /// `Timeline`.
     ToggleLegend,
     /// Open or close the Open Editors card section.

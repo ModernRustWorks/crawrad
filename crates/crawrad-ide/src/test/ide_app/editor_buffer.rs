@@ -58,7 +58,7 @@ fn sem_aba_nao_ha_o_que_editar() {
     assert_eq!(pode_editar(Center::Code, None, true), None);
 }
 
-/// **The dirty mark lives where the X is**, as VS Code: the close button
+/// **The dirty mark lives where the X is**, as in a modern editor: the close button
 /// has a `dirty` on its background (the dot) and on its glyph (the X hides
 /// unless the mouse is on it). A circle drawn by the shader, not a font
 /// glyph: nothing can turn it into an empty box.

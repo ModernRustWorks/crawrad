@@ -1,4 +1,4 @@
-//! **The values a stop writes after the code**: VS Code's inline
+//! **The values a stop writes after the code**: a modern editor's inline
 //! values, the presentation the owner approved for the debugger — one step
 //! further: what a line USES, not just which local it names.
 //!

@@ -9,10 +9,10 @@ mod tests;
 
 #[note("commands-reference-markdown")]
 pub fn commands_reference_markdown() -> String {
-    let vscode = catalogue_with_scheme(KeymapScheme::VsCode);
+    let modern = catalogue_with_scheme(KeymapScheme::Modern);
     let classic = catalogue_with_scheme(KeymapScheme::Classic);
     let mut groups: Vec<&str> = Vec::new();
-    for a in &vscode {
+    for a in &modern {
         if !groups.contains(&a.group) {
             groups.push(a.group);
         }
@@ -28,7 +28,7 @@ pub fn commands_reference_markdown() -> String {
         out.push_str(&format!("\n## {group}\n\n"));
         out.push_str("| Command | Shortcut | Classic keymap | What it does | Id |\n");
         out.push_str("|---|---|---|---|---|\n");
-        for (a, c) in vscode
+        for (a, c) in modern
             .iter()
             .zip(&classic)
             .filter(|(a, _)| a.group == group)

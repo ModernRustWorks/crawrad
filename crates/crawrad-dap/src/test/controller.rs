@@ -253,7 +253,7 @@ fn dropping_the_controller_ends_the_program_it_drove() {
         .expect("closing the IDE must end the program under the debugger");
 }
 
-/// **A logpoint's message, as VS Code writes it**: `{expr}` replaced,
+/// **A logpoint's message, as a modern editor writes it**: `{expr}` replaced,
 /// `\{` a literal brace, an unclosed `{` kept as written.
 #[test]
 fn a_log_message_fills_its_braces() {

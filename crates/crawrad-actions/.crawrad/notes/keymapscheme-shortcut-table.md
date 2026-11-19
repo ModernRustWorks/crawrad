@@ -17,6 +17,6 @@ The shortcuts the Options keyboard page lists for this scheme.
 ```rust
 use crawrad_actions::KeymapScheme;
 
-let table = KeymapScheme::VsCode.shortcut_table();
+let table = KeymapScheme::Modern.shortcut_table();
 assert!(!table.is_empty());
 ```

@@ -434,7 +434,7 @@ fn o_codigo_do_usuario_nunca_e_sobrescrito_e_o_gerado_sempre_e() {
 #[test]
 fn o_rs_gerado_sai_sem_bom() {
     // This test was once the OPPOSITE of this, and the old reason was real: UTF-8 without
-    // BOM is indistinguishable from Windows-1252 to guessers, and VS Code
+    // BOM is indistinguishable from Windows-1252 to guessers, and a modern editor
     // guessed — a tab displayed `formulÃ¡rio`. Removing accents from OUR
     // comments didn't help: the user's caption goes into code, and a
     // "Salvar Configuracoes" button puts accents in the literal.
@@ -444,7 +444,7 @@ fn o_rs_gerado_sai_sem_bom() {
     // offset 0, and because of that the `#![allow(...)]` on the next line stops being
     // in an INNER attribute position and fails with `expected L_BRACK`. Without
     // `allow`, the `mod formPrincipal;` in `main.rs` flags `non_snake_case`, and
-    // so do designer fields. A sample project opened in VS Code with
+    // so do designer fields. A sample project opened in a modern editor with
     // ~30 false errors and 8 warnings because of three bytes; without BOM, ZERO.
     //
     // The test remained because the decision remained: without it, the BOM returns in the next

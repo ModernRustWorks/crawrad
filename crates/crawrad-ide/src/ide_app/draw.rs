@@ -89,7 +89,7 @@ impl IdeApp {
                 format!("{icone}{}{deleted}", rotulo.one_line())
             })
             .collect();
-        // Unsaved work shows where the X is (the tab's `dirty`), as VS Code.
+        // Unsaved work shows where the X is (the tab's `dirty`), as a modern editor does.
         let dirty_tabs: Vec<bool> = (self.abas.files().iter())
             .map(|arquivo| self.host.buffer(arquivo).is_some())
             .collect();

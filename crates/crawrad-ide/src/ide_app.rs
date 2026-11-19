@@ -3,7 +3,7 @@
 //! Native GPU-accelerated IDE shell featuring:
 //! - Titlebar & Top Menu Bar (File, Edit, View, Project, Run, Help, Undo, Redo, Save, Run).
 //! - Centered Project Title and Top Status Badges (Preview, + AI, saved).
-//! - Leftmost VS Code-style Activity Rail (Files, Search, Source Control, Debug, Settings).
+//! - Leftmost modern Activity Rail (Files, Search, Source Control, Debug, Settings).
 //! - Left Dock: Collapsible Toolbox (with Filter and Categories: Additional, Standard, System),
 //!   Structure Object Tree (Form Hierarchy) and the Object Inspector.
 //! - Center Area: the `DesignCanvas` of the open form (which draws its own rulers) and
@@ -756,8 +756,8 @@ pub struct IdeApp {
     /// The scope tab in Settings: 0 = User, 1 = Workspace.
     #[rust]
     options_scope: usize,
-    /// The active keyboard shortcut scheme in the IDE (VS Code by default, or the classic one).
-    #[rust(KeymapScheme::VsCode)]
+    /// The active keyboard shortcut scheme in the IDE (Modern by default, or the classic one).
+    #[rust(KeymapScheme::Modern)]
     esquema_teclado: KeymapScheme,
     /// Is the **Aefos Memory** dialog on screen?
     #[rust]
@@ -1176,7 +1176,7 @@ enum Aberto {
     /// The code actions at the caret, under its line.
     /// `teach`: the caret's line has a compiler error the teacher can explain.
     CodeActions { em: DVec2, teach: bool },
-    /// rust-analyzer's menu, above its status bar cell (as VS Code's).
+    /// rust-analyzer's menu, above its status bar cell (as in modern editors).
     LspStatus,
 }
 

@@ -576,7 +576,7 @@ pub struct Domain {
     /// rows in the `View` menu, and twenty-two of them nobody asked for.
     /// `layout.toggle_panel` is the one where a row per value is the **whole
     /// command and reads as a state**: a row with a tick beside it IS a
-    /// toggle, which is how a classic RAD IDE and VS Code both draw the list of panels.
+    /// toggle, which is how a classic RAD IDE and modern editors both draw the list of panels.
     /// `show`, `hide` and `float` say the same thing three times over and
     /// belong to the doors that take an argument — the panel context menu and
     /// the protocol.
@@ -918,15 +918,15 @@ pub enum LspCommand {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum DebugCommand {
     /// Toggles the breakpoint on the cursor's line — `F5` in the classic RAD IDE,
-    /// `F9` in VS Code, and the same as clicking on the editor glyph margin.
+    /// `F9` in the modern editor convention, and the same as clicking on the editor glyph margin.
     ToggleBreakpoint,
-    /// One step, over calls — `F8` in the classic RAD IDE, `F10` in VS Code.
+    /// One step, over calls — `F8` in the classic RAD IDE, `F10` in the modern editor convention.
     StepOver,
     /// One step, stepping into call — `F7` / `F11`.
     StepInto,
     /// Step out of function — `Shift+F8` / `Shift+F11`.
     StepOut,
-    /// Pauses running program — no key in the classic RAD IDE, `F6` in VS Code.
+    /// Pauses running program — no key in the classic RAD IDE, `F6` in the modern editor convention.
     Pause,
     /// Terminates program and session — `Ctrl+F2` / `Shift+F5`.
     Stop,
@@ -981,8 +981,7 @@ pub enum DesignerMode {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ViewEffect {
     /// `Design` ↔ `Code`, `F12` of the classic RAD IDE
-    /// (ADR 0014
-    /// item 3, ADR 0015 §2).
+    /// (ADR 0014 item 3, ADR 0015 §2).
     ///
     /// **Toggle**, and not `Show(Design)` / `Show(Code)`. The gesture described by
     /// the ADR is a single one — fingers press `F12` to go and `F12` to return
@@ -1003,12 +1002,10 @@ pub enum ViewEffect {
     ///
     /// **The panel does not appear just because this was requested.** It appears when there are
     /// diagnostics *and* this is toggled on — drawing the empty region before having
-    /// what to put in it is the defect that
-    /// ADR 0014
-    /// names. Whoever intersects the two is the shell, because it owns the list.
+    /// what to put in it is the defect that ADR 0014 names. Whoever intersects the two is the shell, because it owns the list.
     ToggleProblems,
     /// The **welcome screen**, over the open form —
-    /// `Help ▸ Welcome` of VS Code.
+    /// `Help ▸ Welcome` of modern editors.
     ///
     /// Toggle, and not `Show`, for the reason of the other three: the gesture is a single one,
     /// back and forth. And it exists because the screen had no way back at
@@ -1099,7 +1096,7 @@ pub enum FileEffect {
     /// Open the generated project in the system editor.
     ///
     /// §9 of the study is explicit: **do not write an editor in Phases 1–3** — an
-    /// "open in VS Code" button resolves this for six months. The real editor,
+    /// "open in an external editor" button resolves this for six months. The real editor,
     /// with `ropey` and rust-analyzer, is Phase 4.
     ///
     /// The path is **relative to the generated project**, and `None` opens the folder —
@@ -1115,12 +1112,12 @@ pub enum FileEffect {
     /// **Open a file in a TAB of the IDE's own editor.**
     ///
     /// It is not [`Self::OpenInEditor`], and the difference is what the owner requested
-    /// on 17/09/2026 looking at VS Code: *"we need tabs for each .RS
+    /// on 17/09/2026: *"we need tabs for each .RS
     /// open in the editor"*. The other leaves the file in the SYSTEM editor — the
     /// solution §9 of the study chose while there was no editor
     /// here; this one opens a tab INSIDE the IDE, beside the design.
     ///
-    /// Both coexist on purpose. Opening in VS Code remains what
+    /// Both coexist on purpose. Opening in an external editor remains what
     /// the `Run` menu does, and remains the right answer for whoever wants full
     /// rust-analyzer — Phase 4 changes that. Merging the two into an
     /// argument would produce an action whose effect depends on which shell applies it.
@@ -1238,15 +1235,15 @@ pub fn is_known_action(id: &str) -> bool {
 #[note("keymapscheme")]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum KeymapScheme {
-    /// Default scheme inspired by VS Code (F5 Run, Ctrl+Shift+B Build, etc.).
+    /// Default scheme with the modern editor convention (F5 Run, Ctrl+Shift+B Build, etc.).
     #[default]
-    VsCode,
+    Modern,
     /// Classic scheme (F9 Run, Ctrl+F9 Build, etc.).
     Classic,
 }
 
 impl KeymapScheme {
-    pub const ALL: &'static [Self] = &[Self::VsCode, Self::Classic];
+    pub const ALL: &'static [Self] = &[Self::Modern, Self::Classic];
 
     pub fn labels() -> Vec<String> {
         Self::ALL.iter().map(|s| s.label().to_string()).collect()
@@ -1258,21 +1255,21 @@ impl KeymapScheme {
 
     pub fn id(self) -> &'static str {
         match self {
-            Self::VsCode => "vscode",
+            Self::Modern => "modern",
             Self::Classic => "classic",
         }
     }
 
     pub fn label(self) -> &'static str {
         match self {
-            Self::VsCode => "Modern (Default)",
+            Self::Modern => "Modern (Default)",
             Self::Classic => "Classic",
         }
     }
 
     pub fn description(self) -> &'static str {
         match self {
-            Self::VsCode => {
+            Self::Modern => {
                 "Modern keybindings (F5 Run, Ctrl+Shift+B Build, Ctrl+G Go to line, Ctrl+P Quick open, Ctrl+Shift+K Delete line)"
             }
             Self::Classic => {
@@ -1284,7 +1281,7 @@ impl KeymapScheme {
     #[note("keymapscheme-shortcut-table")]
     pub fn shortcut_table(self) -> Vec<(&'static str, &'static str)> {
         match self {
-            Self::VsCode => vec![
+            Self::Modern => vec![
                 ("Run Project", "F5"),
                 ("Build / Generate", "Ctrl+Shift+B"),
                 ("Toggle Design / Code", "F12"),
@@ -1699,7 +1696,7 @@ fn pages_of(ir: &crawrad_ir::Document, control: &str) -> usize {
 #[note("shortcut-for-scheme")]
 pub fn shortcut_for_scheme(id: &str, scheme: KeymapScheme) -> Option<&'static str> {
     match scheme {
-        KeymapScheme::VsCode => default_shortcut(id),
+        KeymapScheme::Modern => default_shortcut(id),
         KeymapScheme::Classic => classic_shortcut(id),
     }
 }
@@ -1755,7 +1752,7 @@ pub fn default_shortcut(id: &str) -> Option<&'static str> {
         "edit.select_all" => Some("Ctrl+A"),
         // The text's twins: the same keys, the code view's. Which one
         // runs is the view in front (the shell's `keyboard::not_here`).
-        // VS Code's and the classic IDEs' Shift+F10.
+        // The modern editor convention and the classic IDEs' Shift+F10.
         "editor.context_menu" => Some("Shift+F10"),
         "editor.cut" => Some("Ctrl+X"),
         "editor.copy" => Some("Ctrl+C"),
@@ -1774,24 +1771,24 @@ pub fn default_shortcut(id: &str) -> Option<&'static str> {
         "debug.stop" => Some("Shift+F5"),
         "view.toggle_code" => Some("F12"),
         "view.toggle_form_source" => Some("Alt+F12"),
-        // VS Code's `F12` is ours (Design / Code); `Ctrl+F12` is the free
-        // chord next to it. Back / forward are VS Code's own.
+        // The modern scheme's `F12` is ours (Design / Code); `Ctrl+F12` is the free
+        // chord next to it. Back / forward follow the modern convention.
         "editor.goto_definition" => Some("Ctrl+F12"),
         "editor.navigate_back" => Some("Alt+Left"),
         "editor.navigate_forward" => Some("Alt+Right"),
-        // VS Code's is the chord `Ctrl+K Ctrl+I`; the keymap has no chords,
+        // Modern editors use `Ctrl+K Ctrl+I`; the keymap has no chords,
         // so `Ctrl+K` alone opens it (and the chord's `Ctrl+I` has no owner).
         "editor.show_hover" => Some("Ctrl+K"),
-        // VS Code's *Trigger Parameter Hints*; the classic RAD IDE's *Code
+        // Modern editor *Trigger Parameter Hints*; the classic RAD IDE's *Code
         // Parameters* is the same chord, so both schemes share it.
         "editor.parameter_hints" => Some("Ctrl+Shift+Space"),
-        // VS Code's *Quick Fix*, in both schemes. Not the issue's Alt+Enter:
+        // Modern editor *Quick Fix*, in both schemes. Not the issue's Alt+Enter:
         // on Windows that chord is DXGI's full-screen toggle and ends the
         // IDE.
         "editor.code_actions" => Some("Ctrl+."),
-        // VS Code's own.
+        // The modern editor convention.
         "editor.format_document" => Some("Shift+Alt+F"),
-        // VS Code's *References: Find All References*.
+        // Modern editor *References: Find All References*.
         "editor.find_references" => Some("Shift+Alt+F12"),
         "view.toggle_problems" => Some("Ctrl+Shift+M"),
         "tools.options" => Some("Ctrl+,"),
@@ -1825,7 +1822,7 @@ fn note_effect(kind: NoteKindChoice) -> Effect {
 
 #[note("catalogue")]
 pub fn catalogue() -> Vec<Action> {
-    catalogue_with_scheme(KeymapScheme::VsCode)
+    catalogue_with_scheme(KeymapScheme::Modern)
 }
 
 #[note("catalogue-with-scheme")]
@@ -2116,7 +2113,7 @@ fn base_catalogue() -> Vec<Action> {
             hint: "Save every changed file: the code in every tab, then the form",
             group: "File",
             place: Place::TOP,
-            // VS Code's Save All is the chord `Ctrl+K S`, which this shell
+            // The modern scheme's Save All is the chord `Ctrl+K S`, which this shell
             // does not take; the classic scheme gives it its own key.
             shortcut: None,
             params: &[],
@@ -2596,11 +2593,11 @@ fn base_catalogue() -> Vec<Action> {
         // menu puts the command.
         group: "Edit",
         place: Place::TOP,
-        // Classic RAD IDE gives no chord to this command, and VS Code does not have the command
+        // Classic RAD IDE gives no chord to this command, and modern editors do not have the command
         // — so there was no trained finger to respect, and the choice is free
         // within ADR 0011.
         //
-        // `Ctrl+Shift+L` is *select all occurrences* in VS Code: a TEXT
+        // `Ctrl+Shift+L` is *select all occurrences* in modern editors: a TEXT
         // editing gesture, which is precisely the case of the exception that the ADR already
         // opened for `Ctrl+D` — it means nothing on a drawing canvas, and the
         // `L` for *lock* is the mnemonic that remains. Diverging at source, stating
@@ -2696,8 +2693,7 @@ fn base_catalogue() -> Vec<Action> {
         hint: "Show what the last build reported, and click to go there",
         group: "View",
         place: Place::section(0),
-        // The VS Code key for the same panel
-        // (ADR 0011).
+        // The modern editor key for the same panel (ADR 0011).
         // Classic RAD IDE has no chord for Messages — it is a docked panel opened
         // from the menu —, so there was no trained finger to respect.
         shortcut: Some("Ctrl+Shift+M"),
@@ -3107,7 +3103,7 @@ fn base_catalogue() -> Vec<Action> {
         hint: "Show or hide the types rust-analyzer infers, in grey inside the lines",
         group: "View",
         place: Place::section(2),
-        // No chord: VS Code binds none to its `editor.inlayHints.enabled`.
+        // No chord: modern editors bind none to their equivalent.
         shortcut: None,
         params: &[],
         // Code without a form has hints too.
@@ -3184,7 +3180,7 @@ fn base_catalogue() -> Vec<Action> {
             id,
             label,
             hint,
-            // Not a top menu: VS Code puts these behind the status bar item.
+            // Not a top menu: modern editors put these behind the status bar item.
             group: "rust-analyzer",
             place: Place::TOP,
             shortcut: None,
@@ -3220,8 +3216,7 @@ fn base_catalogue() -> Vec<Action> {
         // `Run`, not `File`: the menu follows classic RAD IDE, where Run lives in Run.
         group: "Run",
         place: Place::TOP,
-        // F5 is VS Code's; classic RAD IDE's F9 becomes a configurable scheme
-        // (ADR 0011).
+        // F5 is the modern convention; classic RAD IDE's F9 becomes a configurable scheme (ADR 0011).
         shortcut: Some("F5"),
         params: &[],
         // **Not valid for whoever has nothing to run** (ADR 0018, Amendment 3).
@@ -3230,7 +3225,7 @@ fn base_catalogue() -> Vec<Action> {
         // — the IDE promising its central gesture and delivering a tool
         // error.
         //
-        // Dimmed, not hidden: this is what VS Code does with a command that does
+        // Dimmed, not hidden: this is what modern editors do with a command that does
         // not apply, and is what classic RAD IDE does with a package's `Run`. A button that
         // vanishes leads to looking for where it went; a dimmed button with a tooltip says
         // what is missing.
@@ -3248,7 +3243,7 @@ fn base_catalogue() -> Vec<Action> {
         hint: "Add or remove the breakpoint on the caret's line of the file in the editor",
         group: "Run",
         place: Place::TOP,
-        // F9 in VS Code; classic scheme F5 comes from the scheme (`classic_shortcut`).
+        // F9 in the modern scheme; classic scheme F5 comes from the scheme (`classic_shortcut`).
         shortcut: Some("F9"),
         params: &[],
         // Breakpoint is a CODE line: on the canvas there is no line to mark.
@@ -3266,7 +3261,7 @@ fn base_catalogue() -> Vec<Action> {
         hint: "Watch an expression in the Run and Debug panel — the selection or the word under the caret when none is given",
         group: "Run",
         place: Place::TOP,
-        // No key in VS Code; `Ctrl+F5` comes from the classic key scheme.
+        // No key in the modern scheme; `Ctrl+F5` comes from the classic key scheme.
         shortcut: None,
         params: &[Param {
             name: "expression",
@@ -3629,14 +3624,14 @@ fn base_catalogue() -> Vec<Action> {
         id: "help.welcome",
         label: "Welcome Page",
         hint: "Show the welcome page — templates and recent folders",
-        // Group of its own, and it is VS Code's `Help` — which is where whoever already looked for
+        // Group of its own, in `Help` — which is where whoever already looked for
         // this screen once looks for it again. It is not `View`: those swap
         // how the open form is shown, and this brings a screen that speaks of the
         // IDE, not of the document.
         group: "Help",
         place: Place::TOP,
         // **No chord, and deliberately so.** ADR 0011 says the key is
-        // BORROWED and not invented: VS Code binds none to
+        // BORROWED and not invented: modern editors bind none to
         // `Help ▸ Welcome`, and classic RAD IDE does not have the screen. A chord chosen here
         // would be the only one in the IDE without a trained finger behind it — and the day there is
         // one, it enters this line and the keyboard gets it for free.
@@ -3841,7 +3836,7 @@ fn base_catalogue() -> Vec<Action> {
     //
     // What remains, and why: `Ctrl+Shift+.` and `Ctrl+Shift+,` are `>` and
     // `<` on the keyboard, which is the pair anyone reads as "greater" and "lesser",
-    // and VS Code does not use them for anything meaningful on a canvas
+    // and modern editors do not use them for anything meaningful on a canvas
     // (ADR 0011).
     // `Ctrl+1` is *actual size* in Photoshop, Illustrator and Figma,
     // literally the same key. Without Shift, and that was MEASURED on screen: with
@@ -4893,7 +4888,7 @@ fn layout_actions() -> Vec<Action> {
         // TOGGLE COMES FIRST, and the order is the menu: `menu::rows` preserves
         // catalogue order inside a section on purpose, and this is where the
         // `View › Panels` submenu comes from — one row per panel, as the owner
-        // designed and as VS Code shows.
+        // designed and as modern editors show.
         Action {
             id: "layout.toggle_panel",
             label: "Toggle panel",
@@ -6638,7 +6633,7 @@ pub const PREFERRED_SHORTCUTS: &[(&str, &[&str])] = &[
         &["Ctrl+=", "Ctrl+Shift+=", "Ctrl+NumpadAdd"],
     ),
     ("view.ui_zoom_out", &["Ctrl+-", "Ctrl+NumpadSubtract"]),
-    // `Ctrl+0` is the *reset* of browsers and VS Code.
+    // `Ctrl+0` is the *reset* of browsers and modern editors.
     ("view.ui_zoom_reset", &["Ctrl+0", "Ctrl+Numpad0"]),
 ];
 
@@ -6658,7 +6653,7 @@ pub fn preferred_shortcuts(id: &str) -> &'static [&'static str] {
 
 #[note("by-id")]
 pub fn by_id(id: &str) -> Option<Action> {
-    by_id_with_scheme(id, KeymapScheme::VsCode)
+    by_id_with_scheme(id, KeymapScheme::Modern)
 }
 
 #[note("by-id-with-scheme")]
@@ -6670,7 +6665,7 @@ pub fn by_id_with_scheme(id: &str, scheme: KeymapScheme) -> Option<Action> {
 
 #[note("by-group")]
 pub fn by_group(group: &str) -> Vec<Action> {
-    by_group_with_scheme(group, KeymapScheme::VsCode)
+    by_group_with_scheme(group, KeymapScheme::Modern)
 }
 
 #[note("by-group-with-scheme")]

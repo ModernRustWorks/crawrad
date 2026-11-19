@@ -468,7 +468,7 @@ impl IdeApp {
             }
         }
 
-        // TOP SEARCH BAR (VS Code Style)
+        // TOP SEARCH BAR (modern-editor style)
         if let Some(t) = dlg.text_input(id!(opt_search_input)).changed(actions) {
             self.options_busca = t;
             self.redraw_options(cx);
@@ -655,7 +655,7 @@ impl IdeApp {
         ) {
             let novo = match pos {
                 1 => crawrad_actions::KeymapScheme::Classic,
-                _ => crawrad_actions::KeymapScheme::VsCode,
+                _ => crawrad_actions::KeymapScheme::Modern,
             };
             if self.esquema_teclado != novo {
                 self.esquema_teclado = novo;

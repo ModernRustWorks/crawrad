@@ -17,5 +17,5 @@ Returns the display shortcut of an action for a given keymap scheme.
 ```rust
 use crawrad_actions::{shortcut_for_scheme, KeymapScheme};
 
-assert_eq!(shortcut_for_scheme("file.save", KeymapScheme::VsCode), Some("Ctrl+S"));
+assert_eq!(shortcut_for_scheme("file.save", KeymapScheme::Modern), Some("Ctrl+S"));
 ```

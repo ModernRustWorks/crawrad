@@ -10,7 +10,7 @@ tags: []
 signature: "pub fn by_id (id : & str) -> Option < Action >"
 ---
 
-Finds an action by id in the default VS Code keymap scheme.
+Finds an action by id in the default Modern keymap scheme.
 
 # Examples
 

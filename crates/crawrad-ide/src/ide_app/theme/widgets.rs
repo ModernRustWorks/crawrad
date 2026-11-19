@@ -27,7 +27,7 @@ live_design! {
         show_bg: true,
         draw_bg: { color: (CRAWRAD_GROUND) }
     }
-    // Dock panel as a modern independent card (VS Code / Cursor style):
+    // Dock panel as a modern independent card (modern-editor style):
     // 4 rounded corners, perimeter margin, and subtle border.
     pub CrawradCardPanel = <CrawradOutlined> {
         width: Fill, height: Fill,
@@ -628,7 +628,7 @@ live_design! {
                 sdf.box(0.5, 0.5, self.rect_size.x - 1.0, self.rect_size.y - 1.0, r);
                 sdf.fill(mix(self.color, self.color_hover, is_hover_down));
 
-                // Active tab indicator bar on the left (VS Code style):
+                // Active tab indicator bar on the left (modern-editor style):
                 if self.active > 0.5 {
                     sdf.box(0.5, 6.0, 2.5, self.rect_size.y - 12.0, 1.0);
                     sdf.fill(self.color_bar);

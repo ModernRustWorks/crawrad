@@ -709,7 +709,7 @@ live_design! {
         }
     }
 
-    // The circular context button (+) in the AI prompt (Antigravity / Cursor style).
+    // The circular context button (+) in the AI prompt.
     pub CrawradContextButton = <CrawradCircleButton> {
         width: 24.0, height: 24.0,
         draw_bg: {
@@ -1056,10 +1056,10 @@ live_design! {
                 chat_bottom_spacer = <View> { width: Fill, height: 16.0 }
             }
 
-            // Send queue (Queued Messages - Ref: Antigravity / Cursor)
+            // Send queue (Queued Messages)
             ai_queue_card = <CrawradAiQueueCard> {}
 
-            // Chat prompt container: unified floating card (Ref: Antigravity / modern VS Code)
+            // Chat prompt container: unified floating card (modern-editor style)
             ai_input_bar = <CrawradAiInputBar> {}
         }
 

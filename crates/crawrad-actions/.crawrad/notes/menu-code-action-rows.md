@@ -19,7 +19,7 @@ no row for what does not run (the AI group waits for #259). The keys are
 the active scheme's.
 The code actions offered at the caret (#359), one row each: running a row
 is `editor.apply_code_action` with its index. A preferred action is
-marked, as VS Code marks it.
+marked, as a modern editor marks it.
 The quick fixes of the caret's place, and with `teach` (the line has a
 compiler error) the teacher's "Fix and Explain" after a rule (#611).
 

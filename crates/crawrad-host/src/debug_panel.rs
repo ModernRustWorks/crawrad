@@ -3,9 +3,9 @@
 //! The shell draws a list; this module decides what is in it, with no window,
 //! so every sentence and every order below is tested instead of eyeballed.
 //!
-//! The sections are VS Code's, top to bottom — Variables, Call Stack,
+//! The sections are a modern editor's, top to bottom — Variables, Call Stack,
 //! Breakpoints — because that is the presentation the owner chose for the
-//! debugger (classic RAD behaviour, VS Code's presentation). Watch is not here
+//! debugger (classic RAD behaviour, a modern editor's presentation). Watch is not here
 //! yet: a section with no way to add a watch would be a promise, not a tool.
 
 use std::path::Path;
@@ -51,7 +51,7 @@ pub enum Row {
         place: String,
         selected: bool,
         /// Code of the project, not of a dependency, the standard library or
-        /// the system — VS Code dims the others, and so does this panel.
+        /// the system — a modern editor dims the others, and so does this panel.
         own: bool,
     },
     /// A breakpoint: the file's name and the line.

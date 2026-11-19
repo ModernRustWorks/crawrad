@@ -10,7 +10,7 @@ tags: []
 signature: "pub fn catalogue () -> Vec < Action >"
 ---
 
-All actions of the IDE in default VS Code keymap scheme.
+All actions of the IDE in the default Modern keymap scheme.
 
 # Examples
 

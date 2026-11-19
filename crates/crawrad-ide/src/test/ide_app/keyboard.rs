@@ -53,6 +53,10 @@ fn modificadores(a: crawrad_runtime_makepad::keys::Chord) -> KeyModifiers {
     }
 }
 
+/// The platform's primary modifier: `Cmd` (logo) on Apple, `Ctrl` elsewhere. Shortcuts
+/// written `Ctrl+...` follow it, so a test that presses one must press the right key.
+const APPLE: bool = cfg!(target_vendor = "apple");
+
 /// **With the cursor in a file, EDITING keys belong to the editor — and IDE keys
 /// remain with the IDE.**
 ///
@@ -316,7 +320,7 @@ fn inside_field_arrows_and_esc_are_not_gestures() {
 
 /// What the field REJECTED remains valid as a catalog shortcut.
 ///
-/// It is the good half of the VS Code rule: `Ctrl+S` with the cursor inside
+/// It is the good half of the modern-editor rule: `Ctrl+S` with the cursor inside
 /// `Filter` saves, because the field does nothing with it — and the field
 /// itself indicates that via `KeyDownUnhandled`.
 #[test]
@@ -661,7 +665,8 @@ fn keyboard_schemes_toggle_build_and_run_commands() {
     let f5 = KeyCode::F5;
     let f9 = KeyCode::F9;
     let ctrl_shift_b = KeyModifiers {
-        control: true,
+        control: !APPLE,
+        logo: APPLE,
         shift: true,
         ..Default::default()
     };
@@ -670,22 +675,23 @@ fn keyboard_schemes_toggle_build_and_run_commands() {
         ..Default::default()
     };
     let ctrl_f9 = KeyModifiers {
-        control: true,
+        control: !APPLE,
+        logo: APPLE,
         ..Default::default()
     };
 
     // Test directly via commands_with_scheme
-    let run_vscode =
-        teclado::commands_with_scheme(f5, &nada(), false, crawrad_actions::KeymapScheme::VsCode);
-    assert!(run_vscode.contains(&Comando::Acao("project.run")));
+    let run_modern =
+        teclado::commands_with_scheme(f5, &nada(), false, crawrad_actions::KeymapScheme::Modern);
+    assert!(run_modern.contains(&Comando::Acao("project.run")));
 
-    let build_vscode = teclado::commands_with_scheme(
+    let build_modern = teclado::commands_with_scheme(
         KeyCode::KeyB,
         &ctrl_shift_b,
         false,
-        crawrad_actions::KeymapScheme::VsCode,
+        crawrad_actions::KeymapScheme::Modern,
     );
-    assert!(build_vscode.contains(&Comando::Acao("project.build_manager")));
+    assert!(build_modern.contains(&Comando::Acao("project.build_manager")));
 
     let run_classic =
         teclado::commands_with_scheme(f9, &nada(), false, crawrad_actions::KeymapScheme::Classic);
@@ -700,10 +706,10 @@ fn keyboard_schemes_toggle_build_and_run_commands() {
     assert!(gen_classic.contains(&Comando::Acao("project.generate")));
 
     // Test dynamic switching of active scheme
-    teclado::set_active_scheme(crawrad_actions::KeymapScheme::VsCode);
+    teclado::set_active_scheme(crawrad_actions::KeymapScheme::Modern);
     assert_eq!(
         teclado::active_scheme(),
-        crawrad_actions::KeymapScheme::VsCode
+        crawrad_actions::KeymapScheme::Modern
     );
     let cmds = teclado::comandos(f5, &nada(), false);
     assert!(cmds.contains(&Comando::Acao("project.run")));
@@ -716,27 +722,28 @@ fn keyboard_schemes_toggle_build_and_run_commands() {
     let cmds_classic = teclado::comandos(f9, &nada(), false);
     assert!(cmds_classic.contains(&Comando::Acao("project.run")));
 
-    // Restore to default VsCode
-    teclado::set_active_scheme(crawrad_actions::KeymapScheme::VsCode);
+    // Restore to default Modern
+    teclado::set_active_scheme(crawrad_actions::KeymapScheme::Modern);
 }
 
 /// **Go to Definition and Back / Forward reach the catalog by key**:
-/// `Ctrl+F12` and `Alt+Left/Right` in VS Code's scheme; the vendor's
+/// `Ctrl+F12` and `Alt+Left/Right` in the Modern scheme; the vendor's
 /// `Alt+Up` and `Alt+Left/Right` in the classic one.
 #[test]
 fn definition_and_back_forward_keys_reach_the_catalog() {
     let classic = *crawrad_actions::KeymapScheme::ALL
         .iter()
-        .find(|s| **s != crawrad_actions::KeymapScheme::VsCode)
+        .find(|s| **s != crawrad_actions::KeymapScheme::Modern)
         .unwrap();
     let m = |control: bool, alt: bool| KeyModifiers {
-        control,
+        control: control && !APPLE,
+        logo: control && APPLE,
         alt,
         ..Default::default()
     };
     let hit =
         |key, mods: &KeyModifiers, scheme| teclado::commands_with_scheme(key, mods, false, scheme);
-    let vs = crawrad_actions::KeymapScheme::VsCode;
+    let vs = crawrad_actions::KeymapScheme::Modern;
     let go = |id: &'static str| vec![Comando::Acao(id)];
     assert_eq!(
         hit(KeyCode::F12, &m(true, false), vs),
@@ -763,21 +770,21 @@ fn definition_and_back_forward_keys_reach_the_catalog() {
     );
 }
 
-/// **Format Document reaches the catalog by key**: VS Code's
+/// **Format Document reaches the catalog by key**: a modern editor's
 /// `Shift+Alt+F`; the vendor's `Ctrl+D` in the classic scheme, where the
 /// designer's duplicate moved to `Ctrl+Shift+D`.
 #[test]
 fn format_document_keys_reach_the_catalog() {
     let classic = *crawrad_actions::KeymapScheme::ALL
         .iter()
-        .find(|s| **s != crawrad_actions::KeymapScheme::VsCode)
+        .find(|s| **s != crawrad_actions::KeymapScheme::Modern)
         .unwrap();
-    let vs = crawrad_actions::KeymapScheme::VsCode;
+    let vs = crawrad_actions::KeymapScheme::Modern;
     let m = |control: bool, shift: bool, alt: bool| KeyModifiers {
-        control,
+        control: control && !APPLE,
+        logo: control && APPLE,
         shift,
         alt,
-        ..Default::default()
     };
     let hit =
         |key, mods: &KeyModifiers, scheme| teclado::commands_with_scheme(key, mods, false, scheme);
@@ -800,21 +807,21 @@ fn format_document_keys_reach_the_catalog() {
     );
 }
 
-/// **Find All References reaches the catalog by key**: VS Code's
+/// **Find All References reaches the catalog by key**: a modern editor's
 /// `Shift+Alt+F12`; the vendor's *Find References*, `Shift+Ctrl+Enter`, in
 /// the classic scheme — and neither key does it in the other scheme.
 #[test]
 fn find_references_keys_reach_the_catalog() {
     let classic = *crawrad_actions::KeymapScheme::ALL
         .iter()
-        .find(|s| **s != crawrad_actions::KeymapScheme::VsCode)
+        .find(|s| **s != crawrad_actions::KeymapScheme::Modern)
         .unwrap();
-    let vs = crawrad_actions::KeymapScheme::VsCode;
+    let vs = crawrad_actions::KeymapScheme::Modern;
     let m = |control: bool, shift: bool, alt: bool| KeyModifiers {
-        control,
+        control: control && !APPLE,
+        logo: control && APPLE,
         shift,
         alt,
-        ..Default::default()
     };
     let hit =
         |key, mods: &KeyModifiers, scheme| teclado::commands_with_scheme(key, mods, false, scheme);
@@ -838,17 +845,18 @@ fn find_references_keys_reach_the_catalog() {
 }
 
 /// **Save All reaches the catalog by the classic scheme's key**: the
-/// vendor's `Shift+Ctrl+S`. VS Code's is the chord `Ctrl+K S`, which this
+/// vendor's `Shift+Ctrl+S`. A modern editor's is the chord `Ctrl+K S`, which this
 /// shell does not take, so there `Ctrl+Shift+S` does not save all.
 #[test]
 fn save_all_key_reaches_the_catalog_in_the_classic_scheme() {
     let classic = *crawrad_actions::KeymapScheme::ALL
         .iter()
-        .find(|s| **s != crawrad_actions::KeymapScheme::VsCode)
+        .find(|s| **s != crawrad_actions::KeymapScheme::Modern)
         .unwrap();
-    let vs = crawrad_actions::KeymapScheme::VsCode;
+    let vs = crawrad_actions::KeymapScheme::Modern;
     let ctrl_shift = KeyModifiers {
-        control: true,
+        control: !APPLE,
+        logo: APPLE,
         shift: true,
         ..Default::default()
     };
@@ -858,17 +866,18 @@ fn save_all_key_reaches_the_catalog_in_the_classic_scheme() {
 }
 
 /// **Rename Symbol reaches the catalog by the classic scheme's key**: the
-/// vendor's *Refactor > Rename*, `Shift+Ctrl+E`. In VS Code's scheme its
+/// vendor's *Refactor > Rename*, `Shift+Ctrl+E`. In the Modern scheme its
 /// key is F2 in the code editor (`editor_keys`), so the catalog has none.
 #[test]
 fn rename_symbol_key_reaches_the_catalog_in_the_classic_scheme() {
     let classic = *crawrad_actions::KeymapScheme::ALL
         .iter()
-        .find(|s| **s != crawrad_actions::KeymapScheme::VsCode)
+        .find(|s| **s != crawrad_actions::KeymapScheme::Modern)
         .unwrap();
-    let vs = crawrad_actions::KeymapScheme::VsCode;
+    let vs = crawrad_actions::KeymapScheme::Modern;
     let ctrl_shift = KeyModifiers {
-        control: true,
+        control: !APPLE,
+        logo: APPLE,
         shift: true,
         ..Default::default()
     };
@@ -901,7 +910,8 @@ fn a_key_with_two_owners_runs_the_view_in_front() {
 #[test]
 fn ctrl_alt_d_n_m_open_the_three_note_kinds() {
     let m = KeyModifiers {
-        control: true,
+        control: !APPLE,
+        logo: APPLE,
         alt: true,
         ..Default::default()
     };

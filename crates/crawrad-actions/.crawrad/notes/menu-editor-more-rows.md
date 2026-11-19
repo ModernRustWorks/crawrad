@@ -12,7 +12,7 @@ signature: "pub fn editor_more_rows (ctx : & Context) -> Vec < Row >"
 
 Rows of the More Actions popup menu in the editor tabs corner.
 
-The rows of the More Actions (...) popup menu in the right corner of the editor tabs (VS Code style).
+The rows of the More Actions (...) popup menu in the right corner of the editor tabs (modern-editor style).
 
 # Examples
 

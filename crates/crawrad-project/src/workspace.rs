@@ -44,7 +44,7 @@
 //! They cannot live inside a project directory: a folder list stored inside one of
 //! them disappears with it, and does not exist on first launch — which is precisely
 //! when the IDE needs to know where the user was. Therefore they go to the user
-//! configuration directory (`%APPDATA%\CrawRAD\` on Windows), just like VS Code.
+//! configuration directory (`%APPDATA%\CrawRAD\` on Windows), just like a modern editor.
 //!
 
 pub const QUIT_PERGUNTA: &str = "Save changes before closing?";
@@ -969,7 +969,7 @@ pub const COLOR_FIELDS: [(&str, &str); 15] = [
 pub struct Preferences {
     /// Open welcome screen instead of reopening last folder.
     pub welcome_on_startup: bool,
-    /// Active keymap scheme in the IDE (default `VsCode`, or classic RAD IDE).
+    /// Active keymap scheme in the IDE (default `Modern`, or classic RAD IDE).
     pub keymap_scheme: crawrad_actions::KeymapScheme,
     /// Code editor font size in points (default: 11).
     pub editor_font_size: u32,
@@ -1037,7 +1037,7 @@ impl Default for Preferences {
     fn default() -> Self {
         Self {
             welcome_on_startup: false,
-            keymap_scheme: crawrad_actions::KeymapScheme::VsCode,
+            keymap_scheme: crawrad_actions::KeymapScheme::Modern,
             editor_font_size: 11,
             editor_tab_size: 4,
             editor_line_numbers: true,
@@ -1278,7 +1278,7 @@ pub fn preferences_from_text(text: &str) -> Preferences {
             p.keymap_scheme = if v == crawrad_actions::KeymapScheme::ALL[1].id() {
                 crawrad_actions::KeymapScheme::ALL[1]
             } else {
-                crawrad_actions::KeymapScheme::VsCode
+                crawrad_actions::KeymapScheme::Modern
             };
         } else if c == KEY_EDITOR_FONT_SIZE {
             if let Ok(tam) = v.parse::<u32>()

@@ -32,6 +32,6 @@ let ctx = Context {
     editor_dirty: false,
     text: EditorText::default(),
 };
-let rows = submenu_rows(Menu::View, "Zoom", &ctx, KeymapScheme::VsCode);
+let rows = submenu_rows(Menu::View, "Zoom", &ctx, KeymapScheme::Modern);
 assert!(!rows.is_empty());
 ```

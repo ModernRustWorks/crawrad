@@ -15,9 +15,14 @@ use crawrad_host::word_motion::{
 /// A line of code this IDE actually writes — the one the owner had on screen.
 const LINHA: &str = "        self.edt_nome_.text.clear();";
 
+/// The platform's primary modifier: `Cmd` (logo) on Apple, `Ctrl` elsewhere. Shortcuts
+/// written `Ctrl+...` follow it, so a test that presses one must press the right key.
+const APPLE: bool = cfg!(target_vendor = "apple");
+
 fn ctrl() -> KeyModifiers {
     KeyModifiers {
-        control: true,
+        control: !APPLE,
+        logo: APPLE,
         ..Default::default()
     }
 }
@@ -74,7 +79,7 @@ fn sem_ctrl_a_tecla_nao_e_nossa() {
             "{tecla:?} alone belongs to framework"
         );
     }
-    // Nor `Alt`: in VS Code `Alt+Left` is *navigate back* in
+    // Nor `Alt`: in modern editors `Alt+Left` is *navigate back* in
     // position history, which is an entirely different feature.
     let alt = KeyModifiers {
         alt: true,
@@ -90,7 +95,7 @@ fn sem_ctrl_a_tecla_nao_e_nossa() {
 /// It redid text, under the chord assigned by the catalog to `edit.redo`. The owner tested and
 /// decided:
 ///
-/// > *"Ctrl+Y doesn't do it, but the VS Code standard doesn't either, that's only in [classic] which
+/// > *"Ctrl+Y doesn't do it, but the [modern scheme] standard doesn't either, that's only in [classic] which
 /// > deletes the line. So Ctrl+Y should only work when we have keymap switching
 /// > and select [classic]."*
 ///
@@ -246,7 +251,7 @@ fn o_espaco_a_esquerda_e_pulado_antes_da_palavra() {
     );
 }
 
-/// **`Ctrl+Right` stops at the END of the word — VS Code's asymmetry.**
+/// **`Ctrl+Right` stops at the END of the word — modern editor asymmetry.**
 ///
 /// It is not a whim: it is what makes `Ctrl+Shift+Right` select the entire
 /// word starting from its beginning, rather than selecting up to the start of the
@@ -373,13 +378,14 @@ fn uma_posicao_impossivel_nao_derruba() {
 }
 
 // ---------------------------------------------------------------------------
-// CODE MANIPULATION TESTS (LAYER 1 - VS CODE)
+// CODE MANIPULATION TESTS (LAYER 1 - MODERN SCHEME)
 // ---------------------------------------------------------------------------
 
 #[test]
 fn acordes_de_manipulacao_sao_reconhecidos() {
     let ctrl = KeyModifiers {
-        control: true,
+        control: !APPLE,
+        logo: APPLE,
         ..Default::default()
     };
     let alt = KeyModifiers {
@@ -392,7 +398,8 @@ fn acordes_de_manipulacao_sao_reconhecidos() {
         ..Default::default()
     };
     let ctrl_shift = KeyModifiers {
-        control: true,
+        control: !APPLE,
+        logo: APPLE,
         shift: true,
         ..Default::default()
     };
@@ -452,7 +459,8 @@ fn acordes_de_manipulacao_sao_reconhecidos() {
 #[test]
 fn comando_reconhece_quick_open_goto_e_abrir_nota() {
     let ctrl_p = KeyModifiers {
-        control: true,
+        control: !APPLE,
+        logo: APPLE,
         ..Default::default()
     };
     assert_eq!(
@@ -461,7 +469,8 @@ fn comando_reconhece_quick_open_goto_e_abrir_nota() {
     );
 
     let ctrl_shift_p = KeyModifiers {
-        control: true,
+        control: !APPLE,
+        logo: APPLE,
         shift: true,
         ..Default::default()
     };
@@ -471,13 +480,15 @@ fn comando_reconhece_quick_open_goto_e_abrir_nota() {
     );
 
     let ctrl_g = KeyModifiers {
-        control: true,
+        control: !APPLE,
+        logo: APPLE,
         ..Default::default()
     };
     assert_eq!(comando(KeyCode::KeyG, &ctrl_g), Some(Command::OpenGoto));
 
     let ctrl_shift_n = KeyModifiers {
-        control: true,
+        control: !APPLE,
+        logo: APPLE,
         shift: true,
         ..Default::default()
     };
@@ -487,7 +498,8 @@ fn comando_reconhece_quick_open_goto_e_abrir_nota() {
     );
     // The three kinds of the note popup reach their actions from the editor.
     let ctrl_alt = KeyModifiers {
-        control: true,
+        control: !APPLE,
+        logo: APPLE,
         alt: true,
         ..Default::default()
     };
@@ -500,7 +512,8 @@ fn comando_reconhece_quick_open_goto_e_abrir_nota() {
     }
 
     let ctrl_shift_lbracket = KeyModifiers {
-        control: true,
+        control: !APPLE,
+        logo: APPLE,
         shift: true,
         ..Default::default()
     };
@@ -510,7 +523,8 @@ fn comando_reconhece_quick_open_goto_e_abrir_nota() {
     );
 
     let ctrl_shift_rbracket = KeyModifiers {
-        control: true,
+        control: !APPLE,
+        logo: APPLE,
         shift: true,
         ..Default::default()
     };
@@ -520,7 +534,8 @@ fn comando_reconhece_quick_open_goto_e_abrir_nota() {
     );
 
     let ctrl_space = KeyModifiers {
-        control: true,
+        control: !APPLE,
+        logo: APPLE,
         ..Default::default()
     };
     assert_eq!(
@@ -535,9 +550,10 @@ fn comando_reconhece_quick_open_goto_e_abrir_nota() {
 }
 
 #[test]
-fn command_with_scheme_respects_classic_and_vscode() {
+fn command_with_scheme_respects_classic_and_modern() {
     let ctrl = KeyModifiers {
-        control: true,
+        control: !APPLE,
+        logo: APPLE,
         ..Default::default()
     };
     let alt = KeyModifiers {
@@ -545,12 +561,13 @@ fn command_with_scheme_respects_classic_and_vscode() {
         ..Default::default()
     };
     let ctrl_shift = KeyModifiers {
-        control: true,
+        control: !APPLE,
+        logo: APPLE,
         shift: true,
         ..Default::default()
     };
 
-    // In VS Code scheme:
+    // In Modern scheme:
     // - Ctrl+Y is NOT DeleteLine (remains reserved for Redo / catalog)
     // - Ctrl+Shift+K is DeleteLine
     // - Ctrl+H is Replace
@@ -558,31 +575,31 @@ fn command_with_scheme_respects_classic_and_vscode() {
     // - Ctrl+P is Quick Open
     // - Ctrl+/ is ToggleComment
     assert_eq!(
-        command_with_scheme(KeyCode::KeyY, &ctrl, crawrad_actions::KeymapScheme::VsCode),
+        command_with_scheme(KeyCode::KeyY, &ctrl, crawrad_actions::KeymapScheme::Modern),
         None
     );
     assert_eq!(
         command_with_scheme(
             KeyCode::KeyK,
             &ctrl_shift,
-            crawrad_actions::KeymapScheme::VsCode
+            crawrad_actions::KeymapScheme::Modern
         ),
         Some(Command::DeleteLine)
     );
     assert_eq!(
-        command_with_scheme(KeyCode::KeyH, &ctrl, crawrad_actions::KeymapScheme::VsCode),
+        command_with_scheme(KeyCode::KeyH, &ctrl, crawrad_actions::KeymapScheme::Modern),
         Some(Command::OpenFind(true))
     );
     assert_eq!(
-        command_with_scheme(KeyCode::KeyG, &ctrl, crawrad_actions::KeymapScheme::VsCode),
+        command_with_scheme(KeyCode::KeyG, &ctrl, crawrad_actions::KeymapScheme::Modern),
         Some(Command::OpenGoto)
     );
     assert_eq!(
-        command_with_scheme(KeyCode::KeyP, &ctrl, crawrad_actions::KeymapScheme::VsCode),
+        command_with_scheme(KeyCode::KeyP, &ctrl, crawrad_actions::KeymapScheme::Modern),
         Some(Command::RunAction("file.quick_open"))
     );
     assert_eq!(
-        command_with_scheme(KeyCode::Slash, &ctrl, crawrad_actions::KeymapScheme::VsCode),
+        command_with_scheme(KeyCode::Slash, &ctrl, crawrad_actions::KeymapScheme::Modern),
         Some(Command::ToggleComment)
     );
 
@@ -660,32 +677,33 @@ fn digits_set_and_go_to_numbered_bookmarks() {
     }
 }
 
-/// The scheme that is not VS Code's, named without its vendor (owner's rule).
+/// The scheme that is not Modern, named without its vendor (owner's rule).
 fn classic() -> crawrad_actions::KeymapScheme {
     *crawrad_actions::KeymapScheme::ALL
         .iter()
-        .find(|s| **s != crawrad_actions::KeymapScheme::VsCode)
+        .find(|s| **s != crawrad_actions::KeymapScheme::Modern)
         .unwrap()
 }
 
 /// **Classic scheme: `Alt+Up` is the vendor's Find Declaration, so
 /// the editor leaves it to the catalog and moves lines on `Ctrl+Alt+Up`.**
-/// VS Code's `Alt+Up` still moves lines.
+/// Modern `Alt+Up` still moves lines.
 #[test]
-fn alt_up_moves_lines_only_in_vs_code() {
-    use crawrad_actions::KeymapScheme::VsCode;
+fn alt_up_moves_lines_only_in_modern() {
+    use crawrad_actions::KeymapScheme::Modern;
     let alt = KeyModifiers {
         alt: true,
         ..Default::default()
     };
     let ctrl_alt = KeyModifiers {
         alt: true,
-        control: true,
+        control: !APPLE,
+        logo: APPLE,
         ..Default::default()
     };
     let up = KeyCode::ArrowUp;
     assert_eq!(
-        command_with_scheme(up, &alt, VsCode),
+        command_with_scheme(up, &alt, Modern),
         Some(Command::MoveLines(LineDirection::Up))
     );
     assert_eq!(command_with_scheme(up, &alt, classic()), None);
@@ -701,22 +719,24 @@ fn alt_up_moves_lines_only_in_vs_code() {
 
 /// **Classic `Ctrl+D` is the vendor's Format Source**: the editor
 /// leaves it to the catalog and finds the next occurrence on `Ctrl+Shift+D`.
-/// VS Code's `Ctrl+D` is still the next occurrence.
+/// Modern `Ctrl+D` is still the next occurrence.
 #[test]
 fn ctrl_d_formats_only_in_the_classic_scheme() {
-    use crawrad_actions::KeymapScheme::VsCode;
+    use crawrad_actions::KeymapScheme::Modern;
     let ctrl = KeyModifiers {
-        control: true,
+        control: !APPLE,
+        logo: APPLE,
         ..Default::default()
     };
     let ctrl_shift = KeyModifiers {
-        control: true,
+        control: !APPLE,
+        logo: APPLE,
         shift: true,
         ..Default::default()
     };
     let d = KeyCode::KeyD;
     assert_eq!(
-        command_with_scheme(d, &ctrl, VsCode),
+        command_with_scheme(d, &ctrl, Modern),
         Some(Command::NextOccurrence)
     );
     assert_eq!(command_with_scheme(d, &ctrl, classic()), None);
@@ -726,19 +746,19 @@ fn ctrl_d_formats_only_in_the_classic_scheme() {
     );
 }
 
-/// **VS Code's F2 renames the symbol only from the code editor**:
+/// **Modern F2 renames the symbol only from the code editor**:
 /// the editor takes it before the catalog, so in the Explorer F2 still
 /// renames a file. The classic scheme leaves F2 alone in the editor.
 #[test]
-fn f2_in_the_code_editor_is_rename_symbol_only_in_vs_code() {
+fn f2_in_the_code_editor_is_rename_symbol_only_in_modern() {
     let none = KeyModifiers::default();
-    let vs = crawrad_actions::KeymapScheme::VsCode;
+    let modern = crawrad_actions::KeymapScheme::Modern;
     let classic = *crawrad_actions::KeymapScheme::ALL
         .iter()
-        .find(|s| **s != vs)
+        .find(|s| **s != modern)
         .unwrap();
     assert!(matches!(
-        command_with_scheme(KeyCode::F2, &none, vs),
+        command_with_scheme(KeyCode::F2, &none, modern),
         Some(Command::RenameSymbol)
     ));
     assert!(command_with_scheme(KeyCode::F2, &none, classic).is_none());
@@ -746,5 +766,5 @@ fn f2_in_the_code_editor_is_rename_symbol_only_in_vs_code() {
         shift: true,
         ..Default::default()
     };
-    assert!(command_with_scheme(KeyCode::F2, &shift, vs).is_none());
+    assert!(command_with_scheme(KeyCode::F2, &shift, modern).is_none());
 }

@@ -1,14 +1,13 @@
-//! **THE EDITOR KEYBOARD** — the VS Code navigation the framework leaves dead.
+//! **THE EDITOR KEYBOARD** — the modern editor navigation the framework leaves dead.
 //!
-//! The owner asked for the VS Code hand in the editor (Ctrl+arrows, Home/End,
-//! the usual chords), the same choice [ADR 0011] made for the IDE's chords.
+//! The owner asked for the modern editor convention in the editor (Ctrl+arrows, Home/End,
+//! the usual chords), the same choice ADR 0011 made for the IDE's chords.
 //! The framework's `CodeEditor` has EMPTY `Ctrl`+arrow arms
 //! (`makepad-code-editor-1.0.0/src/code_editor.rs:751-776`) and no
 //! `Ctrl+Home`/`Ctrl+End` arm (`:800-810`): the key is consumed and the caret
 //! does not move. No fork is needed: the target position is arithmetic over the
 //! lines, applied with `CodeSession::set_selection` / `move_to` (the latter
 //! keeps the anchor, which is `Shift`), so every rule here has a unit test.
-//!
 
 use makepad_widgets::{Cx, Event, KeyCode, KeyModifiers, LiveId, WidgetRef, id};
 
@@ -70,7 +69,7 @@ impl super::IdeApp {
             return true;
         }
         // Esc closes the parameter card — after the completion list,
-        // which Esc closes first, as VS Code's.
+        // which Esc closes first, as in modern editors.
         if ke.key_code == KeyCode::Escape && !self.complete.aberto && self.close_signature(cx) {
             return true;
         }

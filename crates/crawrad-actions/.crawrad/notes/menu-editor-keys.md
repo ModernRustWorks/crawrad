@@ -7,13 +7,13 @@ author:
 created: 
 title: "EDITOR_KEYS"
 tags: []
-signature: "pub const EDITOR_KEYS : & [(& str , crate :: KeymapScheme , & str)] = & [(\"editor.rename_symbol\" , crate :: KeymapScheme :: VsCode , \"F2\")]"
+signature: "pub const EDITOR_KEYS : & [(& str , crate :: KeymapScheme , & str)] = & [(\"editor.rename_symbol\" , crate :: KeymapScheme :: Modern , \"F2\")]"
 ---
 
 Special keys handled directly by the code editor mapped by keymap scheme.
 
 Keys the code editor takes itself, by scheme, that the catalog cannot
-carry because another action owns the key elsewhere: VS Code's F2 renames
+carry because another action owns the key elsewhere: Modern F2 renames
 a symbol in the editor and a file in the Explorer (#258). The editor's
 menu shows them; `editor/keys.rs` maps them.
 

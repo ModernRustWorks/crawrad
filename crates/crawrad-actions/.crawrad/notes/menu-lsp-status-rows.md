@@ -12,7 +12,7 @@ signature: "pub fn lsp_status_rows (version : Option < String > , ctx : & Contex
 
 Rows of the rust-analyzer status bar menu.
 
-rust-analyzer's menu, as VS Code's: its version on top, then what can be
+rust-analyzer's menu, as a modern editor's: its version on top, then what can be
 done to the server — catalogue actions, so an agent has the same doors.
 
 # Examples

@@ -125,10 +125,8 @@ fn test_e2e_all_8_templates_generation_and_layout() {
                 assert!(proj_dir.join("src").join("form_main.rs").exists());
                 assert!(!proj_dir.join("src").join("app.rs").exists());
                 // The page is written by the web Run (W1); the manifest marks the project.
-                assert!(crawrad_project::web_run::is_web_project(
-                    proj_dir.parent().expect("workspace"),
-                    proj_name
-                ));
+                // Read from the member's own manifest: the mark lives there, no cargo needed.
+                assert!(crawrad_project::web_run::is_web_member(&proj_dir));
             }
             "mobile_app" => {
                 assert!(proj_dir.join("src").join("main.rs").exists());

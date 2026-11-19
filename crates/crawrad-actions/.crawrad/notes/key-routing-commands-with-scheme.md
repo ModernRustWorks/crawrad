@@ -29,6 +29,6 @@ let press = Press {
     alt: false,
     logo: false,
 };
-let cmds = commands_with_scheme(&press, false, KeymapScheme::VsCode);
+let cmds = commands_with_scheme(&press, false, KeymapScheme::Modern);
 assert!(!cmds.is_empty());
 ```

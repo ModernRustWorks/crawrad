@@ -326,7 +326,7 @@ live_design! {
                     }
                 }
 
-                // Floating Autocomplete / IntelliSense in classic Code Insight / VS Code style
+                // Floating Autocomplete / IntelliSense in classic Code Insight / modern-editor style
                 completion_box = <CrawradCompletionBox> {
                     margin: { left: 40.0, top: 40.0 },
                     flow: Right,

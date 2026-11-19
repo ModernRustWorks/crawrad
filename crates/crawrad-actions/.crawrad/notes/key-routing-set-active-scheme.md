@@ -20,5 +20,5 @@ use crawrad_actions::KeymapScheme;
 
 set_active_scheme(KeymapScheme::Classic);
 assert_eq!(active_scheme(), KeymapScheme::Classic);
-set_active_scheme(KeymapScheme::VsCode);
+set_active_scheme(KeymapScheme::Modern);
 ```

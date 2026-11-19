@@ -16,7 +16,7 @@ signature: "pub struct Counters"
 
 Until 17/09/2026 this was a `resumo()` that returned
 `"no selection    19 nodes    rev 0"` — three facts pasted together with spaces,
-for a single `Label`. The owner asked for VS Code's rich bar, where each fact is
+for a single `Label`. The owner asked for a modern editor's rich bar, where each fact is
 a CELL with its own outline, and separating them back would require searching
 for a space inside a text where a component name can contain anything.
 

@@ -22,7 +22,7 @@ clone` on Windows comes out like this.
 Nothing is saved: this shell does not edit code, and the file on disk remains
 with the line ending its owner chose — which generation, incidentally, now
 respects (`crawrad_codegen::rxp::marca_em`). It is the same choice every editor
-makes: VS Code shows CRLF without drawing `\r`, and states what it is in the status bar.
+makes: a modern editor shows CRLF without drawing `\r`, and states what it is in the status bar.
 
 # Examples
 

@@ -1,4 +1,4 @@
-//! The list follows what is typed, as VS Code's.
+//! The list follows what is typed, as a modern editor's.
 
 use super::{Opening, typed_trigger};
 use super::{
@@ -128,7 +128,7 @@ fn the_servers_order_stands_inside_a_class() {
         ranked(&["leak", "len", "lex"], "le"),
         ["leak", "len", "lex"]
     );
-    // ...except the exact match, which comes first (VS Code does the same).
+    // ...except the exact match, which comes first (a modern editor does the same).
     assert_eq!(ranked(&["leak", "len", "le"], "le"), ["le", "leak", "len"]);
 }
 

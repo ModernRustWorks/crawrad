@@ -19,5 +19,5 @@ use crawrad_actions::key_routing::active_scheme;
 use crawrad_actions::KeymapScheme;
 
 let scheme = active_scheme();
-assert!(scheme == KeymapScheme::VsCode || scheme == KeymapScheme::Classic);
+assert!(scheme == KeymapScheme::Modern || scheme == KeymapScheme::Classic);
 ```

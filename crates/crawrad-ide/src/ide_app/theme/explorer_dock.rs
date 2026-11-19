@@ -459,7 +459,7 @@ live_design! {
                     let active = max(self.hover, self.drag);
                     let dt_color = mix(self.dot_color, self.dot_color_active, active);
 
-                    // Three discreet dots in the middle of the splitter (VS Code-style resize grip)
+                    // Three discreet dots in the middle of the splitter (modern-editor resize grip)
                     if self.is_vertical > 0.5 {
                         // Vertical splitter between columns (is_vertical = 1.0 in Makepad): 3 dots aligned vertically
                         sdf.circle(mid_x, mid_y - 8.0, 1.8);
@@ -496,7 +496,7 @@ live_design! {
         }
 
         // The rounded corner that `Dock` draws over edges: disabled with zero border_radius
-        // to keep the entire IDE with 100% straight and flat corners (VS Code / a classic RAD IDE style).
+        // to keep the entire IDE with 100% straight and flat corners (a modern editor / a classic RAD IDE style).
         round_corner: {
             border_radius: 0.0
             fn pixel(self) -> vec4 {

@@ -2,6 +2,32 @@
 
 Notable changes to CrawRAD. Each entry links the issue that tracks it.
 
+## 0.1.0 — first public release (beta)
+
+CrawRAD's first public release: a visual RAD IDE for Rust. Design a form, write
+its events, and get an ordinary Rust project you own. The full list is in
+[ROADMAP.md](ROADMAP.md) under **Today**. The highlights:
+
+- **Visual designer.**
+  - Form Designer and Object Inspector with typed property editors.
+  - Visual form inheritance.
+  - A form checker with one-click fixes.
+  - The Sizes and Translations tabs.
+- **51 components.** A Data Grid bound to a real table at design time, a Dataset on CrawRAD's own data engine, and your own components with no restart.
+- **Code editor.**
+  - rust-analyzer: completion, hover, code actions and diagnostics.
+  - Code templates.
+  - Local file history with diff and restore.
+  - Notes kept outside the source.
+- **Build, run and test.**
+  - A build window with a real Cancel.
+  - Desktop and WebAssembly runs.
+  - Your app's panics in the Problems panel.
+  - A Tests panel.
+  - Seven project templates.
+- **AI and automation.** An MCP server that drives the whole IDE, and a chat that sees the form and the selection.
+- **The user manual:** [isaquepinheiro.com.br/crawrad/manual](https://isaquepinheiro.com.br/crawrad/manual/).
+
 ## Planned — after the beta
 
 These features are decided and tracked, and they are scheduled for after the beta.

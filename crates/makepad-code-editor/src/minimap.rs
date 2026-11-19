@@ -121,7 +121,7 @@ impl Widget for CrawradMinimap {
         // 3. Code lines in micro-rendering
         let total_lines = self.lines.len().max(self.total_lines).max(1);
         if total_lines > 0 {
-            // In VS Code, each line occupies about 2.0px in the minimap
+            // In a modern editor, each line occupies about 2.0px in the minimap
             let line_s = 2.0;
             let line_h = 1.3;
             let total_minimap_h = total_lines as f64 * line_s;
@@ -177,7 +177,7 @@ impl Widget for CrawradMinimap {
                             size: dvec2(final_w, line_h),
                         };
 
-                        // Soft and refined palette with transparency identical to VS Code
+                        // Soft and refined palette with transparency identical to a modern editor
                         self.draw_code.color = match token.kind {
                             TokenKind::Comment => vec4(0.38, 0.58, 0.35, 0.70),
                             TokenKind::Keyword => vec4(0.75, 0.48, 0.68, 0.85),

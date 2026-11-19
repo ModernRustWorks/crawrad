@@ -14,7 +14,7 @@ Finds the byte index where `Ctrl+Left` stops on the current line.
 
 Where `Ctrl+Left` stops, starting from `byte` on this line. `None` means
 there is nothing left on this line — the caller crosses to the end of the
-line above, as VS Code does. Spaces are skipped first, so the start of an
+line above, as a modern editor does. Spaces are skipped first, so the start of an
 indentation is one step, not one per level.
 
 # Examples

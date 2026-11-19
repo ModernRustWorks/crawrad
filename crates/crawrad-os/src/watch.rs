@@ -48,6 +48,8 @@ pub struct ProjectWatcher {
     _watcher: RecommendedWatcher,
     rx: Receiver<PathBuf>,
     root: PathBuf,
+    // The system may report through the real path: on macOS `/var/...` arrives as `/private/var/...`.
+    real_root: Option<PathBuf>,
 }
 
 impl ProjectWatcher {
@@ -83,6 +85,7 @@ impl ProjectWatcher {
             _watcher: watcher,
             rx,
             root: root.to_path_buf(),
+            real_root: std::fs::canonicalize(root).ok(),
         })
     }
 
@@ -94,7 +97,8 @@ impl ProjectWatcher {
     pub fn drain(&mut self) -> Vec<PathBuf> {
         let mut paths = Vec::new();
         while let Ok(path) = self.rx.try_recv() {
-            if !ignored(&self.root, &path) {
+            let under_real = self.real_root.as_deref().is_some_and(|r| ignored(r, &path));
+            if !ignored(&self.root, &path) && !under_real {
                 paths.push(path);
             }
         }

@@ -1,8 +1,8 @@
 //! **The completion list while the user types** — pure, no window.
 //!
-//! The owner, on 01/10/2026, comparing with VS Code: *"if I start typing
+//! The owner, on 01/10/2026, comparing with a modern editor: *"if I start typing
 //! 'tab' it doesn't do any search, much less filter which would be the TOP feature"*.
-//! VS Code narrows the open list with every key: `sp` keeps `split`,
+//! A modern editor narrows the open list with every key: `sp` keeps `split`,
 //! `splitlines` (start with it) and then `swapcase`, `strip` (the letters in
 //! order). This module decides that, and where a list starts and ends.
 
@@ -75,7 +75,7 @@ pub fn match_score(label: &str, query: &str) -> Option<u32> {
     let query_l = query.to_lowercase();
     // Inside one class the caller's order stands: it is the server's
     // relevance (`len` before `PartialOrd::le` for `le`).
-    // Exactly what was typed comes first, as in VS Code (`le` -> `le`).
+    // Exactly what was typed comes first, as in a modern editor (`le` -> `le`).
     if label_l == query_l {
         return Some(4000);
     }

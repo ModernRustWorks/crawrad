@@ -297,7 +297,7 @@ pub fn draw_indent_guides(
                         // The ACTIVE scope closes an "L" at its header: an
                         // underline from the guide to the `{`, drawn on the
                         // bottom edge of the header line, and the vertical
-                        // guide starts below it (VS Code's horizontal
+                        // guide starts below it (a modern editor's horizontal
                         // bracket-pair guide; owner's mockup, 30/09/2026).
                         if is_active && line_index == b.start_line {
                             let (x0, y0) = line.grid_to_normalized_position(0, b.indent_col);

@@ -131,7 +131,7 @@ pub CrawradMainUi = <Window> {
                     }
 
                     // The options bar and left panel are joined
-                    // without an internal divider (VS Code style, ADR 0014 / Amendment 10).
+                    // without an internal divider (modern-editor style, ADR 0014 / Amendment 10).
                     sep_rail = <View> {
                         width: 0.0, height: 0.0,
                         visible: false

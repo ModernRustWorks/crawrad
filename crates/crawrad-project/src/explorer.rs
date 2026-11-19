@@ -366,7 +366,7 @@ pub fn rows(view: &View) -> Vec<Row> {
     if !legend.is_empty() {
         // THE HEADER ENTERS EVEN WHEN CLOSED, and that is what separates "collapsed"
         // from "deleted": closed, the section remains on screen as a single line, and
-        // whoever never saw the badges has where to ask. It is what VS Code's Outline does.
+        // whoever never saw the badges has where to ask. It is what a modern editor's Outline does.
         out.push(Box::new(Section::new(
             CAPTION_LEGEND,
             view.legend_open,
@@ -381,7 +381,7 @@ pub fn rows(view: &View) -> Vec<Row> {
         }
     }
 
-    // Additional card sections in VS Code style (Ref 29)
+    // Additional card sections in the modern-editor style (Ref 29)
     out.push(Box::new(Section::new(
         CAPTION_OUTLINE,
         view.outline_open,

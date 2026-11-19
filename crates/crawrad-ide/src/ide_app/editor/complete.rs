@@ -174,7 +174,7 @@ impl IdeApp {
         crawrad_insight::component_items(form, designer.as_deref(), base)
     }
 
-    /// After every edit: the open list follows what is typed, as VS Code's —
+    /// After every edit: the open list follows what is typed, as a modern editor's —
     /// narrowed with each key, closed when the caret leaves the name; a `.`
     /// after a name opens a new one by itself.
     pub(crate) fn completar_acompanha_digitacao(&mut self, cx: &mut Cx) {
@@ -305,7 +305,7 @@ impl IdeApp {
         self.ui.redraw(cx);
     }
 
-    /// Draws the floating autocomplete popup directly below the cursor (classic RAD IDEs / VS Code).
+    /// Draws the floating autocomplete popup directly below the cursor (classic RAD IDEs / a modern editor).
     pub(crate) fn draw_autocomplete(&mut self, cx: &mut Cx) {
         let code_container = self.painel(Panel::Design).widget(id!(code_container));
         let comp_box = code_container.view(id!(completion_box));

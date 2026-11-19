@@ -13,7 +13,7 @@ signature: "pub fn codicon_name (self) -> & 'static str"
 The name of the drawing in Codicons.
 
 The name of the drawing in Codicons — what the `post` table of the file
-calls it, and what one searches for in the VS Code catalogue.
+calls it, and what one searches for in the Codicons catalogue.
 
 It is here so the divergence test can check the NAME as well as the code
 point: two tables that agree on `\u{eb4b}` while disagreeing on what it

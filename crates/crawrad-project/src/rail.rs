@@ -5,7 +5,7 @@
 //!
 //! It used to be the switch of a nailed-down region: one destination at a
 //! time filled `left_dock`, and `IdeApp::mostrar_doca` flipped the visibility
-//! of three views. [ADR 0014, Emenda 9] took the region's owner away — every
+//! of three views. ADR 0014 (Amendment 9) took the region's owner away — every
 //! panel is a dockable tab now, and the rail is what **brings a panel back
 //! into view**, wherever the user has left it.
 //!
@@ -47,7 +47,6 @@
 //! off the egui rail (`main.rs:294-298`): *"every rail item is a panel, and
 //! they all talk about what is open. `Settings` was here and left: it is about
 //! the IDE, not about the form, and it became a window."*
-//!
 
 use crawrad_actions::Panel;
 

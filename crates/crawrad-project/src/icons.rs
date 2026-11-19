@@ -143,11 +143,11 @@ pub enum Chrome {
     /// by whoever adds the next — and the drawing never changed: it is
     /// Codicons `close` all three times.
     Close,
-    /// **An editor tab with unsaved work** — the dot VS Code puts where the
+    /// **An editor tab with unsaved work** — the dot a modern editor puts where the
     /// `X` is.
     ///
     /// Here it sits BESIDE the name instead of replacing the `X`, and the
-    /// difference is measured on this shell and not on that one: VS Code can
+    /// difference is measured on this shell and not on that one: a modern editor can
     /// swap the two because it brings the `X` back when the pointer is over
     /// the tab, and nothing in this strip reacts to hover yet. Swapping now
     /// would hide the close button of exactly the tab you most need to close.

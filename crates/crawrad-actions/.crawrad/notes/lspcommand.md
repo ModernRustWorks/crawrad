@@ -13,7 +13,7 @@ signature: "pub enum LspCommand"
 Requests sent to the language server from the status bar menu.
 
 The language server (rust-analyzer), from the status bar's menu, as in
-VS Code. The action only asks; the shell owns the server.
+a modern editor. The action only asks; the shell owns the server.
 
 # Examples
 
