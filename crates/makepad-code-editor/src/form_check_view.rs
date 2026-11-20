@@ -305,6 +305,14 @@ impl FormCheckViewRef {
     }
 
     pub fn action(&self, actions: &Actions) -> FormCheckAction {
+        // The view captures its buttons' actions and re-emits one of its own (see
+        // `handle_event`): a mouse click only ever reaches the caller as that action.
+        let own = actions
+            .find_widget_action(self.widget_uid())
+            .cast::<FormCheckAction>();
+        if own != FormCheckAction::None {
+            return own;
+        }
         self.borrow_mut()
             .map_or(FormCheckAction::None, |mut inner| inner.action(actions))
     }

@@ -1,6 +1,6 @@
 [package]
 name = "crawrad-ide"
-version = "0.1.0"
+version = "0.1.1"
 description = "The CrawRAD IDE: a Makepad shell hosting the native design surface"
 edition.workspace = true
 license.workspace = true

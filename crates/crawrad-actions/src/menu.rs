@@ -488,9 +488,7 @@ pub fn panel_rows(panel: Panel, ctx: &Context) -> Vec<Row> {
 #[note("menu-placeholder-note")]
 pub fn placeholder_note(label: &str) -> Option<&'static str> {
     Some(match label {
-        "Check for Updates..." => {
-            "CrawRAD v0.1.0-alpha: All tools and dependencies are up to date."
-        }
+        "Check for Updates..." => "CrawRAD: all tools and dependencies are up to date.",
         "Profiles" => "Active profile: Default (Developer / Full Workspace)",
         "\u{2713} Settings Sync is On" => "Settings Sync: on, stored locally in the project",
         "Enable Preview Editors" => "Preview Editors: enabled",

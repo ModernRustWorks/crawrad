@@ -348,6 +348,14 @@ impl EnvironmentCheckViewRef {
     }
 
     pub fn action(&self, actions: &Actions) -> EnvironmentViewAction {
+        // The view captures its buttons' actions and re-emits one of its own (see
+        // `handle_event`): a mouse click only ever reaches the caller as that action.
+        let own = actions
+            .find_widget_action(self.widget_uid())
+            .cast::<EnvironmentViewAction>();
+        if own != EnvironmentViewAction::None {
+            return own;
+        }
         self.borrow_mut()
             .map_or(EnvironmentViewAction::None, |mut inner| {
                 inner.action(actions)
