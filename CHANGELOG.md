@@ -2,6 +2,12 @@
 
 Notable changes to CrawRAD. Each entry links the issue that tracks it.
 
+## 0.1.1 — fixes
+
+- **First start:** the buttons of the Environment Check (install, cancel) answer the mouse again — in 0.1.0 they ignored clicks, so the check could not be completed. The same fix reaches the Form Check and Notes dialogs.
+- **macOS:** the file watcher ignores `target/` also under the real path of a temporary or symlinked folder (`/private/var/...`), so build output no longer floods the IDE.
+- **Keymap:** the default scheme is "Modern" everywhere, and keyboard shortcuts use the platform's primary key (Cmd on macOS).
+
 ## 0.1.0 — first public release (beta)
 
 CrawRAD's first public release: a visual RAD IDE for Rust. Design a form, write
