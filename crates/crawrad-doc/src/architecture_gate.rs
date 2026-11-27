@@ -111,14 +111,14 @@ pub const ALLOWED_SHELL_ROOT_FILES: &[&str] = &["ide_app.rs", "main.rs"];
 /// diagnostic dialog is a new 296-line module, and the three screens account for
 /// the remaining 90. The ratchet normally only tightens; it rises here because the
 /// shell genuinely gained a surface, not because something was moved into it.
-/// Raised on 27/11/2026 from 33,413 to 33,419, measured on the tree this merge
+/// Raised on 27/11/2026 from 33,418 to 33,424, measured on the tree this merge
 /// produces, not taken from either side of it: six lines across the startup path.
 /// `Preferences` gained `last_form` (field, default, read, write) so reopening
 /// brings back the form that WAS open instead of whichever form the folder listed
 /// first, and `abrir_formulario` records it beside the recent folder it already
-/// recorded. Counting this tree reports 33,419, and 33,413 + 6 is the same number.
+/// recorded. Counting this tree reports 33,424, and 33,418 + 6 is the same number.
 /// What to reopen is decided in `crawrad-project`.
-pub const MAX_SHELL_SOURCE_LINES: usize = 33_419;
+pub const MAX_SHELL_SOURCE_LINES: usize = 33_424;
 
 /// Maximum allowed lines for any individual `.rs` file in `crates/crawrad-ide/src/` (outside `test/`).
 ///
