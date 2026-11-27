@@ -721,3 +721,57 @@ fn test_slint_generator_emits_graphic_components() {
     assert!(designer_file.conteudo.contains("pub struct PaintBox"));
     assert!(designer_file.conteudo.contains("pub struct Bevel"));
 }
+
+#[test]
+fn test_slint_generator_emits_timer_and_dialogs() {
+    let mut doc = Document::new("FormSystem", "Form");
+    {
+        let form = doc.node_mut("FormSystem").unwrap();
+        form.set_rect(Rect::new(0.0, 0.0, 800.0, 600.0));
+        form.set_name("FormSystem");
+        form.set_text("System Components");
+    }
+
+    let mut tmr = Node::new("tmr_tick", "Timer");
+    tmr.set_name("tmr_tick");
+    tmr.props
+        .insert("interval".to_string(), crawrad_ir::Value::Int(500));
+    tmr.events
+        .insert("on_timer".to_string(), "tmr_tick_timer".to_string());
+    let _ = doc.add_child("FormSystem", tmr);
+
+    let mut dlg_open = Node::new("dlg_open", "OpenDialog");
+    dlg_open.set_name("dlg_open");
+    let _ = doc.add_child("FormSystem", dlg_open);
+
+    let mut dlg_save = Node::new("dlg_save", "SaveDialog");
+    dlg_save.set_name("dlg_save");
+    let _ = doc.add_child("FormSystem", dlg_save);
+
+    let mut dlg_msg = Node::new("dlg_msg", "MessageDialog");
+    dlg_msg.set_name("dlg_msg");
+    let _ = doc.add_child("FormSystem", dlg_msg);
+
+    let generator = GeradorSlint;
+    let files = generator
+        .gerar(&doc, "my_app", &crawrad_registry::Registry::builtin())
+        .expect("must generate timer and dialogs successfully");
+
+    let designer_file = files
+        .iter()
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormSystem.designer.rs")
+        .unwrap();
+    assert!(designer_file.conteudo.contains("pub tmr_tick: Timer,"));
+    assert!(designer_file.conteudo.contains("pub dlg_open: OpenDialog,"));
+    assert!(designer_file.conteudo.contains("pub dlg_save: SaveDialog,"));
+    assert!(
+        designer_file
+            .conteudo
+            .contains("pub dlg_msg: MessageDialog,")
+    );
+    assert!(designer_file.conteudo.contains("pub struct Timer"));
+    assert!(designer_file.conteudo.contains("pub struct OpenDialog"));
+    assert!(designer_file.conteudo.contains("pub struct SaveDialog"));
+    assert!(designer_file.conteudo.contains("pub struct MessageDialog"));
+    assert!(designer_file.conteudo.contains("f.form.tmr_tick_timer();"));
+}

@@ -13,15 +13,19 @@ pub mod label;
 pub mod link_label;
 pub mod list_box;
 pub mod memo;
+pub mod message_dialog;
+pub mod open_dialog;
 pub mod page_control;
 pub mod paint_box;
 pub mod panel;
 pub mod progress_bar;
 pub mod radio_button;
 pub mod radio_group;
+pub mod save_dialog;
 pub mod shape;
 pub mod speed_button;
 pub mod spin_edit;
+pub mod timer;
 pub mod toggle;
 pub mod track_bar;
 pub mod util;
@@ -56,6 +60,10 @@ static REGISTRY: &[&'static dyn SlintComponentCodegen] = &[
     &shape::ShapeCodegen,
     &paint_box::PaintBoxCodegen,
     &bevel::BevelCodegen,
+    &timer::TimerCodegen,
+    &open_dialog::OpenDialogCodegen,
+    &save_dialog::SaveDialogCodegen,
+    &message_dialog::MessageDialogCodegen,
 ];
 
 pub fn for_class(class: &str) -> Option<&'static dyn SlintComponentCodegen> {
