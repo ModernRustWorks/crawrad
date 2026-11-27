@@ -40,3 +40,8 @@ exemplos/
 
 # Snapshot the gate writes so the Linux container can measure the repository.
 .gate-tracked
+
+# Python bytecode and test caches, from the build and packaging tools.
+__pycache__/
+*.py[cod]
+.pytest_cache/
