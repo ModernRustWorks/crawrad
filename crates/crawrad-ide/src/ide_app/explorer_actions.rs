@@ -189,9 +189,14 @@ impl IdeApp {
         let pasta = self.explorer_target_folder(p);
         let reg = crawrad_registry::Registry::builtin();
         match crawrad_project::creation::create_form_file(&pasta, &reg) {
-            Ok(destino) => {
-                self.status = Some(format!("Created form {}", destino.display()));
-                self.abrir_formulario(cx, &destino);
+            Ok(criado) => {
+                // The warning rides along: the form exists, and saying what did not
+                // come with it beats a bar that claims success over half a result.
+                self.status = Some(match criado.warning {
+                    Some(ref why) => format!("Created form {} — {why}", criado.path.display()),
+                    None => format!("Created form {}", criado.path.display()),
+                });
+                self.abrir_formulario(cx, &criado.path);
             }
             Err(why) => self.status = Some(why),
         }
