@@ -18,6 +18,24 @@ pub fn escape_slint_string(s: &str) -> String {
     s.replace('\\', "\\\\").replace('"', "\\\"")
 }
 
+/// Extracts string items from a property value supporting both string lists and item maps.
+pub fn extract_string_items(v: &Value) -> Vec<String> {
+    match v {
+        Value::List(items) => items
+            .iter()
+            .filter_map(|it| match it {
+                Value::Str(s) => Some(s.clone()),
+                Value::Map(m) => match m.get("text") {
+                    Some(Value::Str(s)) => Some(s.clone()),
+                    _ => None,
+                },
+                _ => None,
+            })
+            .collect(),
+        _ => Vec::new(),
+    }
+}
+
 pub fn common_control_fields() -> Vec<String> {
     vec![FIELD_VISIBLE.to_string(), FIELD_ENABLED.to_string()]
 }

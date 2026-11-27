@@ -231,3 +231,163 @@ fn test_slint_generator_emits_inputs_and_toggles() {
             .contains("window.on_tgl_dark_toggled")
     );
 }
+
+#[test]
+fn test_slint_generator_emits_lists_and_numerical_controls() {
+    let mut doc = Document::new("FormLists", "Form");
+    {
+        let form = doc.node_mut("FormLists").unwrap();
+        form.set_rect(Rect::new(0.0, 0.0, 800.0, 600.0));
+        form.set_name("FormLists");
+        form.set_text("Lists and Numerical");
+    }
+
+    let mut cbo = Node::new("cbo_theme", "ComboBox");
+    cbo.set_name("cbo_theme");
+    cbo.props.insert(
+        "items".to_string(),
+        crawrad_ir::Value::List(vec![
+            crawrad_ir::Value::Str("Light".to_string()),
+            crawrad_ir::Value::Str("Dark".to_string()),
+            crawrad_ir::Value::Str("Auto".to_string()),
+        ]),
+    );
+    cbo.props
+        .insert("item_index".to_string(), crawrad_ir::Value::Int(1));
+    cbo.events
+        .insert("on_select".to_string(), "cbo_theme_select".to_string());
+    let _ = doc.add_child("FormLists", cbo);
+
+    let mut lst = Node::new("lst_items", "ListBox");
+    lst.set_name("lst_items");
+    lst.props.insert(
+        "items".to_string(),
+        crawrad_ir::Value::List(vec![
+            crawrad_ir::Value::Str("First".to_string()),
+            crawrad_ir::Value::Str("Second".to_string()),
+        ]),
+    );
+    lst.props
+        .insert("item_index".to_string(), crawrad_ir::Value::Int(0));
+    lst.events
+        .insert("on_click".to_string(), "lst_items_click".to_string());
+    let _ = doc.add_child("FormLists", lst);
+
+    let mut pb = Node::new("pb_upload", "ProgressBar");
+    pb.set_name("pb_upload");
+    pb.props
+        .insert("min".to_string(), crawrad_ir::Value::Int(0));
+    pb.props
+        .insert("max".to_string(), crawrad_ir::Value::Int(100));
+    pb.props
+        .insert("position".to_string(), crawrad_ir::Value::Int(45));
+    let _ = doc.add_child("FormLists", pb);
+
+    let mut tb = Node::new("tb_volume", "TrackBar");
+    tb.set_name("tb_volume");
+    tb.props
+        .insert("min".to_string(), crawrad_ir::Value::Int(0));
+    tb.props
+        .insert("max".to_string(), crawrad_ir::Value::Int(10));
+    tb.props
+        .insert("position".to_string(), crawrad_ir::Value::Int(7));
+    tb.events
+        .insert("on_change".to_string(), "tb_volume_change".to_string());
+    let _ = doc.add_child("FormLists", tb);
+
+    let mut spn = Node::new("spn_count", "SpinEdit");
+    spn.set_name("spn_count");
+    spn.props
+        .insert("min_value".to_string(), crawrad_ir::Value::Int(1));
+    spn.props
+        .insert("max_value".to_string(), crawrad_ir::Value::Int(50));
+    spn.props
+        .insert("value".to_string(), crawrad_ir::Value::Int(12));
+    let _ = doc.add_child("FormLists", spn);
+
+    let generator = GeradorSlint;
+    let files = generator
+        .gerar(&doc, "my_app", &crawrad_registry::Registry::builtin())
+        .expect("must generate lists successfully");
+
+    let slint_file = files
+        .iter()
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormLists.slint")
+        .unwrap();
+    assert!(slint_file.conteudo.contains("cbo_theme := ComboBox"));
+    assert!(
+        slint_file
+            .conteudo
+            .contains("model: [\"Light\", \"Dark\", \"Auto\"];")
+    );
+    assert!(slint_file.conteudo.contains("current-index: 1;"));
+    assert!(
+        slint_file
+            .conteudo
+            .contains("callback cbo_theme_selected(int, string);")
+    );
+
+    assert!(
+        slint_file
+            .conteudo
+            .contains("lst_items := StandardListView")
+    );
+    assert!(slint_file.conteudo.contains("current-item: 0;"));
+    assert!(
+        slint_file
+            .conteudo
+            .contains("callback lst_items_current_item_changed(int);")
+    );
+
+    assert!(slint_file.conteudo.contains("pb_upload := Rectangle"));
+    assert!(slint_file.conteudo.contains("background: #2a82da;"));
+
+    assert!(slint_file.conteudo.contains("tb_volume := Slider"));
+    assert!(slint_file.conteudo.contains("minimum: 0.0;"));
+    assert!(slint_file.conteudo.contains("maximum: 10.0;"));
+    assert!(slint_file.conteudo.contains("value: 7.0;"));
+    assert!(
+        slint_file
+            .conteudo
+            .contains("callback tb_volume_changed(float);")
+    );
+
+    assert!(slint_file.conteudo.contains("spn_count := SpinBox"));
+    assert!(slint_file.conteudo.contains("minimum: 1;"));
+    assert!(slint_file.conteudo.contains("maximum: 50;"));
+    assert!(slint_file.conteudo.contains("value: 12;"));
+
+    let designer_file = files
+        .iter()
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormLists.designer.rs")
+        .unwrap();
+    assert!(designer_file.conteudo.contains("pub cbo_theme: ComboBox,"));
+    assert!(designer_file.conteudo.contains("pub lst_items: ListBox,"));
+    assert!(
+        designer_file
+            .conteudo
+            .contains("pub pb_upload: ProgressBar,")
+    );
+    assert!(designer_file.conteudo.contains("pub tb_volume: TrackBar,"));
+    assert!(designer_file.conteudo.contains("pub spn_count: SpinEdit,"));
+    assert!(designer_file.conteudo.contains("pub struct ComboBox"));
+    assert!(designer_file.conteudo.contains("pub struct ListBox"));
+    assert!(designer_file.conteudo.contains("pub struct ProgressBar"));
+    assert!(designer_file.conteudo.contains("pub struct TrackBar"));
+    assert!(designer_file.conteudo.contains("pub struct SpinEdit"));
+    assert!(
+        designer_file
+            .conteudo
+            .contains("window.on_cbo_theme_selected")
+    );
+    assert!(
+        designer_file
+            .conteudo
+            .contains("window.on_lst_items_current_item_changed")
+    );
+    assert!(
+        designer_file
+            .conteudo
+            .contains("window.on_tb_volume_changed")
+    );
+}

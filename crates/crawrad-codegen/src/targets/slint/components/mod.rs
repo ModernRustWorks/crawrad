@@ -3,10 +3,15 @@
 pub mod button;
 pub mod checkbox;
 pub mod codegen;
+pub mod combobox;
 pub mod edit;
 pub mod label;
+pub mod list_box;
 pub mod memo;
+pub mod progress_bar;
+pub mod spin_edit;
 pub mod toggle;
+pub mod track_bar;
 pub mod util;
 
 pub use codegen::SlintComponentCodegen;
@@ -21,6 +26,11 @@ static REGISTRY: &[&'static dyn SlintComponentCodegen] = &[
     &memo::MemoCodegen,
     &checkbox::CheckBoxCodegen,
     &toggle::ToggleCodegen,
+    &combobox::ComboBoxCodegen,
+    &list_box::ListBoxCodegen,
+    &progress_bar::ProgressBarCodegen,
+    &track_bar::TrackBarCodegen,
+    &spin_edit::SpinEditCodegen,
 ];
 
 pub fn for_class(class: &str) -> Option<&'static dyn SlintComponentCodegen> {
