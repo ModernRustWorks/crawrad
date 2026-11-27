@@ -210,15 +210,18 @@ pub enum NumberChoice {
     MaxFileKb,
     /// Minutes between recovery copies.
     RecoverMinutes,
+    /// Maximum recent projects retained.
+    RecentProjects,
 }
 
 impl NumberChoice {
     #[note("options-numberchoice-all")]
-    pub const ALL: [Self; 4] = [
+    pub const ALL: [Self; 5] = [
         Self::Limit,
         Self::MergeSeconds,
         Self::MaxFileKb,
         Self::RecoverMinutes,
+        Self::RecentProjects,
     ];
 
     #[note("options-numberchoice-widget")]
@@ -228,12 +231,16 @@ impl NumberChoice {
             Self::MergeSeconds => "opt_history_merge",
             Self::MaxFileKb => "opt_history_max",
             Self::RecoverMinutes => "opt_recover_minutes",
+            Self::RecentProjects => "opt_recent_limit",
         }
     }
 
     #[note("options-numberchoice-is-history")]
     pub fn is_history(self) -> bool {
-        self != Self::RecoverMinutes
+        match self {
+            Self::Limit | Self::MergeSeconds | Self::MaxFileKb => true,
+            Self::RecoverMinutes | Self::RecentProjects => false,
+        }
     }
 
     #[note("options-numberchoice-values")]
@@ -243,6 +250,7 @@ impl NumberChoice {
             Self::MergeSeconds => &[0, 5, 10, 30, 60],
             Self::MaxFileKb => &[256, 1024, 5120, 10240],
             Self::RecoverMinutes => &crate::recover::MINUTES,
+            Self::RecentProjects => &[3, 5, 10, 15, 20, 30, 50],
         }
     }
 
@@ -255,6 +263,7 @@ impl NumberChoice {
             Self::MaxFileKb if v.is_multiple_of(1024) => format!("{} MB", v / 1024),
             Self::MaxFileKb => format!("{v} KB"),
             Self::RecoverMinutes => format!("{v} min"),
+            Self::RecentProjects => format!("{v} projects"),
         };
         self.values().iter().map(|&v| label(v)).collect()
     }
@@ -266,6 +275,7 @@ impl NumberChoice {
             Self::MergeSeconds => p.history_merge_seconds,
             Self::MaxFileKb => p.history_max_file_kb,
             Self::RecoverMinutes => p.recover_minutes,
+            Self::RecentProjects => p.recent_limit,
         };
         self.values().iter().position(|&v| v == current)
     }
@@ -280,6 +290,7 @@ impl NumberChoice {
             Self::MergeSeconds => p.history_merge_seconds = v,
             Self::MaxFileKb => p.history_max_file_kb = v,
             Self::RecoverMinutes => p.recover_minutes = v,
+            Self::RecentProjects => p.recent_limit = v,
         }
     }
 }
@@ -459,7 +470,8 @@ impl OptionsSearchMatches {
             || q.contains("number")
             || q.contains("margin")
             || q.contains("editor");
-        let save = q.contains("save") || q.contains("auto") || q.contains("file");
+        let save =
+            q.contains("save") || q.contains("auto") || q.contains("file") || q.contains("recent");
         let grid = q.contains("grid")
             || q.contains("snap")
             || q.contains("grade")
@@ -562,6 +574,29 @@ mod tests {
         every.pick(&mut p, 0);
         assert_eq!(p.recover_minutes, 1);
         assert!(!every.is_history() && NumberChoice::Limit.is_history());
+    }
+
+    #[test]
+    fn the_recent_projects_limit_is_offered() {
+        let mut p = crate::workspace::Preferences::default();
+        let choice = NumberChoice::RecentProjects;
+        assert_eq!(choice.widget(), "opt_recent_limit");
+        assert_eq!(
+            choice.labels(),
+            [
+                "3 projects",
+                "5 projects",
+                "10 projects",
+                "15 projects",
+                "20 projects",
+                "30 projects",
+                "50 projects"
+            ]
+        );
+        assert_eq!(choice.position(&p), Some(2), "10 projects by default");
+        choice.pick(&mut p, 1);
+        assert_eq!(p.recent_limit, 5);
+        assert!(!choice.is_history());
     }
 
     #[test]

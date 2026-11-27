@@ -12,13 +12,20 @@ signature: "pub fn list_height (rows : usize) -> f64"
 
 Calculates the height of the recent projects list.
 
-The Recent list's height: one 50 pt row each (the rule drawn over its top), at most eight.
+The Recent list's height: one row each (the rule drawn over its top), at most eight.
+
+The row height is `RECENT_ROW_HEIGHT`, the same height the live_design declares
+on `WelcomeRecentRow`; `recent_row_guard` fails the build if the two drift
+apart. It was raised from 50 to 62 because the selection highlight was
+touching the project name above and its path below.
 
 # Examples
 
 ```rust
 use crawrad_runtime_makepad::welcome::list_height;
 
-assert_eq!(list_height(3), 150.0);
-assert_eq!(list_height(10), 400.0);
+use crawrad_runtime_makepad::welcome::RECENT_ROW_HEIGHT;
+
+assert_eq!(list_height(3), 3.0 * RECENT_ROW_HEIGHT);
+assert_eq!(list_height(10), 8.0 * RECENT_ROW_HEIGHT);
 ```

@@ -30,16 +30,16 @@ live_design! {
 
     // One shortcut of the hero grid.
     pub CrawradAiShortcut = <CrawradButton> {
-        width: Fill, height: 46.0, align: { x: 0.0, y: 0.5 }, padding: { left: 14.0 },
-        draw_text: { text_style: <THEME_FONT_BOLD> { font_size: 10.0 } }
+        width: Fill, height: 54.0, align: { x: 0.0, y: 0.5 }, padding: { left: 16.0 },
+        draw_text: { text_style: <THEME_FONT_BOLD> { font_size: 11.0 } }
     }
     // One row of two shortcuts.
-    AiShortcutRow = <View> { width: Fill, height: Fit, flow: Right, spacing: (CRAWRAD_ESPACO_S) }
+    AiShortcutRow = <View> { width: Fill, height: Fit, flow: Right, spacing: 10.0 }
 
     pub CrawradAiHeroView = <View> {
         width: Fill, height: Fit,
         flow: Down,
-        spacing: (CRAWRAD_ESPACO_M),
+        spacing: 24.0,
 
         session_row = <View> {
             width: Fill, height: Fit, flow: Right, align: { y: 0.5 },
@@ -50,16 +50,16 @@ live_design! {
 
         hero_block = <View> {
             width: Fill, height: Fit, flow: Down, align: { x: 0.5 },
-            margin: { top: (CRAWRAD_ESPACO_M), bottom: (CRAWRAD_ESPACO_S) },
-            spacing: (CRAWRAD_ESPACO_XS),
+            margin: { top: 28.0, bottom: 20.0 },
+            spacing: 8.0,
 
-            lbl_hero_badge = <CrawradLabel> { align: { x: 0.5 }, draw_text: { text_style: <THEME_FONT_BOLD> { font_size: 16.0 }, color: (CRAWRAD_ACENTO_TEXTO) }, text: "⚡ Aefos AI" }
+            lbl_hero_badge = <CrawradLabel> { align: { x: 0.5 }, draw_text: { text_style: <THEME_FONT_BOLD> { font_size: 22.0 }, color: (CRAWRAD_ACENTO_TEXTO) }, text: "⚡ Aefos AI" }
             lbl_hero_title = <CrawradLabel> { align: { x: 0.5 }, draw_text: { text_style: <THEME_FONT_BOLD> { font_size: (CRAWRAD_FONTE_CABECALHO) }, color: (CRAWRAD_TEXTO_PRIMARIO) }, text: "What are we building today?" }
             lbl_hero_subtitle = <CrawradLabelMuted> { align: { x: 0.5 }, text: "Aefos is ready. Pick a shortcut or just start typing." }
         }
 
         shortcuts_grid = <View> {
-            width: Fill, height: Fit, flow: Down, spacing: (CRAWRAD_ESPACO_S),
+            width: Fill, height: Fit, flow: Down, spacing: 12.0,
 
             row_1 = <AiShortcutRow> {
                 btn_card_explain = <CrawradAiShortcut> { text: "❓  Explain" }
@@ -74,8 +74,8 @@ live_design! {
                 btn_card_optimize = <CrawradAiShortcut> { text: "⚡  Optimize" }
             }
             row_teach = <View> {
-                width: Fill, height: Fit, align: { x: 0.5 }, margin: { top: (CRAWRAD_ESPACO_XS) },
-                teach_card = <View> { width: 220.0, height: 56.0, flow: Overlay,
+                width: Fill, height: Fit, align: { x: 0.5 }, margin: { top: 18.0 },
+                teach_card = <View> { width: 250.0, height: 68.0, flow: Overlay,
                     btn_card_teach = <CrawradAiShortcut> { width: Fill, height: Fill, text: "",
                         draw_bg: { color: (CRAWRAD_TEACH_FILL), color_hover: (CRAWRAD_TEACH_HOVER), border_color_1: (CRAWRAD_ACENTO), border_color_2: (CRAWRAD_ACENTO) }
                     }
@@ -95,7 +95,7 @@ live_design! {
         ready_row = <View> {
             width: Fill, height: Fit,
             align: { x: 0.5 },
-            margin: { top: (CRAWRAD_ESPACO_S) },
+            margin: { top: 32.0, bottom: 16.0 },
             lbl_ready_status = <CrawradLabelMuted> {
                 align: { x: 0.5 },
                 text: "⚪ Checking the AI agent…"
@@ -984,27 +984,32 @@ live_design! {
                 padding: { top: 6.0, bottom: 2.0 },
                 ai_agent_chip = <View> {
                     width: Fit, height: 24.0,
-                    flow: Right, align: { y: 0.5 },
-                    spacing: 6.0,
-                    padding: { left: 9.0, right: 11.0 },
-                    show_bg: true,
-                    draw_bg: {
-                        uniform border_color: (CRAWRAD_DIVISOR)
-                        color: (CRAWRAD_PAINEL)
-                        fn pixel(self) -> vec4 {
-                            let sdf = Sdf2d::viewport(self.pos * self.rect_size);
-                            sdf.box(0.5, 0.5, self.rect_size.x - 1.0, self.rect_size.y - 1.0, 4.0);
-                            sdf.fill_keep(self.color);
-                            sdf.stroke(self.border_color, 1.0);
-                            return sdf.result;
+                    flow: Overlay,
+                    chip_face = <View> {
+                        width: Fit, height: 24.0,
+                        flow: Right, align: { y: 0.5 },
+                        spacing: 6.0,
+                        padding: { left: 9.0, right: 11.0 },
+                        show_bg: true,
+                        draw_bg: {
+                            uniform border_color: (CRAWRAD_DIVISOR)
+                            color: (CRAWRAD_PAINEL)
+                            fn pixel(self) -> vec4 {
+                                let sdf = Sdf2d::viewport(self.pos * self.rect_size);
+                                sdf.box(0.5, 0.5, self.rect_size.x - 1.0, self.rect_size.y - 1.0, 4.0);
+                                sdf.fill_keep(self.color);
+                                sdf.stroke(self.border_color, 1.0);
+                                return sdf.result;
+                            }
                         }
+                        chip_dot_waiting = <CrawradChipDot> { draw_bg: { color: (CRAWRAD_TEXTO_TERCIARIO) } }
+                        chip_dot_acp = <CrawradChipDot> { draw_bg: { color: (CRAWRAD_CHIP_ACP) } }
+                        chip_dot_cli = <CrawradChipDot> { draw_bg: { color: (CRAWRAD_AVISO) } }
+                        chip_dot_failed = <CrawradChipDot> { draw_bg: { color: (CRAWRAD_ERRO) } }
+                        chip_text = <CrawradLabel> { width: Fit, text: "",
+                            draw_text: { color: (CRAWRAD_TEXTO_SECUNDARIO), text_style: <THEME_FONT_REGULAR> { font_size: (CRAWRAD_FONTE_PEQUENO) } } }
                     }
-                    chip_dot_waiting = <CrawradChipDot> { draw_bg: { color: (CRAWRAD_TEXTO_TERCIARIO) } }
-                    chip_dot_acp = <CrawradChipDot> { draw_bg: { color: (CRAWRAD_CHIP_ACP) } }
-                    chip_dot_cli = <CrawradChipDot> { draw_bg: { color: (CRAWRAD_AVISO) } }
-                    chip_dot_failed = <CrawradChipDot> { draw_bg: { color: (CRAWRAD_ERRO) } }
-                    chip_text = <CrawradLabel> { width: Fit, text: "",
-                        draw_text: { color: (CRAWRAD_TEXTO_SECUNDARIO), text_style: <THEME_FONT_REGULAR> { font_size: (CRAWRAD_FONTE_PEQUENO) } } }
+                    btn_chip = <CrawradListRowOverlay> { width: Fill, height: Fill }
                 }
             }
 

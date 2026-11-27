@@ -17,29 +17,29 @@ fn terminal_panel_is_in_dock_dsl() {
 
 #[test]
 fn terminal_panel_has_actions_and_ai_drawer() {
-    let paineis = include_str!("../../ide_app/panels/terminal.rs");
+    let panels = include_str!("../../../ide_app/panels/terminal.rs");
     assert!(
-        paineis.contains("pub CrawradPanelTerminal = <CrawradPanel> {"),
-        "CrawradPanelTerminal DSL disappeared from paineis.rs"
+        panels.contains("pub CrawradPanelTerminal = <CrawradPanel> {"),
+        "CrawradPanelTerminal DSL disappeared from panels/terminal.rs"
     );
     assert!(
-        paineis.contains("btn_term_new"),
+        panels.contains("btn_term_new"),
         "button btn_term_new is not declared in the terminal"
     );
     assert!(
-        paineis.contains("btn_term_ai"),
+        panels.contains("btn_term_ai"),
         "button btn_term_ai is not declared in the terminal"
     );
     assert!(
-        paineis.contains("term_ai_drawer"),
+        panels.contains("term_ai_drawer"),
         "drawer term_ai_drawer is not declared in the terminal"
     );
     assert!(
-        paineis.contains("term_search_bar"),
+        panels.contains("term_search_bar"),
         "bar term_search_bar is not declared in the terminal"
     );
     assert!(
-        paineis.contains("term_sidebar_left"),
+        panels.contains("term_sidebar_left"),
         "side bar term_sidebar_left for actions/snippets disappeared"
     );
 }

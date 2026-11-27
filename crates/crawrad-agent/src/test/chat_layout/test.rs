@@ -419,3 +419,48 @@ fn popup_margins_calculations() {
     let (fx, fy) = slash_popup_margin((0.0, 0.0), (0.0, 0.0, 600.0), 200.0);
     assert_eq!((fx, fy), (8.0, 315.0));
 }
+
+/// The panel must never give two verdicts at once.
+///
+/// The chip reads the live status; the hero footer reads the agent card. The
+/// owner reported seeing "ACP unavailable" in the chip and "Ready" in the
+/// footer at the same moment, and that is what this pins down: whatever the
+/// live status says, the two lines agree.
+#[test]
+fn the_chip_and_the_footer_never_disagree() {
+    use crate::acp_live::LiveStatus;
+    use crate::acp_registry::{agent_state, chat_status_line};
+
+    let casos = [
+        (LiveStatus::Failed("connection refused".to_string()), false),
+        (LiveStatus::Idle, false),
+        (LiveStatus::Connecting, false),
+        (
+            LiveStatus::Ready {
+                session: "abc12345".to_string(),
+            },
+            true,
+        ),
+    ];
+
+    for (live, connected) in casos {
+        // The IDE feeds the live failure through as `last_error`; this mirrors
+        // that wiring (ide_app/dialogs/options.rs, IdeApp::agent_card).
+        let live_failure = match &live {
+            LiveStatus::Failed(e) => Some(e.as_str()),
+            _ => None,
+        };
+        let chip = crate::chat_layout::agent_chip(&[], "claude", &live);
+        let footer = chat_status_line(agent_state(true, connected, live_failure), connected);
+
+        let chip_says_broken = chip.text.contains("unavailable") || chip.text.contains("error");
+        let footer_says_ready = footer.contains("Ready") || footer.contains("Connected");
+
+        assert!(
+            !(chip_says_broken && footer_says_ready),
+            "the panel is giving two verdicts at once for {live:?}:\n  \
+             chip:   {}\n  footer: {footer}",
+            chip.text
+        );
+    }
+}

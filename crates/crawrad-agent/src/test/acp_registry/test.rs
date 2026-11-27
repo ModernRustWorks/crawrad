@@ -309,6 +309,95 @@ fn chat_status_line_every_state() {
         chat_status_line(AgentState::NotInstalled, true),
         "⚪ No AI agent installed · set one up at Tools › Options › AI"
     );
+    assert_eq!(
+        chat_status_line(AgentState::Failed, false),
+        "🔴 Connection failed · sending messages will not work"
+    );
+    assert_eq!(
+        chat_status_line(AgentState::Failed, true),
+        "🔴 Connection failed · sending messages will not work"
+    );
+}
+
+#[test]
+fn agent_state_and_chat_status_line_all_combinations() {
+    let auth_err = Some(r#"{"code": -32000, "message": "auth required"}"#);
+    let conn_err = Some("Connection refused: 127.0.0.1:45123");
+
+    // Connected is always Ready
+    for installed in [false, true] {
+        for err in [None, auth_err, conn_err] {
+            let state = agent_state(installed, true, err);
+            assert_eq!(state, AgentState::Ready);
+            assert_eq!(chat_status_line(state, true), "🟢 Connected · ready");
+        }
+    }
+
+    // Disconnected: auth error always SignedOut
+    for installed in [false, true] {
+        let state = agent_state(installed, false, auth_err);
+        assert_eq!(state, AgentState::SignedOut);
+        assert_eq!(
+            chat_status_line(state, false),
+            "🟡 Signed out · sign in at Tools › Options › AI"
+        );
+    }
+
+    // Disconnected: connection error
+    // When installed=true with connection error: state is Failed, footer is Failed (NOT Ready!)
+    let state_inst = agent_state(true, false, conn_err);
+    assert_eq!(state_inst, AgentState::Failed);
+    let line_inst = chat_status_line(state_inst, false);
+    assert_eq!(
+        line_inst,
+        "🔴 Connection failed · sending messages will not work"
+    );
+    assert!(
+        !line_inst.contains("Ready"),
+        "Footer must not say Ready on connection error"
+    );
+
+    // When installed=false with connection error: state is NotInstalled (NOT Ready!)
+    let state_not_inst = agent_state(false, false, conn_err);
+    assert_eq!(state_not_inst, AgentState::NotInstalled);
+    let line_not_inst = chat_status_line(state_not_inst, false);
+    assert_eq!(
+        line_not_inst,
+        "⚪ No AI agent installed · set one up at Tools › Options › AI"
+    );
+    assert!(
+        !line_not_inst.contains("Ready"),
+        "Footer must not say Ready on connection error"
+    );
+
+    // Disconnected: no error
+    assert_eq!(agent_state(true, false, None), AgentState::Ready);
+    assert_eq!(
+        chat_status_line(AgentState::Ready, false),
+        "🟢 Ready · connects on your first message"
+    );
+
+    assert_eq!(agent_state(false, false, None), AgentState::NotInstalled);
+    assert_eq!(
+        chat_status_line(AgentState::NotInstalled, false),
+        "⚪ No AI agent installed · set one up at Tools › Options › AI"
+    );
+}
+
+#[test]
+fn connection_error_never_shows_ready_footer() {
+    // Specifically test the case that caused the bug: installed=true, connected=false, error=Some(...)
+    let state = agent_state(true, false, Some("connect ECONNREFUSED"));
+    assert_eq!(state, AgentState::Failed);
+    let footer = chat_status_line(state, false);
+    assert!(
+        !footer.contains("Ready"),
+        "Convergence failed: footer said Ready"
+    );
+    assert_eq!(
+        footer,
+        "🔴 Connection failed · sending messages will not work"
+    );
 }
 
 #[test]

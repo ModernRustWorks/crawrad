@@ -24,6 +24,7 @@ impl IdeApp {
         self.atender_memory(cx, actions);
         self.atender_environment(cx, actions);
         self.atender_mcp(cx, actions);
+        self.atender_acp_diagnostic(cx, actions);
         self.atender_nota(cx, actions);
         if self.hover_note_clicked(actions) {
             self.open_hover_note(cx);

@@ -1,6 +1,7 @@
 #![forbid(unsafe_code)]
 
 pub mod acp;
+pub mod acp_diagnostic;
 pub mod acp_live;
 pub mod acp_registry;
 pub mod acp_status;
@@ -44,6 +45,10 @@ pub use acp::{
     AcpConfig, AcpModelInfo, CliInvocation, PromptDelivery, SessionSupport,
     build_cli_args_for_session, build_cli_invocation_with_options, execute_invocation,
     format_model_label_pure,
+};
+pub use acp_diagnostic::{
+    CheckStatus, DiagnosticAction, DiagnosticCheck, DiagnosticHooks, DiagnosticReport,
+    DiagnosticStep, run_diagnostic,
 };
 pub use acp_live::{LiveAgent, LiveStatus};
 pub use acp_registry::{

@@ -50,8 +50,12 @@ live_design! {
         text: ""
     }
 
+    // Height and padding are what the selection highlight shows: with the text
+    // filling the row, the coloured band touches the name above and the path
+    // below and the row reads as cramped. `list_height` below multiplies by
+    // this same height -- `recent_row_guard` keeps the two numbers equal.
     WelcomeRecentRow = <View> {
-        width: Fill, height: 50.0,
+        width: Fill, height: 62.0,
         flow: Overlay,
         show_bg: true,
         draw_bg: { color: #232427 }
@@ -67,11 +71,11 @@ live_design! {
             width: Fill, height: Fill,
             flow: Right,
             align: { y: 0.5 },
-            padding: { left: 12.0, right: 4.0 },
+            padding: { left: 12.0, right: 4.0, top: 9.0, bottom: 9.0 },
             names = <View> {
                 width: Fill, height: Fit,
                 flow: Down,
-                spacing: 2.0,
+                spacing: 3.0,
                 lbl_name = <Label> { width: Fill, height: Fit, draw_text: { color: #f0f1f3, text_style: <THEME_FONT_BOLD> { font_size: 10.0 } }, text: "" }
                 lbl_place = <Label> { width: Fill, height: Fit, draw_text: { color: #a8abb3, text_style: <THEME_FONT_REGULAR> { font_size: 9.0 } }, text: "" }
             }
@@ -116,7 +120,32 @@ live_design! {
             align: { y: 1.0 },
             padding: { left: 8.0 },
             show_bg: true,
-            draw_bg: { color: #2b2d30 }
+            // The page below is a rounded card. This bar is its FIRST child and
+            // spans the full width, so a square fill here paints over the page's
+            // two top corners and squares them off -- which is what kept coming
+            // back. It repeats the page's radius on the TOP corners only, and
+            // stays square at the bottom where the page body continues.
+            // The page below is a rounded card. This bar is its FIRST child and
+            // spans the full width, so a square fill here paints over the page's
+            // two top corners and squares them off -- which is what kept coming
+            // back. It repeats the page's radius on the TOP corners only, and
+            // stays square at the bottom where the page body continues.
+            draw_bg: {
+                color: #2b2d30
+                uniform border_radius: 6.0
+                fn pixel(self) -> vec4 {
+                    let sdf = Sdf2d::viewport(self.pos * self.rect_size);
+                    sdf.box(
+                        0.5,
+                        0.5,
+                        self.rect_size.x - 1.0,
+                        self.rect_size.y + self.border_radius,
+                        self.border_radius
+                    );
+                    sdf.fill(self.color);
+                    return sdf.result;
+                }
+            }
             tab = <View> {
                 width: Fit, height: 28.0,
                 flow: Right,
@@ -186,7 +215,18 @@ live_design! {
             right = <View> {
                 width: Fill, height: Fill,
                 flow: Down,
-                spacing: 10.0,
+                spacing: 12.0,
+
+                crab_box = <View> {
+                    width: Fill, height: Fit,
+                    flow: Down,
+                    align: { x: 0.5, y: 0.5 },
+                    spacing: 8.0,
+                    // Breathing room between the crab and the Recent heading
+                    // below it: they were touching.
+                    margin: { bottom: 20.0 },
+                    empty_crab = <Image> { width: 168.0, height: 144.0, fit: Stretch }
+                }
 
                 <View> {
                     width: Fill, height: Fit,
@@ -207,6 +247,14 @@ live_design! {
                         width: Fill, height: 50.0,
                         row = <WelcomeRecentRow> {}
                     }
+                    empty_row = <View> {
+                        visible: false,
+                        width: Fill, height: 62.0,
+                        align: { x: 0.5, y: 0.5 },
+                        show_bg: true,
+                        draw_bg: { color: #232427 }
+                        lbl_empty = <Label> { draw_text: { color: #c9ccd1, text_style: <THEME_FONT_REGULAR> { font_size: 10.0 } }, text: "No project opened yet." }
+                    }
                 }
 
                 lbl_recent_help = <Label> {
@@ -217,25 +265,9 @@ live_design! {
 
                 empty_box = <View> {
                     visible: false,
-                    width: Fill, height: 300.0,
-                    flow: Down,
-                    align: { x: 0.5, y: 0.5 },
-                    spacing: 12.0,
-                    show_bg: true,
-                    draw_bg: { color: #232427 }
-                    empty_crab = <Image> { width: 120.0, height: 103.0, fit: Stretch }
-                    <Label> { draw_text: { color: #c9ccd1, text_style: <THEME_FONT_REGULAR> { font_size: 10.0 } }, text: "No project opened yet." }
-                    <View> {
-                        width: Fit, height: Fit,
-                        flow: Right,
-                        spacing: 10.0,
-                        btn_empty_new = <WelcomeButton> {
-                            draw_bg: { color: #e5582a, color_hover: #f06a3d, color_down: #c94c23, border_color_1: #0000, border_color_2: #0000 }
-                            draw_text: { color: #ffffff }
-                            text: "New Project…"
-                        }
-                        btn_empty_open = <WelcomeButton> { text: "Open Folder…" }
-                    }
+                    width: 0.0, height: 0.0,
+                    btn_empty_new = <WelcomeButton> {}
+                    btn_empty_open = <WelcomeButton> {}
                 }
             }
         }
@@ -278,8 +310,15 @@ pub fn reopen_note(reopen: bool) -> &'static str {
 
 #[crawrad_note::note("welcome-list-height")]
 pub fn list_height(rows: usize) -> f64 {
-    rows.clamp(1, 8) as f64 * 50.0
+    rows.clamp(1, 8) as f64 * RECENT_ROW_HEIGHT
 }
+
+/// The height of one row in the Recent list.
+///
+/// It must equal the height `WelcomeRecentRow` declares in the live_design, or
+/// the list reserves the wrong space and the last row is clipped or floats.
+/// `recent_row_guard` below proves they agree.
+pub const RECENT_ROW_HEIGHT: f64 = 62.0;
 
 #[crawrad_note::note("welcome-crawradwelcomepage")]
 #[derive(Live, LiveHook, Widget)]
@@ -340,16 +379,15 @@ impl CrawradWelcomePage {
         self.row_areas = vec![Area::Empty; rows.len()];
         self.forget_areas = vec![Area::Empty; rows.len()];
         let empty = rows.is_empty();
-        self.view.view(id!(recent_box)).set_visible(cx, !empty);
+        self.view.view(id!(recent_box)).set_visible(cx, true);
+        self.view.label(id!(lbl_recent_help)).set_visible(cx, true);
+        self.view.label(id!(lbl_recent_note)).set_visible(cx, true);
+        self.view.view(id!(empty_row)).set_visible(cx, empty);
         self.view
-            .label(id!(lbl_recent_help))
+            .portal_list(id!(recent_list))
             .set_visible(cx, !empty);
-        self.view
-            .label(id!(lbl_recent_note))
-            .set_visible(cx, !empty);
-        self.view.view(id!(empty_box)).set_visible(cx, empty);
-        // The crab greets an empty list only, and is decoded once.
-        if empty && !self.crab_loaded {
+        // The crab is always visible, and is decoded once.
+        if !self.crab_loaded {
             self.crab_loaded = self
                 .view
                 .image(id!(empty_crab))
@@ -463,3 +501,112 @@ impl CrawradWelcomePageRef {
 #[cfg(test)]
 #[path = "test/welcome/test.rs"]
 mod tests;
+
+#[cfg(test)]
+mod corner_guard {
+    //! The Welcome page is a rounded card. Its tab bar is the first child and
+    //! spans the full width, so a plain square fill there paints over the two
+    //! top corners and squares them off. That regression came back five times,
+    //! each time through a change that looked harmless, because nothing failed
+    //! when the radius was dropped. Now something does.
+
+    const SOURCE: &str = include_str!("welcome.rs");
+
+    /// Returns the `draw_bg` block that belongs to `tab_bar`.
+    fn tab_bar_draw_bg() -> String {
+        let bar = SOURCE
+            .find("tab_bar = <View>")
+            .expect("welcome.rs must declare tab_bar");
+        let rest = &SOURCE[bar..];
+        let start = rest
+            .find("draw_bg:")
+            .expect("tab_bar must paint its own background");
+        let open = rest[start..].find('{').expect("draw_bg must open a block");
+        let mut depth = 0usize;
+        for (i, c) in rest[start + open..].char_indices() {
+            match c {
+                '{' => depth += 1,
+                '}' => {
+                    depth -= 1;
+                    if depth == 0 {
+                        return rest[start..start + open + i + 1].to_string();
+                    }
+                }
+                _ => {}
+            }
+        }
+        panic!("tab_bar draw_bg block is never closed");
+    }
+
+    #[test]
+    fn the_tab_bar_never_squares_off_the_rounded_page() {
+        let draw_bg = tab_bar_draw_bg();
+        assert!(
+            draw_bg.contains("border_radius"),
+            "The Welcome tab bar is painting a SQUARE background over a rounded              page, which squares off its two top corners. Keep the rounded              shader on tab_bar's draw_bg. What was found:
+{draw_bg}"
+        );
+        assert!(
+            draw_bg.contains("sdf.box"),
+            "tab_bar declares border_radius but never draws with it; the corners              will still come out square. What was found:
+{draw_bg}"
+        );
+    }
+
+    #[test]
+    fn the_page_itself_stays_rounded() {
+        let page = SOURCE
+            .find("uniform border_radius: 6.0")
+            .map(|i| &SOURCE[i..i + 200]);
+        assert!(
+            page.is_some_and(|p| p.contains("sdf.box")),
+            "The Welcome page lost its own rounded background."
+        );
+    }
+}
+
+#[cfg(test)]
+mod recent_row_guard {
+    //! The row height lives in two places: the live_design declares it on
+    //! `WelcomeRecentRow`, and `list_height` multiplies by it to reserve space
+    //! for the list. Nothing connected them, so changing one left the other
+    //! behind and the list reserved the wrong height.
+
+    use super::{RECENT_ROW_HEIGHT, list_height};
+
+    const SOURCE: &str = include_str!("welcome.rs");
+
+    /// The height `WelcomeRecentRow` declares in the live_design.
+    fn declared_row_height() -> f64 {
+        let row = SOURCE
+            .find("WelcomeRecentRow = <View> {")
+            .expect("welcome.rs must declare WelcomeRecentRow");
+        let rest = &SOURCE[row..];
+        let marker = "height: ";
+        let at = rest.find(marker).expect("the row must declare a height");
+        let tail = &rest[at + marker.len()..];
+        let end = tail
+            .find(|c: char| !c.is_ascii_digit() && c != '.')
+            .expect("the height must end");
+        tail[..end]
+            .parse()
+            .expect("the row height must be a plain number")
+    }
+
+    #[test]
+    fn the_drawn_row_and_the_reserved_height_agree() {
+        assert_eq!(
+            declared_row_height(),
+            RECENT_ROW_HEIGHT,
+            "WelcomeRecentRow is drawn at one height while list_height reserves              another, so the list ends up with the wrong space: the last row is              clipped, or empty space hangs below it. Change both together."
+        );
+    }
+
+    #[test]
+    fn the_list_reserves_one_row_per_project_up_to_eight() {
+        assert_eq!(list_height(1), RECENT_ROW_HEIGHT);
+        assert_eq!(list_height(5), 5.0 * RECENT_ROW_HEIGHT);
+        // Beyond eight the list scrolls instead of growing.
+        assert_eq!(list_height(40), 8.0 * RECENT_ROW_HEIGHT);
+    }
+}
