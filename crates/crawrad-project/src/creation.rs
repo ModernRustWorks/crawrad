@@ -523,10 +523,22 @@ pub fn create_unit_file(folder: &Path) -> Result<PathBuf, std::io::Error> {
 }
 
 /// Creates the next free form in the folder.
+/// A form that was created, and whether its code could be generated with it.
+///
+/// Mirrors [`CreatedProject`]: the form EXISTS even when generation failed, so the
+/// warning is said and the form is kept. Refusing the form over this would throw
+/// away what is already on disk.
+#[note("creation-createdform")]
+pub struct CreatedForm {
+    pub path: PathBuf,
+    pub warning: Option<String>,
+}
+
+#[note("creation-create-form-file")]
 pub fn create_form_file(
     folder: &Path,
     reg: &crawrad_registry::Registry,
-) -> Result<PathBuf, String> {
+) -> Result<CreatedForm, String> {
     std::fs::create_dir_all(folder).map_err(|e| format!("Failed to create folder: {e}"))?;
     let (stem, caption) = new_form_name(folder);
     let dest = folder.join(format!("{stem}.crawform"));
@@ -543,7 +555,25 @@ pub fn create_form_file(
         .to_json()
         .map_err(|e| format!("Failed to serialize form: {e}"))?;
     std::fs::write(&dest, json).map_err(|e| format!("Failed to create form: {e}"))?;
-    Ok(dest)
+    // THE CODE IS BORN WITH THE FORM, exactly as it is when a project is created a
+    // few lines above. Without this the `.crawform` existed alone: `cargo` never saw
+    // the form, the Explorer had no unit to list, and the only way to make the form
+    // real was to find `Generate` — which nothing on screen said was needed.
+    //
+    // A form outside a crate member (`<member>/src/`) has nowhere to generate into.
+    // That is not a failure: the form is kept, and the phrase says why no code came
+    // with it instead of leaving the absence unexplained.
+    let warning = match crate::source::member_of(&dest) {
+        Some(member) => generator::generate_for_new_project(&member, &doc).err(),
+        None => Some(format!(
+            "form created, but no code was generated: `{}` is not inside a crate's              `src/`, so there is no package to generate into",
+            folder.display()
+        )),
+    };
+    Ok(CreatedForm {
+        path: dest,
+        warning,
+    })
 }
 
 /// Creates the next free subfolder in the folder.
