@@ -116,7 +116,11 @@ pub const ALLOWED_SHELL_ROOT_FILES: &[&str] = &["ide_app.rs", "main.rs"];
 /// base, and 33,180 + 233 is exactly what counting this tree reports. Measured two
 /// ways rather than taken from either side of the merge, because neither side
 /// describes the tree that results from it.
-pub const MAX_SHELL_SOURCE_LINES: usize = 33_413;
+/// Raised on 27/11/2026 from 33,413 to 33,418, measured on this tree: five lines in
+/// the Explorer action, which now carries the warning that rides with a created form
+/// instead of claiming success over half a result. Generating the code with the form
+/// is decided in `crawrad-project`, where a new project already did it.
+pub const MAX_SHELL_SOURCE_LINES: usize = 33_418;
 
 /// Maximum allowed lines for any individual `.rs` file in `crates/crawrad-ide/src/` (outside `test/`).
 ///
