@@ -639,3 +639,24 @@ pub mod tasks;
 pub mod tree;
 #[cfg(feature = "full")]
 pub mod watch;
+
+/// **A PATH INSIDE `WindowsApps` IS UNUSABLE TO EVERYONE BUT THE PACKAGE.**
+///
+/// An installed Store app lives under `C:\Program Files\WindowsApps\`, a folder
+/// Windows locks down: the package itself reads it, so an `is_file()` check
+/// answers yes, and every other process is refused. Two places need to know this
+/// and for different reasons - where components may be installed, and which
+/// command may be written into a project's `.mcp.json` - so the fact lives here,
+/// with the rest of what this house knows about the operating system, instead of
+/// being stated twice and drifting.
+///
+/// Writing such a path into `.mcp.json` sent the agent's CLI, a separate process,
+/// to `fork/exec ... Access is denied`, and it started with no MCP server at all.
+#[note("is-inside-store-package")]
+pub fn is_inside_store_package(path: &std::path::Path) -> bool {
+    path.components().any(|c| {
+        c.as_os_str()
+            .to_str()
+            .is_some_and(|s| s.eq_ignore_ascii_case("WindowsApps"))
+    })
+}
