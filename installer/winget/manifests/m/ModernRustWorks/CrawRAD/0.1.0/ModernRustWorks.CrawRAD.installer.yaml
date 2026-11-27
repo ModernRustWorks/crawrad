@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.9.0.schema.json
+PackageIdentifier: ModernRustWorks.CrawRAD
+PackageVersion: 0.1.0
+InstallerType: inno
+Scope: user
+UpgradeBehavior: install
+ProductCode: '{C45BFA2D-9D7D-48D6-B7F2-48E0F9855B7A}_is1'
+ReleaseDate: 2026-11-19
+Installers:
+- Architecture: x64
+  InstallerUrl: https://github.com/ModernRustWorks/crawrad/releases/download/v0.1.0/CrawRAD-0.1.0-windows-x64-setup.exe
+  InstallerSha256: 77B415B1A48B243E9662F657C81F36D1AC9600B2109F1CF0E1AEF4D88E6E213C
+  InstallerSwitches:
+    Custom: /CURRENTUSER
+ManifestType: installer
+ManifestVersion: 1.9.0
