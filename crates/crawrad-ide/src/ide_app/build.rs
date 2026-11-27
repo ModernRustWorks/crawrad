@@ -150,7 +150,7 @@ impl IdeApp {
             self.status = Some(format!("{salvo} — {gerado} (the unlink is not on disk)"));
         }
         if let Some(d) = self.host.doc() {
-            self.rev_salva = d.revision();
+            self.host.set_saved_revision(d.revision());
         }
         self.reabrir_no_canvas(cx);
         self.redraw_panel_list(cx, Panel::Inspector, id!(inspector_panel.inspector_list));
@@ -163,7 +163,7 @@ impl IdeApp {
         let d = self.host.doc()?;
         let saved = crawrad_project::form_file::save(&d.own_ir(), self.host.active_file()?);
         if let Ok(p) = &saved {
-            self.rev_salva = d.revision();
+            self.host.set_saved_revision(d.revision());
             self.host.set_active_file(Some(p.clone()));
         }
         Some(saved)
@@ -175,7 +175,7 @@ impl IdeApp {
         let form = self
             .host
             .doc()
-            .is_some_and(|d| d.revision() != self.rev_salva);
+            .is_some_and(|d| d.revision() != self.host.saved_revision());
         let review = form && self.has_any_pending_diff_review();
         if review {
             failed.push(format!("the form: {}", super::diff_review::REVIEW_PENDING));
@@ -255,7 +255,7 @@ impl IdeApp {
         if self
             .host
             .doc()
-            .is_some_and(|d| d.revision() != self.rev_salva)
+            .is_some_and(|d| d.revision() != self.host.saved_revision())
         {
             self.status = Some(Self::TRABALHO_NAO_SALVO.into());
             return;
@@ -264,7 +264,7 @@ impl IdeApp {
         self.host.set_active_file(None);
         self.design_language = None;
         self.design_locale = None;
-        self.rev_salva = 0;
+        self.host.set_saved_revision(0);
         self.reabrir_no_canvas(cx);
         self.sincronizar(cx);
         self.redraw_panel_list(cx, Panel::Explorer, id!(explorer_body.explorer_list));
@@ -281,7 +281,7 @@ impl IdeApp {
         // The form reaches the disk with its code, or a crash loses the design.
         if let (Some(d), Some(p)) = (self.host.doc(), self.host.active_file())
             && crawrad_project::form_file::is_form(p)
-            && (d.revision() != self.rev_salva || !p.exists())
+            && (d.revision() != self.host.saved_revision() || !p.exists())
             && let Some(Err(e)) = self.save_form_file()
         {
             self.status = Some(format!("save failed: {e}"));

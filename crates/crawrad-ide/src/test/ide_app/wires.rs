@@ -208,7 +208,7 @@ fn save_writes_form_to_disk() {
         "`salvar()` stopped writing the document to the path it          came from. A `salvar()` that does not save is the same mute button, one layer          deeper."
     );
     assert!(
-        file.contains("self.rev_salva=d.revision()"),
+        file.contains("self.host.set_saved_revision(d.revision())"),
         "`salvar()` does not mark the saved revision, and the `saved`/`modified`          badge in the title goes back to meaning nothing."
     );
     // **AND `Ctrl+S` GENERATES**, which is what PRUNES the empty handler (ADR 0025) and
@@ -1554,7 +1554,7 @@ fn generate_saves_the_form_before_writing_code() {
     );
     assert!(
         method_body("save_before_build")
-            .contains("is_form(p)&&(d.revision()!=self.rev_salva||!p.exists())"),
+            .contains("is_form(p)&&(d.revision()!=self.host.saved_revision()||!p.exists())"),
         "only a changed or never-saved `.crawform` is written — never `main.rs`"
     );
 }

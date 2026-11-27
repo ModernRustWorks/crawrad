@@ -118,7 +118,18 @@ pub const ALLOWED_SHELL_ROOT_FILES: &[&str] = &["ide_app.rs", "main.rs"];
 /// first, and `abrir_formulario` records it beside the recent folder it already
 /// recorded. Counting this tree reports 33,424, and 33,418 + 6 is the same number.
 /// What to reopen is decided in `crawrad-project`.
-pub const MAX_SHELL_SOURCE_LINES: usize = 33_424;
+/// Raised on 27/11/2026 from 33,424 to 33,450, measured on the tree this merge
+/// produces, not taken from either side of it: 26 lines wiring the shell to the
+/// strip. Opening a form now calls `open_form` instead of `set_doc`, so it joins
+/// the strip rather than replacing what was there; the unsaved-work guard was
+/// narrowed to a RELOAD of the form in front, since a different form no longer
+/// costs the first one; and `reacomodar` reads the previous rectangle before it
+/// borrows the document, because that state moved onto the form itself. Counting
+/// this tree reports 33,450, and 33,424 + 26 is the same number - 28 added, less
+/// the two fields that went dead when their state moved onto the form and that
+/// only `clippy` noticed. What a strip of forms IS lives in `crawrad-host`; the
+/// shell holds the wiring.
+pub const MAX_SHELL_SOURCE_LINES: usize = 33_450;
 
 /// Maximum allowed lines for any individual `.rs` file in `crates/crawrad-ide/src/` (outside `test/`).
 ///

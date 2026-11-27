@@ -23,6 +23,11 @@ use crawrad_host::OpenForm;
 use crawrad_doc::Doc;
 use crawrad_ir::Document;
 
-let open = OpenForm { doc: Doc::new(Document::new("form_main", "Form")), path: None };
+let open = OpenForm {
+    doc: Doc::new(Document::new("form_main", "Form")),
+    path: None,
+    saved_revision: 0,
+    previous_rect: None,
+};
 assert!(open.path.is_none(), "a form that was never saved has no file");
 ```
