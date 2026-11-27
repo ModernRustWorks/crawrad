@@ -251,11 +251,10 @@ pub fn install_now(origin: &Path) -> Verdict {
 
 #[note("installation-is-packaged-location")]
 pub fn is_packaged_location(exe: &Path) -> bool {
-    exe.components().any(|c| {
-        c.as_os_str()
-            .to_str()
-            .is_some_and(|s| s.eq_ignore_ascii_case("WindowsApps"))
-    })
+    // The same question the MCP config asks before it writes a command: a path in
+    // there is readable by the package and refused to everyone else. One answer,
+    // in the crate that holds what this house knows about the operating system.
+    crawrad_os::is_inside_store_package(exe)
 }
 
 #[note("installation-choose-installation-dir")]

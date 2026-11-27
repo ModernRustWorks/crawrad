@@ -5,23 +5,44 @@
 use crawrad_note::note;
 use serde_json::json;
 
+/// The bridge's bare name, which resolves on PATH.
+///
+/// On a packaged install this is the execution alias Windows places in
+/// `%LOCALAPPDATA%\Microsoft\WindowsApps\`; on every other install it is the
+/// binary beside the IDE, found on PATH as before.
+#[note("workspace-config-bare-command")]
+pub fn bare_command() -> String {
+    if cfg!(windows) {
+        "crawrad-mcp-bridge.exe".to_string()
+    } else {
+        "crawrad-mcp-bridge".to_string()
+    }
+}
+
+/// Whether this path lies inside the Store's protected package folder, and so
+/// must never be written into `.mcp.json`.
+///
+/// The fact itself lives in `crawrad-os` beside the rest of what this house knows
+/// about the operating system: the installer needs the same answer, for a
+/// different reason, and one of the two would have drifted.
+#[note("workspace-config-is-inside-package")]
+pub fn is_inside_package(exe: &std::path::Path) -> bool {
+    crawrad_os::is_inside_store_package(exe)
+}
+
 #[note("workspace-config-sync")]
 pub fn sync(workspace_root: &std::path::Path, instance_id: &str) {
     let bridge_cmd = match std::env::current_exe() {
         Ok(exe) => {
             let mut bridge = exe;
-            bridge.set_file_name(if cfg!(windows) {
-                "crawrad-mcp-bridge.exe"
-            } else {
-                "crawrad-mcp-bridge"
-            });
-            if bridge.is_file() {
+            bridge.set_file_name(bare_command());
+            if bridge.is_file() && !is_inside_package(&bridge) {
                 bridge.display().to_string()
             } else {
-                "crawrad-mcp-bridge".to_string()
+                bare_command()
             }
         }
-        Err(_) => "crawrad-mcp-bridge".to_string(),
+        Err(_) => bare_command(),
     };
 
     let mcp_json_path = workspace_root.join(".mcp.json");

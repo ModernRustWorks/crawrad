@@ -33,3 +33,61 @@ fn test_sync_workspace_mcp_config_creates_valid_mcp_json() {
 
     let _ = std::fs::remove_dir_all(&temp_dir);
 }
+
+/// **The Store build wrote a path nothing outside the package could run.**
+///
+/// An installed Store app lives under `C:\Program Files\WindowsApps\`, which
+/// Windows locks down. The package reads its own folder, so the `is_file()` check
+/// answered yes and the physical path went into `.mcp.json`; the agent's CLI, a
+/// separate process, then got `fork/exec ... Access is denied` and started with no
+/// MCP server at all. What the owner saw, three sessions in a row.
+#[test]
+fn a_path_inside_the_store_package_is_never_offered() {
+    let store = std::path::Path::new(
+        r"C:\Program Files\WindowsApps\GUARANA.CrawRAD_0.1.1.0_x64__2nygkg5m59wk2\crawrad-mcp-bridge.exe",
+    );
+    assert!(
+        super::super::workspace_config::is_inside_package(store),
+        "the Store's own install path was not recognised, so it would be written again"
+    );
+}
+
+/// An ordinary install keeps the real path beside the IDE: the fix must not cost
+/// everyone else the exact binary they were launching.
+#[test]
+fn an_ordinary_install_keeps_its_real_path() {
+    for ok in [
+        r"C:\Users\someone\CrawRAD\crawrad-mcp-bridge.exe",
+        r"D:\dev\crawrad\target\release\crawrad-mcp-bridge.exe",
+        "/usr/local/bin/crawrad-mcp-bridge",
+    ] {
+        assert!(
+            !super::super::workspace_config::is_inside_package(std::path::Path::new(ok)),
+            "`{ok}` was mistaken for a Store install and would lose its exact path"
+        );
+    }
+}
+
+/// The name written for a packaged install is the one the manifest declares its
+/// execution alias under — if the two ever disagree, nothing resolves.
+#[test]
+fn the_bare_name_matches_the_alias_the_manifest_declares() {
+    let cmd = super::super::workspace_config::bare_command();
+    assert!(
+        !cmd.contains('\\') && !cmd.contains('/'),
+        "a path was offered where a bare name must be: `{cmd}`"
+    );
+
+    let manifest = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../installer/windows/msix/AppxManifest.xml");
+    let xml = std::fs::read_to_string(&manifest).expect("the MSIX manifest must be readable");
+    assert!(
+        xml.contains(r#"Alias="crawrad-mcp-bridge.exe""#),
+        "the manifest declares no execution alias for the bridge, so the bare name \
+         resolves to nothing on a Store install"
+    );
+    assert!(
+        xml.contains(&format!(r#"Alias="{}""#, "crawrad-mcp-bridge.exe")),
+        "the alias in the manifest and the name written to .mcp.json disagree"
+    );
+}
