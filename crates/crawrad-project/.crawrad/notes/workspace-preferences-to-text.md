@@ -18,5 +18,9 @@ Serializes preferences to text.
 use crawrad_project::workspace::{preferences_to_text, Preferences};
 
 let text = preferences_to_text(Preferences::default());
-assert!(text.contains("welcome-on-startup=false"));
+assert!(text.contains("welcome-on-startup=true"));
+
+// A form is written only when there is one, so an empty value is never read back
+// as a path and reopened as a missing file.
+assert!(!text.contains("last-form="));
 ```
