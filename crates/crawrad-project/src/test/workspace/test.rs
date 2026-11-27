@@ -1093,6 +1093,8 @@ fn open_preference_survives_text_round_trip() {
             for &color_scheme in EditorColorScheme::ALL {
                 let p = Preferences {
                     welcome_on_startup: on,
+                    last_form: on
+                        .then(|| PathBuf::from("C:/projects/my_app/src/form_main.crawform")),
                     keymap_scheme: scheme,
                     editor_font_size: 14,
                     editor_tab_size: 2,
@@ -1251,13 +1253,24 @@ fn the_old_target_key_is_read_and_ignored() {
 }
 
 #[test]
-fn without_file_ide_opens_as_always() {
-    // Default IS today's behavior, and that is not a detail: existing IDE
-    // users must not see startup screen change behavior because of a checkbox
-    // they never checked.
+fn without_a_saved_preference_the_recent_list_opens() {
+    // This test asserted the opposite until 27/11/2026, for a reason worth keeping
+    // in view: an existing user should not have startup change under them because
+    // of a box they never ticked. What it missed is that reopening was ALSO never
+    // asked for — the IDE decided, on a machine it had never run on, to drop a
+    // person straight into a file. Someone who did tick the box keeps reopening:
+    // their preference is saved, and this default only answers an empty file.
     assert!(
-        !preferences_from_text("").welcome_on_startup,
-        "without saved preference, IDE reopens last folder"
+        preferences_from_text("").welcome_on_startup,
+        "with no saved preference the IDE reopened a project nobody asked it to"
+    );
+    assert!(
+        !preferences_from_text(
+            "welcome-on-startup=false
+"
+        )
+        .welcome_on_startup,
+        "a saved choice to reopen must still be honoured"
     );
     // And unknown key — from a future version, or manual file editing — does
     // not break reading the others.
@@ -1390,8 +1403,9 @@ fn the_color_page_updates_syntax_and_diagnostics_apart() {
     assert_eq!(p.color_fields(), Preferences::default().color_fields());
 }
 
-/// The start form: the first form of the most recent project — and
-/// nothing when the box is off, there is no recent, or the recent has no form.
+/// The start form: the one that WAS open, falling back to the first form of the
+/// most recent project — and nothing when the recent list opens instead, there is
+/// no recent, or the recent has no form.
 #[test]
 fn the_last_project_form_comes_from_the_first_recent() {
     let recent = vec![PathBuf::from("/p/latest"), PathBuf::from("/p/older")];
@@ -1405,15 +1419,17 @@ fn the_last_project_form_comes_from_the_first_recent() {
             vec![root.join("src/x.crawform")]
         }
     };
-    let on = Preferences::default();
+    // Reopening is now opt-in, so the test states it instead of leaning on the default.
+    let on = Preferences {
+        welcome_on_startup: false,
+        ..Preferences::default()
+    };
     assert_eq!(
         last_project_form(&on, &recent, docs),
         Some(PathBuf::from("/p/latest").join("src/main.crawform"))
     );
-    let off = Preferences {
-        welcome_on_startup: true,
-        ..Preferences::default()
-    };
+    let off = Preferences::default();
+    assert!(off.welcome_on_startup, "the recent list is the default");
     assert_eq!(last_project_form(&off, &recent, docs), None);
     assert_eq!(last_project_form(&on, &[], docs), None);
     assert_eq!(last_project_form(&on, &recent, |_| Vec::new()), None);
@@ -1814,6 +1830,61 @@ fn the_folder_chosen_in_options_wins() {
         default_project_parent(Some(&install), None, Some(&home), None, Some(&install)),
         Some(home.join("CrawRAD-Projects")),
         "a chosen folder inside the install folder was offered anyway"
+    );
+
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+/// Reopening brings back the form that WAS open, not whichever form sorts first.
+///
+/// Taking `documents(root).next()` meant the folder's listing order decided: add a
+/// form and the newly added, empty one wins over the one being worked on. That is
+/// what happened on the Store build — a fresh `form_1` reopened instead of the
+/// project's real form.
+#[test]
+fn reopening_brings_back_the_form_that_was_open() {
+    let root = std::env::temp_dir().join(format!("crawrad-lastform-{}", std::process::id()));
+    let project = root.join("my_app");
+    let src = project.join("src");
+    std::fs::create_dir_all(&src).expect("project src");
+    let first_listed = src.join("form_1.crawform");
+    let was_open = src.join("form_main.crawform");
+    std::fs::write(&first_listed, "").expect("first form");
+    std::fs::write(&was_open, "").expect("open form");
+
+    let recent = vec![project.clone()];
+    let docs = |_: &Path| -> Vec<PathBuf> { vec![first_listed.clone(), was_open.clone()] };
+    let reopening = |last: Option<PathBuf>| Preferences {
+        welcome_on_startup: false,
+        last_form: last,
+        ..Preferences::default()
+    };
+
+    assert_eq!(
+        last_project_form(&reopening(Some(was_open.clone())), &recent, docs),
+        Some(was_open.clone()),
+        "it reopened the first form the folder listed, not the one that was open"
+    );
+
+    // A form that was deleted, or that belongs to another project, must not be
+    // reopened: the fallback is the project's own first document, never a stale path.
+    assert_eq!(
+        last_project_form(
+            &reopening(Some(src.join("deleted.crawform"))),
+            &recent,
+            docs
+        ),
+        Some(first_listed.clone()),
+        "a form that no longer exists was reopened"
+    );
+    assert_eq!(
+        last_project_form(
+            &reopening(Some(root.join("other_app/src/form_main.crawform"))),
+            &recent,
+            docs
+        ),
+        Some(first_listed.clone()),
+        "a form from another project was reopened"
     );
 
     let _ = std::fs::remove_dir_all(&root);

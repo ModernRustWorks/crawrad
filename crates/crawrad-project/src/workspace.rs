@@ -348,7 +348,17 @@ pub fn last_project_form(
     if p.welcome_on_startup {
         return None;
     }
-    documents(recent.first()?).into_iter().next()
+    let root = recent.first()?;
+    // The form that WAS open, when it is still there and still belongs to that
+    // project. Taking the first document the folder lists meant reopening whichever
+    // form sorted first — a newly added, empty one wins over the one being worked on.
+    if let Some(f) = p.last_form.as_ref()
+        && f.starts_with(root)
+        && f.is_file()
+    {
+        return Some(f.clone());
+    }
+    documents(root).into_iter().next()
 }
 
 #[note("workspace-forget-recent")]
@@ -1027,6 +1037,8 @@ pub struct Preferences {
     pub color_recent: Vec<String>,
     /// Default directory for opening and creating projects.
     pub default_projects_dir: Option<PathBuf>,
+    /// The form that was open, so reopening brings back THAT one.
+    pub last_form: Option<PathBuf>,
     /// Whether local file history snapshots are recorded (default: true).
     pub history_enabled: bool,
     /// Maximum number of local history revisions kept per file (default: 10, range: 1..=100).
@@ -1069,7 +1081,11 @@ pub struct Preferences {
 impl Default for Preferences {
     fn default() -> Self {
         Self {
-            welcome_on_startup: false,
+            // The recent list, not the last project. Reopening was the default and
+            // nobody asked for it: the IDE decided, on a machine it had never run on,
+            // that a person wanted to be dropped straight into a file. Options still
+            // offers the other behaviour to whoever wants it.
+            welcome_on_startup: true,
             keymap_scheme: crawrad_actions::KeymapScheme::Modern,
             editor_font_size: 11,
             editor_tab_size: 4,
@@ -1083,6 +1099,7 @@ impl Default for Preferences {
             editor_diagnostic_colors: EditorDiagnosticColors::default(),
             color_recent: Vec::new(),
             default_projects_dir: None,
+            last_form: None,
             history_enabled: true,
             history_limit: 10,
             recent_limit: DEFAULT_RECENT_LIMIT,
@@ -1183,6 +1200,7 @@ pub const KEY_EDITOR_COLOR_SCHEME: &str = "editor-color-scheme";
 pub const KEY_EDITOR_COLOR_BASE: &str = "editor-color-base";
 pub const KEY_COLOR_RECENT: &str = "color-recent";
 pub const KEY_DEFAULT_PROJECTS_DIR: &str = "default-projects-dir";
+pub const KEY_LAST_FORM: &str = "last-form";
 pub const KEY_HISTORY_ENABLED: &str = "history-enabled";
 pub const KEY_HISTORY_LIMIT: &str = "history-limit";
 pub const KEY_RECENT_LIMIT: &str = "recent-limit";
@@ -1366,6 +1384,8 @@ pub fn preferences_from_text(text: &str) -> Preferences {
         } else if c == "editor-color-bg" && !v.is_empty() {
             p.editor_custom_colors.bg = v.to_string();
         } else if p.editor_diagnostic_colors.set_by_key(c, v) {
+        } else if c == KEY_LAST_FORM && !v.is_empty() {
+            p.last_form = Some(PathBuf::from(v));
         } else if c == KEY_DEFAULT_PROJECTS_DIR && !v.is_empty() {
             p.default_projects_dir = Some(PathBuf::from(v));
         } else if c == KEY_HISTORY_ENABLED {
@@ -1496,6 +1516,19 @@ pub fn preferences_to_text(p: Preferences) -> String {
     {
         text.push_str(&format!(
             "{key}={value}
+"
+        ));
+    }
+    // The form that was open, written only when there is one: an empty value
+    // would be read back as a path and reopened as a missing file.
+    if let Some(f) = p
+        .last_form
+        .as_ref()
+        .map(|f| f.to_string_lossy().to_string())
+        && !f.is_empty()
+    {
+        text.push_str(&format!(
+            "{KEY_LAST_FORM}={f}
 "
         ));
     }
