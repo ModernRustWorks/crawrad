@@ -148,49 +148,31 @@ impl McpServer {
         cx: &mut Cx,
         params: &Value,
     ) -> ToolCallResult {
-        let Some(name) = params.get("name").and_then(Value::as_str) else {
-            self.record_audit("unknown", params, "error");
-            return ToolCallResult::error_text(
-                "invalid-request",
-                "Missing 'name' field in tools/call parameters",
-            );
-        };
-        let default_args = json!({});
-        let args = params.get("arguments").unwrap_or(&default_args);
-        let (name, args) = crawrad_mcp::tools::unwrap_action_execute(name, args);
-        let rewritten = crawrad_mcp::edit::absolute_path_arg(args, &[app.raiz(), app.membro()]);
-        let args = rewritten.as_ref().unwrap_or(args);
-        // Guardrail: runs for EVERY command, before anything is touched.
-        // A dialog owns the IDE while it is open — a person cannot reach past
-        // it, and neither may the MCP. The refusal says what to do, so the
-        // caller closes the dialog and sends the command again.
-        if let Some(refusal) = crawrad_mcp::guardrails::check(
-            name,
+        // Every command checks itself BEFORE it runs: the name is read, an
+        // `action.execute` wrapper unwrapped, relative paths made absolute, and
+        // the guardrails and the pending-review save guard consulted — all in
+        // `crawrad_mcp`, so the shell holds no copy of that logic.
+        let (name, args_val) = match crawrad_mcp::guardrails::prepare_tools_call(
+            params,
+            &[app.raiz(), app.membro()],
             crawrad_mcp::guardrails::State {
                 modal_open: app.modal_open(),
+                build_running: app.build_tasks.is_running("build"),
+                has_selection: !app.host.selection().is_empty(),
             },
-        ) {
-            self.record_audit(name, args, "rejected");
-            let text = format!("{} {}", refusal.message, refusal.fix);
-            return ToolCallResult::error_text(refusal.code, &text);
-        }
-
-        // Guard: refuses to save while a review is pending
-        if let Err(refused) = crawrad_mcp::protocol::check_pending_review_save_guard(
             self.disable_diff_review_gate,
-            name,
             app.has_any_pending_diff_review(),
         ) {
-            return self.audited("action.execute", args, refused);
-        }
+            Ok(found) => found,
+            Err(refusal) => return self.audited(&refusal.0, &refusal.1, (refusal.2, refusal.3)),
+        };
+        let args = &args_val;
         // The tools that only read a part of the view: what each answers and
         // the line it says, audited and answered alike.
         let read = match name {
             "editor.get_completion" => Some(app.completion_json(cx)),
             "editor.get_choices" => Some(app.nav.choices_json()),
-            "view.get_inspector" => Some(crawrad_actions::inspector_model::rows_json(
-                &app.linhas_do_inspector(),
-            )),
+            "view.get_inspector" => Some(app.inspector_json(cx)),
             "editor.get_rename" => Some(app.nav.rename.to_json()),
             "editor.get_references" => Some(app.nav.references.to_json()),
             "editor.get_hover" => Some(app.hover_json()),
@@ -200,8 +182,8 @@ impl McpServer {
             "view.get_designer" => Some(app.designer_json(cx)),
             "view.get_welcome" => Some(app.welcome_json(cx)),
             "view.get_explorer" => Some(app.explorer_drawn.clone()),
-            "view.get_notes" => Some(app.notes_json()),
-            "view.get_tests" => Some(app.tests_json()),
+            "view.get_notes" => Some(app.notes_json(cx)),
+            "view.get_tests" => Some(app.tests_json(cx)),
             "form.check" => Some(app.form_check_json()),
             "view.sizes" => Some(app.sizes_json()),
             "strings.list" => Some(app.strings_list_json(args)),

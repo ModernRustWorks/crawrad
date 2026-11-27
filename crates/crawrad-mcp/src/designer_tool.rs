@@ -379,6 +379,20 @@ pub fn unknown_language_error(code: &str, valids: Vec<String>) -> ToolCallResult
     )
 }
 
+/// Dispatches inspector and selection read queries on the active form.
+pub fn dispatch_inspect(
+    name: &str,
+    doc: Option<&crawrad_doc::Doc>,
+    args: &Value,
+) -> Option<Answer> {
+    match name {
+        "designer.list_components" => Some(list_components(doc)),
+        "designer.get_selection" => Some(get_selection(doc)),
+        "designer.get_component_properties" => Some(get_component_properties(doc, args)),
+        _ => None,
+    }
+}
+
 #[cfg(test)]
 #[path = "test/designer_tool/test.rs"]
 mod tests;

@@ -379,6 +379,15 @@ fn load_manifest(path: &Path, scope: ComponentScope, i: &mut InstalledPackages) 
     }
 }
 
+/// Returns property keys for a class from the IDE catalogue.
+pub fn catalog_prop_keys(class: &str) -> Vec<&'static str> {
+    ide_catalog()
+        .catalog
+        .get(class)
+        .map(|d| d.props.iter().map(|p| p.key).collect())
+        .unwrap_or_default()
+}
+
 #[cfg(test)]
 #[path = "test/installed/test.rs"]
 mod test;

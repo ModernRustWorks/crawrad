@@ -307,6 +307,8 @@ pub struct NotesPanelView {
     alert_info: Json,
     #[rust]
     footer_info: Json,
+    #[rust]
+    row_rects: Vec<(usize, Rect)>,
 }
 
 impl Widget for NotesPanelView {
@@ -320,6 +322,7 @@ impl Widget for NotesPanelView {
 
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
         self.drawn_rows.clear();
+        self.row_rects.clear();
         while let Some(step) = self.view.draw_walk(cx, scope, walk).step() {
             if let Some(mut list) = step.as_portal_list().borrow_mut() {
                 list.set_item_range(cx, 0, self.rows.len());
@@ -419,6 +422,9 @@ impl Widget for NotesPanelView {
                     item.draw_all(cx, scope);
 
                     let r = item.area().rect(cx);
+                    if r.size.x > 0.0 && r.size.y > 0.0 {
+                        self.row_rects.push((i, r));
+                    }
                     self.drawn_rows.push(serde_json::json!({
                         "text": title,
                         "kind": kind,
@@ -595,14 +601,61 @@ impl NotesPanelView {
         NotesPanelAction::None
     }
 
+    /// Where each visible row was drawn during the last frame.
+    pub fn captured_rects(&self) -> Vec<(usize, Rect)> {
+        self.row_rects.clone()
+    }
+
+    /// Number of total rows currently loaded in the panel.
+    pub fn rows_count(&self) -> usize {
+        self.rows.len()
+    }
+
     /// Returns drawn row geometry and header state as a serialized JSON string for MCP inspect.
     pub fn rows_json(&self) -> String {
+        self.rows_json_with_rects(&[])
+    }
+
+    /// Serializes every row with its on-screen rectangle (null when not drawn or off-screen).
+    pub fn rows_json_with_rects(&self, rects: &[(usize, [f64; 4])]) -> String {
+        let rows: Vec<serde_json::Value> = self
+            .rows
+            .iter()
+            .enumerate()
+            .map(
+                |(
+                    i,
+                    (
+                        is_group,
+                        kind,
+                        title,
+                        badge_text,
+                        _badge_is_warn,
+                        right_text,
+                        faded,
+                        _struck,
+                        _collapsed,
+                    ),
+                )| {
+                    let rect = rects.iter().find(|(n, _)| *n == i).map(|(_, r)| *r);
+                    serde_json::json!({
+                        "text": title,
+                        "kind": kind,
+                        "badge": badge_text,
+                        "right": right_text,
+                        "group": is_group,
+                        "faded": faded,
+                        "rect": rect,
+                    })
+                },
+            )
+            .collect();
         serde_json::json!({
             "chips": self.chips_info,
             "file": self.file_info,
             "alert": self.alert_info,
             "footer": self.footer_info,
-            "rows": self.drawn_rows,
+            "rows": rows,
         })
         .to_string()
     }
@@ -614,6 +667,27 @@ impl NotesPanelViewRef {
         if let Some(mut inner) = self.borrow_mut() {
             inner.set_view(cx, head, rows);
         }
+    }
+
+    /// Where each visible row was drawn during the last frame.
+    pub fn captured_rects(&self) -> Vec<(usize, Rect)> {
+        self.borrow()
+            .map(|inner| inner.captured_rects())
+            .unwrap_or_default()
+    }
+
+    /// Returns the internal portal list widget for direct geometry inspection.
+    pub fn portal_list(&self) -> PortalListRef {
+        if let Some(inner) = self.borrow() {
+            inner.view.portal_list(id!(list))
+        } else {
+            PortalListRef::default()
+        }
+    }
+
+    /// Number of total rows currently loaded in the panel.
+    pub fn rows_count(&self) -> usize {
+        self.borrow().map(|inner| inner.rows_count()).unwrap_or(0)
     }
 
     /// Reads back whatever action occurred during this frame.
@@ -635,8 +709,13 @@ impl NotesPanelViewRef {
 
     /// Serializes rows and header state for MCP inspect tool.
     pub fn rows_json(&self) -> String {
+        self.rows_json_with_rects(&[])
+    }
+
+    /// Serializes rows with measured rectangle geometry.
+    pub fn rows_json_with_rects(&self, rects: &[(usize, [f64; 4])]) -> String {
         if let Some(inner) = self.borrow() {
-            inner.rows_json()
+            inner.rows_json_with_rects(rects)
         } else {
             "{}".to_string()
         }

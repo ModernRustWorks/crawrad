@@ -156,16 +156,30 @@ fn matches_filter(d: &ComponentDesc, query: &str) -> bool {
 /// The palette as the MCP `view.get_toolbox` reads it: the filter and every row.
 #[note("palette-to-json")]
 pub fn to_json(rows: &[Row], filter: &str) -> serde_json::Value {
+    to_json_with_rects(rows, filter, &[])
+}
+
+/// The palette as the MCP `view.get_toolbox` reads it: the filter, every row,
+/// and the on-screen geometry of each currently drawn row.
+pub fn to_json_with_rects(
+    rows: &[Row],
+    filter: &str,
+    rects: &[(usize, [f64; 4])],
+) -> serde_json::Value {
     let rows: Vec<serde_json::Value> = rows
         .iter()
-        .map(|r| match r {
-            Row::Section(title) => serde_json::json!({ "section": title }),
-            Row::Item {
-                class,
-                label,
-                blocked,
-            } => serde_json::json!({ "class": class, "label": label, "disabled": blocked }),
-            Row::Empty => serde_json::json!({ "empty": NO_MATCH }),
+        .enumerate()
+        .map(|(i, r)| {
+            let rect = rects.iter().find(|(n, _)| *n == i).map(|(_, r)| *r);
+            match r {
+                Row::Section(title) => serde_json::json!({ "section": title, "rect": rect }),
+                Row::Item {
+                    class,
+                    label,
+                    blocked,
+                } => serde_json::json!({ "class": class, "label": label, "disabled": blocked, "rect": rect }),
+                Row::Empty => serde_json::json!({ "empty": NO_MATCH, "rect": rect }),
+            }
         })
         .collect();
     serde_json::json!({ "empty_state": null, "filter": filter, "rows": rows })

@@ -111,7 +111,12 @@ pub const ALLOWED_SHELL_ROOT_FILES: &[&str] = &["ide_app.rs", "main.rs"];
 /// diagnostic dialog is a new 296-line module, and the three screens account for
 /// the remaining 90. The ratchet normally only tightens; it rises here because the
 /// shell genuinely gained a surface, not because something was moved into it.
-pub const MAX_SHELL_SOURCE_LINES: usize = 33_180;
+/// Raised on 27/11/2026 from 33,180 to 33,413 on the tree that carries both the
+/// three screens and the MCP's rectangles: this branch adds 233 lines over its own
+/// base, and 33,180 + 233 is exactly what counting this tree reports. Measured two
+/// ways rather than taken from either side of the merge, because neither side
+/// describes the tree that results from it.
+pub const MAX_SHELL_SOURCE_LINES: usize = 33_413;
 
 /// Maximum allowed lines for any individual `.rs` file in `crates/crawrad-ide/src/` (outside `test/`).
 ///

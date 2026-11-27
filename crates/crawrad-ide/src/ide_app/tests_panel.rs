@@ -7,7 +7,7 @@ use makepad_code_editor::tests_panel_view::TestsPanelAction as A;
 use makepad_code_editor::tests_panel_view::*;
 use makepad_widgets::*;
 
-use super::{IdeApp, layout};
+use super::{IdeApp, layout, xywh};
 
 impl IdeApp {
     pub(super) fn open_tests(&mut self, cx: &mut Cx) {
@@ -68,8 +68,35 @@ impl IdeApp {
         self.test_effect(cx, effect);
     }
 
-    pub(super) fn tests_json(&self) -> serde_json::Value {
+    pub(super) fn tests_view(&self) -> TestsPanelViewRef {
         let tab = self.dock().item(layout::tab_of(Panel::Tests));
-        serde_json::from_str(&tab.tests_panel_view(id!(tests_view)).rows_json()).unwrap_or_default()
+        tab.tests_panel_view(id!(tests_view))
+    }
+
+    pub(crate) fn measured_tests_rects(&self, cx: &Cx) -> Vec<(usize, [f64; 4])> {
+        if !self.tests_rects.is_empty() {
+            return (self.tests_rects.iter())
+                .filter(|(_, r)| r.size.x > 0.0 && r.size.y > 0.0)
+                .map(|(i, r)| (*i, xywh(*r)))
+                .collect();
+        }
+        let view = self.tests_view();
+        let list = view.portal_list();
+        let count = view.rows_count();
+        let mut rects = Vec::new();
+        for i in 0..count {
+            if let Some((_, item)) = list.get_item(i) {
+                let r = item.area().rect(cx);
+                if r.size.x > 0.0 && r.size.y > 0.0 {
+                    rects.push((i, xywh(r)));
+                }
+            }
+        }
+        rects
+    }
+
+    pub(super) fn tests_json(&self, cx: &Cx) -> serde_json::Value {
+        let rects = self.measured_tests_rects(cx);
+        serde_json::from_str(&self.tests_view().rows_json_with_rects(&rects)).unwrap_or_default()
     }
 }

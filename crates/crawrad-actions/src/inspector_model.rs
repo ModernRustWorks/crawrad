@@ -223,6 +223,11 @@ pub enum Row {
 
 #[note("inspector-model-rows-json")]
 pub fn rows_json(rows: &[Row]) -> serde_json::Value {
+    rows_json_with_rects(rows, &[])
+}
+
+/// Serializes inspector rows with measured on-screen rectangles.
+pub fn rows_json_with_rects(rows: &[Row], rects: &[(usize, [f64; 4])]) -> serde_json::Value {
     use serde_json::json;
     let cell = |c: &Cell| {
         let slot = format!("{:?}", c.slot());
@@ -239,26 +244,33 @@ pub fn rows_json(rows: &[Row]) -> serde_json::Value {
             Cell::Swatch { rgba, .. } => json!({ "slot": slot, "kind": "swatch", "rgba": rgba }),
         }
     };
-    let row = |r: &Row| match r {
-        Row::Category { label, open } => json!({ "category": label, "open": open }),
-        Row::Prop(p) => json!({
-            "key": p.key,
-            "label": p.label,
-            "depth": p.depth,
-            "template": p.editor.template(),
-            "cells": p.editor.cells().iter().map(cell).collect::<Vec<_>>(),
-        }),
-        Row::Event(e) => json!({
-            "event": e.event,
-            "label": e.label,
-            "handler": e.handler,
-            "base_handler": e.base_handler,
-            "template": e.template(),
-        }),
-        Row::Notice(text) => json!({ "notice": text }),
-        Row::InheritedFrom(form) => json!({ "inherited_from": form }),
+    let row = |(i, r): (usize, &Row)| {
+        let rect = rects.iter().find(|(n, _)| *n == i).map(|(_, r)| *r);
+        match r {
+            Row::Category { label, open } => {
+                json!({ "category": label, "open": open, "rect": rect })
+            }
+            Row::Prop(p) => json!({
+                "key": p.key,
+                "label": p.label,
+                "depth": p.depth,
+                "template": p.editor.template(),
+                "cells": p.editor.cells().iter().map(cell).collect::<Vec<_>>(),
+                "rect": rect,
+            }),
+            Row::Event(e) => json!({
+                "event": e.event,
+                "label": e.label,
+                "handler": e.handler,
+                "base_handler": e.base_handler,
+                "template": e.template(),
+                "rect": rect,
+            }),
+            Row::Notice(text) => json!({ "notice": text, "rect": rect }),
+            Row::InheritedFrom(form) => json!({ "inherited_from": form, "rect": rect }),
+        }
     };
-    json!({ "rows": rows.iter().map(row).collect::<Vec<_>>() })
+    json!({ "rows": rows.iter().enumerate().map(row).collect::<Vec<_>>() })
 }
 
 #[note("inspector-model-eventrow")]

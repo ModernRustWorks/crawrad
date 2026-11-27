@@ -964,6 +964,21 @@ pub struct IdeApp {
     /// Where each row of the `Events` tab WAS on the last frame.
     #[rust]
     rects_dos_eventos: Vec<(usize, Rect)>,
+    /// Where each visible row of the Toolbox was on the last frame.
+    #[rust]
+    toolbox_rects: Vec<(usize, Rect)>,
+    /// Where each visible row of the Object Inspector was on the last frame.
+    #[rust]
+    inspector_rects: Vec<(usize, Rect)>,
+    /// Where each visible row of the Notes panel was on the last frame.
+    #[rust]
+    notes_rects: Vec<(usize, Rect)>,
+    /// Where each visible row of the Tests panel was on the last frame.
+    #[rust]
+    tests_rects: Vec<(usize, Rect)>,
+    /// Where each clickable cell of the status bar was on the last frame.
+    #[rust]
+    status_bar_rects: Vec<(String, Rect)>,
     /// The last tap of the primary button — where and when.
     ///
     /// The memory required by Makepad's tap counter, which it does
@@ -1017,6 +1032,9 @@ pub struct IdeApp {
     /// The Form check panel.
     #[rust]
     form_check: CheckPanel,
+    /// Tracks whether a document was open during last form check paint.
+    #[rust]
+    form_check_had_doc: bool,
     /// The Sizes preview tab.
     #[rust(SizePreview::new(crawrad_designer::size_preview::SizePlatform::Desktop))]
     size_preview: SizePreview,
@@ -1351,3 +1369,7 @@ mod extension_reference_e2e;
 #[cfg(test)]
 #[path = "test/ide_app/diff_review_test.rs"]
 mod diff_review_test;
+
+#[cfg(test)]
+#[path = "test/ide_app/form_check_strip.rs"]
+mod form_check_strip;

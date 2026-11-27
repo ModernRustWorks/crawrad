@@ -117,6 +117,14 @@ impl IdeApp {
         }
     }
 
+    pub(crate) fn measured_status_bar_lsp_rect(&self) -> Option<[f64; 4]> {
+        self.status_bar_rects
+            .iter()
+            .find(|(k, _)| k == "lsp")
+            .filter(|(_, r)| r.size.x > 0.0 && r.size.y > 0.0)
+            .map(|(_, r)| xywh(*r))
+    }
+
     #[note("ide-app-status-bar-ideapp-status-bar-json")]
     pub(crate) fn status_bar_json(&self) -> serde_json::Value {
         let pairs = CELL_NAMES.split(' ').zip(&self.barra_na_tela);
@@ -125,6 +133,16 @@ impl IdeApp {
             .collect();
         let phase = self.lsp_shown.0.phase.name();
         cells.insert("lsp_phase".into(), phase.into());
+        // ONE key, and it says WHOSE rectangle it is. Writing the same value into
+        // `rect` as well would have the caller read "the status bar's rectangle"
+        // where the LSP cell's actually is — and whoever navigates only through the
+        // MCP has no way to suspect the mistake. Today the LSP is the bar's only
+        // clickable cell; when another becomes one it gets its own key, by the same
+        // rule: a rectangle is a promise that clicking there does something.
+        cells.insert(
+            "lsp_rect".into(),
+            serde_json::json!(self.measured_status_bar_lsp_rect()),
+        );
         cells.into()
     }
 

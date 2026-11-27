@@ -89,6 +89,25 @@ pub fn initialize_result() -> Value {
     })
 }
 
+/// Dispatches generic JSON-RPC methods (initialize, notifications/initialized, and unknown methods).
+pub fn dispatch_generic(
+    method: &str,
+    _params: &Value,
+    id: Value,
+) -> (JsonRpcResponse, &'static str) {
+    match method {
+        "initialize" => (JsonRpcResponse::success(id, initialize_result()), "applied"),
+        "notifications/initialized" => (
+            JsonRpcResponse::success(id, serde_json::json!({})),
+            "applied",
+        ),
+        _ => (
+            JsonRpcResponse::error(id, -32601, format!("Method not found: '{method}'"), None),
+            "error",
+        ),
+    }
+}
+
 #[note("protocol-jsonrpcerror")]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct JsonRpcError {

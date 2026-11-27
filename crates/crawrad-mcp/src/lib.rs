@@ -29,6 +29,7 @@ pub mod view_tool;
 pub mod workspace_config;
 
 pub use audit::{AuditEntry, AuditLogger};
+pub use guardrails::{Refusal, State, check};
 pub use protocol::{
     JsonRpcError, JsonRpcRequest, JsonRpcResponse, PROTOCOL_VERSION, TOOLS_VERSION, ToolCallResult,
     ToolDefinition,
