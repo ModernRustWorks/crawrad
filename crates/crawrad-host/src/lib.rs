@@ -135,11 +135,31 @@ impl ViewCenter {
 // HostModel
 // ---------------------------------------------------------------------------
 
+/// A form open in the strip: its document, and the file it came from.
+///
+/// The path is what tells two tabs apart and what keeps a file from opening
+/// twice; it is `None` for a form that has never been saved.
+#[note("hostmodel-openform")]
+pub struct OpenForm {
+    pub doc: Doc,
+    pub path: Option<PathBuf>,
+}
+
 #[note("hostmodel")]
 #[derive(Default)]
 pub struct HostModel {
-    /// The open visual form document, if any.
-    doc: Option<Doc>,
+    /// The forms open in the strip, in the order their tabs are drawn.
+    ///
+    /// The IDE used to hold ONE form, so opening a second one replaced the first
+    /// and the person lost their place. A tab per form is what the designer has
+    /// always promised and what the strip above the canvas now shows.
+    forms: Vec<OpenForm>,
+    /// Which form's tab is in front. `None` when none is open.
+    ///
+    /// `doc()` answers for THIS one, so the hundred callers that ask the host for
+    /// "the document" keep asking exactly as before: what changed is how many
+    /// there can be, not how one is reached.
+    front: Option<usize>,
     /// Which panel is in front (design canvas, form-as-text, or code editor).
     center: ViewCenter,
     /// Path of the file currently shown in the editor, if any.
@@ -172,7 +192,8 @@ impl HostModel {
     #[note("hostmodel-with-doc")]
     pub fn with_doc(doc: Doc) -> Self {
         Self {
-            doc: Some(doc),
+            forms: vec![OpenForm { doc, path: None }],
+            front: Some(0),
             ..Self::default()
         }
     }
@@ -183,22 +204,124 @@ impl HostModel {
 
     #[note("hostmodel-doc")]
     pub fn doc(&self) -> Option<&Doc> {
-        self.doc.as_ref()
+        self.forms.get(self.front?).map(|f| &f.doc)
     }
 
     #[note("hostmodel-doc-mut")]
     pub fn doc_mut(&mut self) -> Option<&mut Doc> {
-        self.doc.as_mut()
+        let i = self.front?;
+        self.forms.get_mut(i).map(|f| &mut f.doc)
     }
 
     #[note("hostmodel-set-doc")]
     pub fn set_doc(&mut self, doc: Option<Doc>) {
-        self.doc = doc;
+        match (doc, self.front) {
+            // Replacing what is in front: the tab stays, its document changes.
+            (Some(d), Some(i)) => self.forms[i].doc = d,
+            // Nothing in front yet, so this opens the first tab.
+            (Some(d), None) => {
+                self.forms.push(OpenForm { doc: d, path: None });
+                self.front = Some(self.forms.len() - 1);
+            }
+            // `None` closes the tab in front and leaves the others alone. It used
+            // to mean "no document at all", which was the same thing when there
+            // could only be one.
+            (None, Some(i)) => {
+                self.forms.remove(i);
+                self.front = self.front_after_removing(i);
+            }
+            (None, None) => {}
+        }
+    }
+
+    /// Which tab comes forward when the one at `removed` has just gone.
+    ///
+    /// The neighbour on the right, as every editor does, falling back to the one
+    /// on the left at the end of the strip, and to nothing when the strip empties.
+    fn front_after_removing(&self, removed: usize) -> Option<usize> {
+        if self.forms.is_empty() {
+            None
+        } else if removed < self.forms.len() {
+            Some(removed)
+        } else {
+            Some(self.forms.len() - 1)
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // The strip: many forms, one in front
+    // -----------------------------------------------------------------------
+
+    #[note("hostmodel-forms")]
+    pub fn forms(&self) -> &[OpenForm] {
+        &self.forms
+    }
+
+    #[note("hostmodel-front")]
+    pub fn front(&self) -> Option<usize> {
+        self.front
+    }
+
+    #[note("hostmodel-open-form")]
+    pub fn open_form(&mut self, doc: Doc, path: Option<PathBuf>) -> usize {
+        // A form already open comes forward instead of opening twice: two tabs
+        // of one file would each hold their own edits, and saving would decide
+        // between them silently.
+        if let Some(p) = path.as_ref()
+            && let Some(i) = self.forms.iter().position(|f| f.path.as_ref() == Some(p))
+        {
+            self.forms[i].doc = doc;
+            self.front = Some(i);
+            return i;
+        }
+        self.forms.push(OpenForm { doc, path });
+        let i = self.forms.len() - 1;
+        self.front = Some(i);
+        i
+    }
+
+    #[note("hostmodel-bring-to-front")]
+    pub fn bring_to_front(&mut self, i: usize) -> bool {
+        if i < self.forms.len() {
+            self.front = Some(i);
+            true
+        } else {
+            false
+        }
+    }
+
+    #[note("hostmodel-close-form")]
+    pub fn close_form(&mut self, i: usize) -> bool {
+        if i >= self.forms.len() {
+            return false;
+        }
+        self.forms.remove(i);
+        // Closing a tab BEHIND the one in front must not change which form the
+        // person is looking at, so the index follows its form instead of staying
+        // put. This is the bug every tab strip is born with.
+        self.front = match self.front {
+            Some(f) if f > i => Some(f - 1),
+            Some(f) if f == i => self.front_after_removing(i),
+            other => other,
+        };
+        true
+    }
+
+    #[note("hostmodel-close-all-forms")]
+    pub fn close_all_forms(&mut self) {
+        self.forms.clear();
+        self.front = None;
     }
 
     #[note("hostmodel-probe-dataset-columns")]
     pub fn probe_dataset_columns(&mut self, project_dir: Option<&Path>) {
-        if let Some(doc) = &self.doc {
+        // The fields are reached directly, not through `doc()`: that method
+        // borrows the whole host, and the two caches below are other fields of
+        // it. Disjoint field borrows are allowed; a method call is not.
+        if let Some(i) = self.front
+            && let Some(form) = self.forms.get(i)
+        {
+            let doc = &form.doc;
             self.dataset_columns
                 .ensure(doc.ir(), doc.revision(), project_dir);
             self.design_rows
@@ -212,7 +335,7 @@ impl HostModel {
         project_dir: Option<&Path>,
         id: &str,
     ) -> Option<Result<Vec<String>, String>> {
-        let doc = self.doc.as_ref()?;
+        let doc = self.doc()?;
         self.dataset_columns.answer(doc.ir(), project_dir, id)
     }
 
@@ -221,7 +344,7 @@ impl HostModel {
         &self,
         project_dir: Option<&Path>,
     ) -> BTreeMap<crawrad_ir::NodeId, crawrad_ir::design_rows::GridRows> {
-        let Some(doc) = self.doc.as_ref().map(|d| d.ir()) else {
+        let Some(doc) = self.doc().map(|d| d.ir()) else {
             return BTreeMap::new();
         };
         doc.nodes
@@ -238,24 +361,24 @@ impl HostModel {
 
     #[note("hostmodel-has-doc")]
     pub fn has_doc(&self) -> bool {
-        self.doc.is_some()
+        self.doc().is_some()
     }
 
     #[note("hostmodel-selection")]
     pub fn selection(&self) -> &[NodeId] {
-        self.doc.as_ref().map(|d| d.selection()).unwrap_or(&[])
+        self.doc().map(|d| d.selection()).unwrap_or(&[])
     }
 
     #[note("hostmodel-set-selection")]
     pub fn set_selection(&mut self, selection: Vec<NodeId>) {
-        if let Some(doc) = self.doc.as_mut() {
+        if let Some(doc) = self.doc_mut() {
             doc.select(selection);
         }
     }
 
     #[note("hostmodel-select-one")]
     pub fn select_one(&mut self, id: impl Into<NodeId>) {
-        if let Some(doc) = self.doc.as_mut() {
+        if let Some(doc) = self.doc_mut() {
             doc.select_one(id);
         }
     }
@@ -357,7 +480,7 @@ impl HostModel {
 
     #[note("hostmodel-clear-selection")]
     pub fn clear_selection(&mut self) {
-        if let Some(doc) = self.doc.as_mut() {
+        if let Some(doc) = self.doc_mut() {
             doc.clear_selection();
         }
     }
@@ -870,3 +993,7 @@ mod tests {
         assert_eq!(ViewCenter::History.as_str(), "history");
     }
 }
+
+#[cfg(test)]
+#[path = "test/form_strip/test.rs"]
+mod form_strip_test;
