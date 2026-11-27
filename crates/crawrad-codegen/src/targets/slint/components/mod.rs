@@ -5,10 +5,14 @@ pub mod checkbox;
 pub mod codegen;
 pub mod combobox;
 pub mod edit;
+pub mod group_box;
 pub mod label;
 pub mod list_box;
 pub mod memo;
+pub mod panel;
 pub mod progress_bar;
+pub mod radio_button;
+pub mod radio_group;
 pub mod spin_edit;
 pub mod toggle;
 pub mod track_bar;
@@ -31,6 +35,10 @@ static REGISTRY: &[&'static dyn SlintComponentCodegen] = &[
     &progress_bar::ProgressBarCodegen,
     &track_bar::TrackBarCodegen,
     &spin_edit::SpinEditCodegen,
+    &panel::PanelCodegen,
+    &group_box::GroupBoxCodegen,
+    &radio_button::RadioButtonCodegen,
+    &radio_group::RadioGroupCodegen,
 ];
 
 pub fn for_class(class: &str) -> Option<&'static dyn SlintComponentCodegen> {
@@ -39,6 +47,41 @@ pub fn for_class(class: &str) -> Option<&'static dyn SlintComponentCodegen> {
 
 pub fn classes() -> Vec<&'static str> {
     REGISTRY.iter().map(|c| c.class()).collect()
+}
+
+pub fn emit_children(
+    doc: &Document,
+    reg: &crawrad_registry::Registry,
+    parent: &Node,
+    indent: &str,
+) -> Result<String, Erro> {
+    let mut out = String::new();
+    for child_id in &parent.children {
+        if let Some(child) = doc.node(child_id) {
+            let effective = reg.effective_class(&child.class);
+            if for_class(effective).is_none() {
+                continue;
+            }
+            let child_rect = child
+                .rect()
+                .unwrap_or(crawrad_ir::Rect::new(0.0, 0.0, 80.0, 24.0));
+            let child_slint = emit_slint(
+                doc,
+                reg,
+                child,
+                child_rect.x,
+                child_rect.y,
+                child_rect.w,
+                child_rect.h,
+            )?;
+            for line in child_slint.lines() {
+                out.push_str(indent);
+                out.push_str(line);
+                out.push('\n');
+            }
+        }
+    }
+    Ok(out)
 }
 
 pub fn component_structs(doc: &Document, reg: &crawrad_registry::Registry) -> String {

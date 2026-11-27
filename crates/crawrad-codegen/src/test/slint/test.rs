@@ -391,3 +391,102 @@ fn test_slint_generator_emits_lists_and_numerical_controls() {
             .contains("window.on_tb_volume_changed")
     );
 }
+
+#[test]
+fn test_slint_generator_emits_containers_and_options() {
+    let mut doc = Document::new("FormContainers", "Form");
+    {
+        let form = doc.node_mut("FormContainers").unwrap();
+        form.set_rect(Rect::new(0.0, 0.0, 800.0, 600.0));
+        form.set_name("FormContainers");
+        form.set_text("Containers Form");
+    }
+
+    let mut pnl = Node::new("pnl_header", "Panel");
+    pnl.set_name("pnl_header");
+    pnl.set_rect(Rect::new(10.0, 10.0, 780.0, 60.0));
+    let _ = doc.add_child("FormContainers", pnl);
+
+    let mut btn_child = Node::new("btn_inside", "Button");
+    btn_child.set_name("btn_inside");
+    btn_child.set_text("Inside Panel");
+    btn_child.set_rect(Rect::new(10.0, 10.0, 120.0, 32.0));
+    let _ = doc.add_child("pnl_header", btn_child);
+
+    let mut grp = Node::new("grp_prefs", "GroupBox");
+    grp.set_name("grp_prefs");
+    grp.set_text("User Preferences");
+    grp.set_rect(Rect::new(10.0, 80.0, 380.0, 200.0));
+    let _ = doc.add_child("FormContainers", grp);
+
+    let mut rb_child = Node::new("rb_dark", "RadioButton");
+    rb_child.set_name("rb_dark");
+    rb_child.set_text("Use Dark Theme");
+    rb_child.set_rect(Rect::new(10.0, 20.0, 150.0, 24.0));
+    let _ = doc.add_child("grp_prefs", rb_child);
+
+    let mut rb_stand = Node::new("rb_mode", "RadioButton");
+    rb_stand.set_name("rb_mode");
+    rb_stand.set_text("Expert Mode");
+    rb_stand
+        .props
+        .insert("checked".to_string(), crawrad_ir::Value::Bool(true));
+    rb_stand
+        .events
+        .insert("on_click".to_string(), "rb_mode_click".to_string());
+    let _ = doc.add_child("FormContainers", rb_stand);
+
+    let mut rg = Node::new("rg_priority", "RadioGroup");
+    rg.set_name("rg_priority");
+    rg.set_text("Task Priority");
+    rg.props.insert(
+        "items".to_string(),
+        crawrad_ir::Value::List(vec![
+            crawrad_ir::Value::Str("Low".to_string()),
+            crawrad_ir::Value::Str("High".to_string()),
+        ]),
+    );
+    rg.props
+        .insert("item_index".to_string(), crawrad_ir::Value::Int(1));
+    let _ = doc.add_child("FormContainers", rg);
+
+    let generator = GeradorSlint;
+    let files = generator
+        .gerar(&doc, "my_app", &crawrad_registry::Registry::builtin())
+        .expect("must generate containers successfully");
+
+    let slint_file = files
+        .iter()
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormContainers.slint")
+        .unwrap();
+
+    assert!(slint_file.conteudo.contains("pnl_header := Rectangle"));
+    assert!(slint_file.conteudo.contains("btn_inside := Button"));
+    assert!(slint_file.conteudo.contains("grp_prefs := GroupBox"));
+    assert!(slint_file.conteudo.contains("title: \"User Preferences\";"));
+    assert!(slint_file.conteudo.contains("rb_dark := HorizontalLayout"));
+    assert!(slint_file.conteudo.contains("rb_mode := HorizontalLayout"));
+    assert!(slint_file.conteudo.contains("callback rb_mode_clicked();"));
+    assert!(slint_file.conteudo.contains("rg_priority := GroupBox"));
+    assert!(slint_file.conteudo.contains("title: \"Task Priority\";"));
+
+    let designer_file = files
+        .iter()
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormContainers.designer.rs")
+        .unwrap();
+    assert!(designer_file.conteudo.contains("pub pnl_header: Panel,"));
+    assert!(designer_file.conteudo.contains("pub btn_inside: Button,"));
+    assert!(designer_file.conteudo.contains("pub grp_prefs: GroupBox,"));
+    assert!(designer_file.conteudo.contains("pub rb_dark: RadioButton,"));
+    assert!(designer_file.conteudo.contains("pub rb_mode: RadioButton,"));
+    assert!(
+        designer_file
+            .conteudo
+            .contains("pub rg_priority: RadioGroup,")
+    );
+    assert!(designer_file.conteudo.contains("pub struct Panel"));
+    assert!(designer_file.conteudo.contains("pub struct GroupBox"));
+    assert!(designer_file.conteudo.contains("pub struct RadioButton"));
+    assert!(designer_file.conteudo.contains("pub struct RadioGroup"));
+    assert!(designer_file.conteudo.contains("window.on_rb_mode_clicked"));
+}
