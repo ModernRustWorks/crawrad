@@ -659,3 +659,65 @@ fn test_slint_generator_emits_button_variants_and_link_label() {
             .contains("window.on_lnk_docs_clicked")
     );
 }
+
+#[test]
+fn test_slint_generator_emits_graphic_components() {
+    let mut doc = Document::new("FormGraphics", "Form");
+    {
+        let form = doc.node_mut("FormGraphics").unwrap();
+        form.set_rect(Rect::new(0.0, 0.0, 800.0, 600.0));
+        form.set_name("FormGraphics");
+        form.set_text("Graphics Form");
+    }
+
+    let mut img = Node::new("img_logo", "Image");
+    img.set_name("img_logo");
+    img.set_rect(Rect::new(10.0, 10.0, 120.0, 80.0));
+    let _ = doc.add_child("FormGraphics", img);
+
+    let mut shp = Node::new("shp_box", "Shape");
+    shp.set_name("shp_box");
+    shp.set_rect(Rect::new(140.0, 10.0, 100.0, 100.0));
+    let _ = doc.add_child("FormGraphics", shp);
+
+    let mut pbx = Node::new("pbx_canvas", "PaintBox");
+    pbx.set_name("pbx_canvas");
+    pbx.set_rect(Rect::new(10.0, 120.0, 200.0, 150.0));
+    let _ = doc.add_child("FormGraphics", pbx);
+
+    let mut bvl = Node::new("bvl_separator", "Bevel");
+    bvl.set_name("bvl_separator");
+    bvl.set_rect(Rect::new(10.0, 280.0, 300.0, 4.0));
+    let _ = doc.add_child("FormGraphics", bvl);
+
+    let generator = GeradorSlint;
+    let files = generator
+        .gerar(&doc, "my_app", &crawrad_registry::Registry::builtin())
+        .expect("must generate graphic components successfully");
+
+    let slint_file = files
+        .iter()
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormGraphics.slint")
+        .unwrap();
+
+    assert!(slint_file.conteudo.contains("img_logo := Image"));
+    assert!(slint_file.conteudo.contains("image-fit: contain;"));
+    assert!(slint_file.conteudo.contains("shp_box := Rectangle"));
+    assert!(slint_file.conteudo.contains("border-color: #000000;"));
+    assert!(slint_file.conteudo.contains("pbx_canvas := Rectangle"));
+    assert!(slint_file.conteudo.contains("bvl_separator := Rectangle"));
+    assert!(slint_file.conteudo.contains("border-color: #a0a0a0;"));
+
+    let designer_file = files
+        .iter()
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormGraphics.designer.rs")
+        .unwrap();
+    assert!(designer_file.conteudo.contains("pub img_logo: Image,"));
+    assert!(designer_file.conteudo.contains("pub shp_box: Shape,"));
+    assert!(designer_file.conteudo.contains("pub pbx_canvas: PaintBox,"));
+    assert!(designer_file.conteudo.contains("pub bvl_separator: Bevel,"));
+    assert!(designer_file.conteudo.contains("pub struct Image"));
+    assert!(designer_file.conteudo.contains("pub struct Shape"));
+    assert!(designer_file.conteudo.contains("pub struct PaintBox"));
+    assert!(designer_file.conteudo.contains("pub struct Bevel"));
+}
