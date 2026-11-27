@@ -202,6 +202,22 @@ pub fn center_content(
     }
 }
 
+/// Locates the 0-based handler line in a unit file on disk.
+pub fn find_handler_line(unit: &Path, handler: &str) -> Option<usize> {
+    let text = std::fs::read_to_string(unit).ok()?;
+    crawrad_codegen::elo::localizar_handler(&text, handler).map(|d| d.linha)
+}
+
+/// Finds the unit path and handler line for an active file path.
+pub fn handler_location(
+    active_path: Option<&Path>,
+    handler: &str,
+) -> (Option<PathBuf>, Option<usize>) {
+    let unit = active_path.map(unit_path);
+    let line = unit.as_deref().and_then(|u| find_handler_line(u, handler));
+    (unit, line)
+}
+
 #[cfg(test)]
 #[path = "test/source/test.rs"]
 mod source_test;

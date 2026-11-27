@@ -2,12 +2,29 @@
 //! the new buffer is, from the arguments and the text the editor holds. The
 //! window decides where it lands (review, undo, buffer).
 
+use crawrad_actions::ViewAffinity;
 use crawrad_note::note;
 use serde_json::{Value, json};
+use sha2::{Digest, Sha256};
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use crate::protocol::ToolCallResult;
 use crate::run_tool::Answer;
+
+/// Computes lowercase hex-encoded SHA-256 hash of bytes.
+pub fn hex_sha256(bytes: &[u8]) -> String {
+    format!("{:x}", Sha256::digest(bytes))
+}
+
+/// Refuses an edit when a diff review is already pending for this file.
+pub fn check_review_busy(pending: bool, disable_gate: bool, path: &str) -> Option<Answer> {
+    if disable_gate || !pending {
+        None
+    } else {
+        Some((review_busy_error(path), "rejected"))
+    }
+}
 
 #[note("edit-refusal")]
 pub type Refusal = (&'static str, String);
@@ -325,6 +342,234 @@ pub fn parse_editor_open_file_path(args: &Value, exists: bool) -> Result<&str, A
         ));
     }
     Ok(path_str)
+}
+
+/// Prepares a `code.edit` operation by validating view affinity, arguments, pending review state,
+/// and verifying that the file was previously read in this session.
+pub fn prepare_code_edit<'a>(
+    args: &'a Value,
+    is_design_view: bool,
+    pending_review: bool,
+    disable_gate: bool,
+    session_read_hashes: &HashMap<String, String>,
+    current_content: Option<String>,
+) -> Result<(&'a str, PathBuf, String, &'a str), Answer> {
+    if is_design_view {
+        let (code, said) = wrong_view(ViewAffinity::Code);
+        return Err((ToolCallResult::error_text(code, said), "rejected"));
+    }
+    let (path_str, base_hash, content) = parse_code_edit_args(args)?;
+    if let Some(busy) = check_review_busy(pending_review, disable_gate, path_str) {
+        return Err(busy);
+    }
+    let ckey = crate::project_tree::canonical_key(path_str);
+    if let Err((refusal, outcome)) =
+        verify_read_before_edit(session_read_hashes, &ckey, path_str, base_hash)
+    {
+        return Err((refusal, outcome));
+    }
+    let current = current_content.unwrap_or_default();
+    Ok((path_str, PathBuf::from(path_str), current, content))
+}
+
+/// Prepares an `editor.apply_edit` operation by resolving path, verifying review and hash guards,
+/// and splicing text.
+pub fn prepare_apply_edit(
+    args: &Value,
+    active_path: Option<&Path>,
+    pending_review: bool,
+    disable_gate: bool,
+    session_read_hashes: &HashMap<String, String>,
+    current_content: Option<String>,
+) -> Result<(String, PathBuf, String, String, Value), Answer> {
+    let path_str = resolve_path(args, active_path)
+        .map_err(|(code, said)| (ToolCallResult::error_text(code, said), "error"))?;
+    if let Some(busy) = check_review_busy(pending_review, disable_gate, &path_str) {
+        return Err(busy);
+    }
+    let ckey = crate::project_tree::canonical_key(&path_str);
+    check_optional_base_hash(session_read_hashes, &ckey, &path_str, args)?;
+    let current = current_content.unwrap_or_default();
+    let after = splice(&current, args)
+        .map_err(|(code, said)| (ToolCallResult::error_text(code, said), "error"))?;
+    let lines = edit_lines_summary(&path_str, &after);
+    Ok((
+        path_str.clone(),
+        PathBuf::from(&path_str),
+        current,
+        after,
+        lines,
+    ))
+}
+
+/// Prepares a unified read target for `code.read`, `editor.read_file`, or `editor.get_buffer_content`.
+pub fn prepare_read_target(
+    tool: &str,
+    args: &Value,
+    is_design_view: bool,
+    active_path: Option<&Path>,
+) -> Result<String, Answer> {
+    if tool.starts_with("code.") && is_design_view {
+        let (code, said) = wrong_view(ViewAffinity::Code);
+        return Err((ToolCallResult::error_text(code, said), "rejected"));
+    }
+    if tool.starts_with("code.") {
+        parse_code_read_path(args).map(|s| s.to_string())
+    } else {
+        resolve_path(args, active_path)
+            .map_err(|(code, said)| (ToolCallResult::error_text(code, said), "error"))
+    }
+}
+
+/// Prepares a unified edit target for `code.edit`, `editor.edit_file`, or `editor.apply_edit`.
+pub fn prepare_unified_edit(
+    tool: &str,
+    args: &Value,
+    is_design_view: bool,
+    active_path: Option<&Path>,
+    pending_review: bool,
+    disable_gate: bool,
+    session_read_hashes: &HashMap<String, String>,
+    current_content: Option<String>,
+) -> Result<(String, PathBuf, Option<String>, String, Value), Answer> {
+    if tool.starts_with("code.") {
+        let (path_str, path_buf, current, content) = prepare_code_edit(
+            args,
+            is_design_view,
+            pending_review,
+            disable_gate,
+            session_read_hashes,
+            current_content,
+        )?;
+        Ok((
+            path_str.to_string(),
+            path_buf,
+            Some(current),
+            content.to_string(),
+            serde_json::json!({}),
+        ))
+    } else {
+        let (path_str, path_buf, current, after, lines) = prepare_apply_edit(
+            args,
+            active_path,
+            pending_review,
+            disable_gate,
+            session_read_hashes,
+            current_content,
+        )?;
+        Ok((path_str, path_buf, Some(current), after, lines))
+    }
+}
+
+/// Answers `editor.get_selection` by computing character ranges and formatting results.
+pub fn editor_selection_answer(
+    active_file: Option<&Path>,
+    buffer: Option<&str>,
+    selected_text: Option<String>,
+    bounds: Option<[(usize, usize); 2]>,
+    text_in_view: &str,
+) -> Answer {
+    let range = bounds.map(|r| selection_range(text_in_view, r));
+    let len = buffer.map(|t| t.len()).unwrap_or(0);
+    let res = selection_info(
+        active_file.map(|p| p.display().to_string()),
+        buffer.is_some(),
+        len,
+        selected_text,
+        range,
+    );
+    (res, "applied")
+}
+
+/// Builds the active file tool call result from raw host and view parameters.
+pub fn make_active_file_result(
+    active_path: Option<&Path>,
+    tab_path: Option<&Path>,
+    is_dirty: bool,
+    center_view: &str,
+    is_text: bool,
+    read_only: bool,
+    caret: Option<(usize, usize)>,
+    status: Option<&str>,
+    breadcrumb: Vec<String>,
+    disk_flags: (bool, bool),
+) -> ToolCallResult {
+    let path = active_path.map(|p| p.display().to_string());
+    let tab = tab_path.map(|p| p.display().to_string());
+    active_file_result(ActiveFileParams {
+        path: path.as_deref(),
+        is_dirty,
+        is_editable: is_text && active_path.is_some(),
+        center_view,
+        tab_file: tab.as_deref(),
+        read_only,
+        caret,
+        status,
+        breadcrumb,
+        disk_changed: disk_flags.0,
+        deleted_on_disk: disk_flags.1,
+    })
+}
+
+/// Information from a landed diff review.
+#[derive(Debug, Clone)]
+pub struct LandedReview<'a> {
+    pub predicted_hash: &'a str,
+    pub total_additions: usize,
+    pub total_deletions: usize,
+}
+
+/// Shapes the edit result for both applied edits and pending diff reviews.
+pub fn finish_edit_result(
+    path_str: &str,
+    after: &str,
+    landed: Result<Option<LandedReview<'_>>, &str>,
+    answer: Value,
+) -> Result<(ToolCallResult, String, Option<String>), Answer> {
+    match landed {
+        Err(e) => Err((ToolCallResult::error_text("diff-review-error", e), "error")),
+        Ok(Some(review)) => {
+            let res = pending_review_result(
+                answer,
+                path_str,
+                review.predicted_hash,
+                review.total_additions,
+                review.total_deletions,
+            );
+            Ok((res, crate::project_tree::canonical_key(path_str), None))
+        }
+        Ok(None) => {
+            let hash = hex_sha256(after.as_bytes());
+            let res = applied_edit_result(answer, path_str, &hash);
+            Ok((
+                res,
+                crate::project_tree::canonical_key(path_str),
+                Some(hash),
+            ))
+        }
+    }
+}
+
+/// Finishes a paged read, calculating hash and formatting the success result.
+pub fn finish_paged_read(
+    path_str: &str,
+    text: Result<String, (&str, String)>,
+    args: &Value,
+    predicted: Option<String>,
+) -> Result<(ToolCallResult, String, String), Answer> {
+    let text = match text {
+        Ok(t) => t,
+        Err((code, said)) => return Err((ToolCallResult::error_text(code, said), "error")),
+    };
+    let hash = hex_sha256(text.as_bytes());
+    let ckey = crate::project_tree::canonical_key(path_str);
+    let res = crate::paging::paged_read_success(path_str, &text, &hash, args, predicted);
+    Ok((res, ckey, hash))
+}
+
+/// Builds the audited answer pair for `editor.list_open_files`.
+pub fn list_open_files_answer(files: Value) -> Answer {
+    (open_files_result(files), "applied")
 }
 
 #[cfg(test)]

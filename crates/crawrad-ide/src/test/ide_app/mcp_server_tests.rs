@@ -378,7 +378,11 @@ fn test_audit_log_records_applied_rejected_and_error() {
     // Read the audit log file
     let log_content = std::fs::read_to_string(&temp_log).expect("read audit log");
     let lines: Vec<&str> = log_content.lines().collect();
-    assert_eq!(lines.len(), 3, "expected 3 audit log records");
+    assert_eq!(
+        lines.len(),
+        3,
+        "expected 3 audit log records, got: {lines:?}"
+    );
 
     let r1: Value = serde_json::from_str(lines[0]).unwrap();
     assert_eq!(r1["outcome"], "applied");
@@ -1623,5 +1627,539 @@ fn test_view_get_rail_and_toolbox() {
     assert_eq!(
         resp_tb2["result"]["data"]["empty_state"]["button"]["text"],
         "New Form…"
+    );
+}
+
+#[test]
+fn test_notes_rows_carry_screen_rects() {
+    let (mut cx, mut app) = create_test_ide_app();
+    let mut server = McpServer::new("test-notes-rects");
+
+    // Open Notes panel and populate notes view with 2 rows.
+    app.show_panel(&mut cx, crawrad_actions::Panel::Notes);
+    app.notes_view().set_view(
+        &mut cx,
+        (
+            [
+                "All 2".into(),
+                "Doc 1".into(),
+                "Int 0".into(),
+                "Cmt 1".into(),
+            ],
+            0,
+            vec!["All files".into()],
+            0,
+            "Alerts".into(),
+            false,
+            "2 notes".into(),
+        ),
+        vec![
+            (
+                true,
+                0,
+                "src/main.rs".into(),
+                "".into(),
+                false,
+                "2".into(),
+                false,
+                false,
+                false,
+            ),
+            (
+                false,
+                0,
+                "Doc Note".into(),
+                "".into(),
+                false,
+                "10".into(),
+                false,
+                false,
+                false,
+            ),
+        ],
+    );
+
+    // Simulate visible vs off-screen rows: row 0 is visible with non-zero dimensions; row 1 is off-screen.
+    app.notes_rects = vec![(
+        0,
+        makepad_widgets::Rect {
+            pos: makepad_widgets::dvec2(10.0, 20.0),
+            size: makepad_widgets::dvec2(180.0, 24.0),
+        },
+    )];
+
+    let req_notes = json!({
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "tools/call",
+        "params": {
+            "name": "view.get_notes",
+            "arguments": {}
+        }
+    });
+    let resp_str = server.handle_raw_request(&mut app, &mut cx, &req_notes.to_string());
+    let resp: Value = serde_json::from_str(&resp_str).expect("valid json");
+    assert_eq!(resp["result"]["isError"], Value::Null);
+    let rows = resp["result"]["data"]["rows"]
+        .as_array()
+        .expect("notes rows array");
+    assert_eq!(rows.len(), 2, "notes must have 2 rows");
+
+    // Row 0 is visible: non-zero width and height in [x, y, w, h] format.
+    let r0 = &rows[0]["rect"];
+    assert!(r0.is_array(), "visible row 0 must carry an array rect");
+    assert_eq!(r0, &json!([10.0, 20.0, 180.0, 24.0]));
+    assert!(
+        r0[2].as_f64().unwrap_or(0.0) > 0.0,
+        "width must be non-zero"
+    );
+    assert!(
+        r0[3].as_f64().unwrap_or(0.0) > 0.0,
+        "height must be non-zero"
+    );
+
+    // Row 1 is off-screen: null rect.
+    assert_eq!(
+        rows[1]["rect"],
+        Value::Null,
+        "off-screen row 1 must carry null rect"
+    );
+
+    // Zero-size rects are dropped to null.
+    app.notes_rects = vec![(
+        0,
+        makepad_widgets::Rect {
+            pos: makepad_widgets::dvec2(0.0, 0.0),
+            size: makepad_widgets::dvec2(0.0, 0.0),
+        },
+    )];
+    let resp_str_zero = server.handle_raw_request(&mut app, &mut cx, &req_notes.to_string());
+    let resp_zero: Value = serde_json::from_str(&resp_str_zero).expect("valid json");
+    let rows_zero = resp_zero["result"]["data"]["rows"]
+        .as_array()
+        .expect("rows");
+    assert_eq!(
+        rows_zero[0]["rect"],
+        Value::Null,
+        "zero-size row rect must be dropped to null"
+    );
+}
+
+#[test]
+fn test_tests_rows_carry_screen_rects() {
+    let (mut cx, mut app) = create_test_ide_app();
+    let mut server = McpServer::new("test-tests-rects");
+
+    // Open Tests panel and populate tests view with 2 rows.
+    app.show_panel(&mut cx, crawrad_actions::Panel::Tests);
+    app.tests_view().set_view(
+        &mut cx,
+        (
+            [
+                ("All (2)".into(), true),
+                ("Passed (1)".into(), true),
+                ("Failed (1)".into(), true),
+            ],
+            "2 tests".into(),
+        ),
+        vec![
+            (0, 0, "test_first".into(), "".into(), true, false),
+            (1, 1, "test_second".into(), "".into(), false, false),
+        ],
+    );
+
+    // Simulate visible vs off-screen rows: row 0 is visible; row 1 is off-screen.
+    app.tests_rects = vec![(
+        0,
+        makepad_widgets::Rect {
+            pos: makepad_widgets::dvec2(15.0, 30.0),
+            size: makepad_widgets::dvec2(160.0, 22.0),
+        },
+    )];
+
+    let req_tests = json!({
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "tools/call",
+        "params": {
+            "name": "view.get_tests",
+            "arguments": {}
+        }
+    });
+    let resp_str = server.handle_raw_request(&mut app, &mut cx, &req_tests.to_string());
+    let resp: Value = serde_json::from_str(&resp_str).expect("valid json");
+    assert_eq!(resp["result"]["isError"], Value::Null);
+    let rows = resp["result"]["data"]["rows"]
+        .as_array()
+        .expect("tests rows array");
+    assert_eq!(rows.len(), 2, "tests must have 2 rows");
+
+    // Row 0 is visible: non-zero width and height in [x, y, w, h] format.
+    let r0 = &rows[0]["rect"];
+    assert!(r0.is_array(), "visible row 0 must carry an array rect");
+    assert_eq!(r0, &json!([15.0, 30.0, 160.0, 22.0]));
+    assert!(
+        r0[2].as_f64().unwrap_or(0.0) > 0.0,
+        "width must be non-zero"
+    );
+    assert!(
+        r0[3].as_f64().unwrap_or(0.0) > 0.0,
+        "height must be non-zero"
+    );
+
+    // Row 1 is off-screen: null rect.
+    assert_eq!(
+        rows[1]["rect"],
+        Value::Null,
+        "off-screen row 1 must carry null rect"
+    );
+
+    // Zero-size rects are dropped to null.
+    app.tests_rects = vec![(
+        0,
+        makepad_widgets::Rect {
+            pos: makepad_widgets::dvec2(0.0, 0.0),
+            size: makepad_widgets::dvec2(0.0, 0.0),
+        },
+    )];
+    let resp_str_zero = server.handle_raw_request(&mut app, &mut cx, &req_tests.to_string());
+    let resp_zero: Value = serde_json::from_str(&resp_str_zero).expect("valid json");
+    let rows_zero = resp_zero["result"]["data"]["rows"]
+        .as_array()
+        .expect("rows");
+    assert_eq!(
+        rows_zero[0]["rect"],
+        Value::Null,
+        "zero-size row rect must be dropped to null"
+    );
+}
+
+#[test]
+fn test_status_bar_carries_clickable_rects() {
+    let (mut cx, mut app) = create_test_ide_app();
+    let mut server = McpServer::new("test-status-bar-rects");
+
+    // Simulate visible LSP cell in status bar.
+    app.status_bar_rects = vec![(
+        "lsp".to_string(),
+        makepad_widgets::Rect {
+            pos: makepad_widgets::dvec2(80.0, 600.0),
+            size: makepad_widgets::dvec2(120.0, 24.0),
+        },
+    )];
+
+    let req_status = json!({
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "tools/call",
+        "params": {
+            "name": "view.get_status_bar",
+            "arguments": {}
+        }
+    });
+    let resp_str = server.handle_raw_request(&mut app, &mut cx, &req_status.to_string());
+    let resp: Value = serde_json::from_str(&resp_str).expect("valid json");
+    assert_eq!(resp["result"]["isError"], Value::Null);
+    let data = &resp["result"]["data"];
+
+    // LSP clickable control carries non-zero rect.
+    let lsp_rect = &data["lsp_rect"];
+    assert!(lsp_rect.is_array(), "lsp cell must carry an array rect");
+    assert_eq!(lsp_rect, &json!([80.0, 600.0, 120.0, 24.0]));
+    assert!(
+        lsp_rect[2].as_f64().unwrap_or(0.0) > 0.0,
+        "width must be non-zero"
+    );
+    assert!(
+        lsp_rect[3].as_f64().unwrap_or(0.0) > 0.0,
+        "height must be non-zero"
+    );
+
+    // Non-clickable cells (e.g. target, errors, zoom) must not carry clickable rects.
+    assert_eq!(data["target_rect"], Value::Null);
+    assert_eq!(data["errors_rect"], Value::Null);
+    assert_eq!(data["zoom_rect"], Value::Null);
+
+    // When status bar cell was not drawn or zero size, it reports null.
+    app.status_bar_rects.clear();
+    let resp_str_none = server.handle_raw_request(&mut app, &mut cx, &req_status.to_string());
+    let resp_none: Value = serde_json::from_str(&resp_str_none).expect("valid json");
+    assert_eq!(resp_none["result"]["data"]["lsp_rect"], Value::Null);
+}
+
+/// The position of a row or control only holds for the frame in which it was drawn.
+/// Caches must be cleared at the top of the draw loop to prevent stale hit targets.
+#[test]
+fn surfaces_position_does_not_survive_hidden_panel() {
+    let source = include_str!("../../ide_app/draw.rs");
+
+    let start = source
+        .find("let mut rail_rects")
+        .expect("the beginning of draw pass changed: review this guard");
+    let before = &source[..start];
+
+    for field in ["notes_rects", "tests_rects", "status_bar_rects"] {
+        assert!(
+            before.contains(&format!("self.{field}.clear()")),
+            "`{field}` is no longer cleared BEFORE the draw loop: a hidden panel reports stale rects"
+        );
+    }
+}
+
+#[test]
+fn test_guardrail_refuses_run_start_when_build_running() {
+    let (mut cx, mut app) = create_test_ide_app();
+    let mut server = McpServer::new("test-guardrail-build");
+
+    // Spawn a persistent task in build_tasks to simulate an active build
+    let task_id = app.build_tasks.spawn("build", |reporter| {
+        while !reporter.is_cancelled() {
+            std::thread::sleep(std::time::Duration::from_millis(10));
+        }
+    });
+
+    assert!(app.build_tasks.is_running("build"));
+    assert!(server.running_process.running().is_none());
+
+    let req = json!({
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "tools/call",
+        "params": {
+            "name": "run.start",
+            "arguments": {}
+        }
+    });
+
+    let resp_str = server.handle_raw_request(&mut app, &mut cx, &req.to_string());
+    let resp: Value = serde_json::from_str(&resp_str).expect("valid json");
+
+    // Refusal must report stable code and the corrective fix
+    assert_eq!(resp["result"]["isError"], true);
+    assert_eq!(resp["result"]["data"]["code"], "build-running");
+    let content = resp["result"]["content"][0]["text"]
+        .as_str()
+        .unwrap_or_default();
+    assert!(content.contains("run.stop"), "fix must name stop command");
+    assert!(
+        content.contains("run.start"),
+        "message must name offending tool"
+    );
+
+    // Nothing must have been started or mutated
+    assert!(server.running_process.running().is_none());
+
+    // Read tools must remain allowed even while build runs
+    let req_read = json!({
+        "jsonrpc": "2.0",
+        "id": 2,
+        "method": "tools/call",
+        "params": {
+            "name": "view.get_status_bar",
+            "arguments": {}
+        }
+    });
+    let resp_read_str = server.handle_raw_request(&mut app, &mut cx, &req_read.to_string());
+    let resp_read: Value = serde_json::from_str(&resp_read_str).expect("valid json");
+    assert_eq!(resp_read["result"]["isError"], Value::Null);
+
+    app.build_tasks.cancel(task_id);
+}
+
+#[test]
+fn test_guardrail_refuses_selection_command_when_nothing_selected() {
+    let (mut cx, mut app) = create_test_ide_app();
+    let mut server = McpServer::new("test-guardrail-selection");
+
+    // Ensure selection is empty
+    app.host.doc_mut().unwrap().clear_selection();
+    assert!(app.host.selection().is_empty());
+
+    let initial_node_count = app.doc().unwrap().ir().nodes.len();
+
+    let req = json!({
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "tools/call",
+        "params": {
+            "name": "edit.delete",
+            "arguments": {}
+        }
+    });
+
+    let resp_str = server.handle_raw_request(&mut app, &mut cx, &req.to_string());
+    let resp: Value = serde_json::from_str(&resp_str).expect("valid json");
+
+    // Refusal must report code "no-selection" and fix naming designer.select
+    assert_eq!(resp["result"]["isError"], true);
+    assert_eq!(resp["result"]["data"]["code"], "no-selection");
+    let content = resp["result"]["content"][0]["text"]
+        .as_str()
+        .unwrap_or_default();
+    assert!(
+        content.contains("designer.select"),
+        "fix must name selection command"
+    );
+    assert!(
+        content.contains("edit.delete"),
+        "message must name offending tool"
+    );
+
+    // Document must not be mutated
+    assert_eq!(app.doc().unwrap().ir().nodes.len(), initial_node_count);
+
+    // Read tools like designer.get_selection must stay allowed
+    let req_read = json!({
+        "jsonrpc": "2.0",
+        "id": 2,
+        "method": "tools/call",
+        "params": {
+            "name": "designer.get_selection",
+            "arguments": {}
+        }
+    });
+    let resp_read_str = server.handle_raw_request(&mut app, &mut cx, &req_read.to_string());
+    let resp_read: Value = serde_json::from_str(&resp_read_str).expect("valid json");
+    assert_eq!(resp_read["result"]["isError"], Value::Null);
+
+    // Now select a component and verify the guardrail allows it
+    let root_id = app.doc().unwrap().ir().root.clone();
+    app.host.doc_mut().unwrap().select_one(&root_id);
+    assert!(!app.host.selection().is_empty());
+
+    let req_copy = json!({
+        "jsonrpc": "2.0",
+        "id": 3,
+        "method": "tools/call",
+        "params": {
+            "name": "edit.copy",
+            "arguments": {}
+        }
+    });
+    let resp_copy_str = server.handle_raw_request(&mut app, &mut cx, &req_copy.to_string());
+    let resp_copy: Value = serde_json::from_str(&resp_copy_str).expect("valid json");
+    assert_ne!(resp_copy["result"]["data"]["code"], "no-selection");
+}
+
+/// A row's rectangle is only true for the frame it was drawn in.
+///
+/// Measured on the running IDE, 24/11/2026: with the palette hidden behind the Explorer,
+/// `view.get_toolbox` kept answering the SAME 18 rectangles, at the same coordinates.
+/// Anyone clicking them would have hit the Explorer — and an agent that only sees through
+/// the MCP has no way to suspect it. The fix clears the caches at the top of the draw
+/// loop, and each panel refills its own; a panel that did not draw reports nothing, which
+/// is the truth.
+#[test]
+fn a_row_rect_does_not_outlive_its_panel() {
+    let source = include_str!("../../ide_app/draw.rs");
+
+    let loop_start = source
+        .find("let mut rail_rects")
+        .expect("the draw loop changed shape: revisit this guard");
+    let before_loop = &source[..loop_start];
+
+    for field in ["toolbox_rects", "inspector_rects"] {
+        assert!(
+            before_loop.contains(&format!("self.{field}.clear()")),
+            "`{field}` is no longer cleared BEFORE the draw loop: a hidden panel goes back \
+             to answering where it used to be, and whoever clicks hits the panel in front."
+        );
+    }
+}
+
+#[test]
+fn test_toolbox_and_inspector_rows_carry_screen_rects() {
+    let (mut cx, mut app) = create_test_ide_app();
+    let mut server = McpServer::new("test-toolbox-inspector-rects");
+
+    // Simulate visible vs off-screen rows via measured rects.
+    // Row 0 is on screen with non-zero dimensions; row 1 is off-screen.
+    app.toolbox_rects = vec![(
+        0,
+        makepad_widgets::Rect {
+            pos: makepad_widgets::dvec2(12.0, 34.0),
+            size: makepad_widgets::dvec2(180.0, 24.0),
+        },
+    )];
+    app.inspector_rects = vec![(
+        1,
+        makepad_widgets::Rect {
+            pos: makepad_widgets::dvec2(220.0, 60.0),
+            size: makepad_widgets::dvec2(160.0, 21.0),
+        },
+    )];
+
+    let req_tb = json!({
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "tools/call",
+        "params": {
+            "name": "view.get_toolbox",
+            "arguments": {}
+        }
+    });
+    let resp_tb_str = server.handle_raw_request(&mut app, &mut cx, &req_tb.to_string());
+    let resp_tb: Value = serde_json::from_str(&resp_tb_str).expect("valid json");
+    assert_eq!(resp_tb["result"]["isError"], Value::Null);
+    let tb_rows = resp_tb["result"]["data"]["rows"]
+        .as_array()
+        .expect("toolbox rows array");
+    assert!(tb_rows.len() > 1, "toolbox must have multiple rows");
+
+    // Visible row: non-zero width and height in [x, y, w, h] format.
+    let r0 = &tb_rows[0]["rect"];
+    assert!(r0.is_array(), "visible row 0 must carry an array rect");
+    assert_eq!(r0, &json!([12.0, 34.0, 180.0, 24.0]));
+    assert!(
+        r0[2].as_f64().unwrap_or(0.0) > 0.0,
+        "width must be non-zero"
+    );
+    assert!(
+        r0[3].as_f64().unwrap_or(0.0) > 0.0,
+        "height must be non-zero"
+    );
+
+    // Off-screen row: null rect (matching view.get_explorer absent geometry).
+    assert_eq!(
+        tb_rows[1]["rect"],
+        Value::Null,
+        "off-screen row 1 must carry null rect"
+    );
+
+    let req_insp = json!({
+        "jsonrpc": "2.0",
+        "id": 2,
+        "method": "tools/call",
+        "params": {
+            "name": "view.get_inspector",
+            "arguments": {}
+        }
+    });
+    let resp_insp_str = server.handle_raw_request(&mut app, &mut cx, &req_insp.to_string());
+    let resp_insp: Value = serde_json::from_str(&resp_insp_str).expect("valid json");
+    assert_eq!(resp_insp["result"]["isError"], Value::Null);
+    let insp_rows = resp_insp["result"]["data"]["rows"]
+        .as_array()
+        .expect("inspector rows array");
+    assert!(insp_rows.len() > 1, "inspector must have multiple rows");
+
+    // Row 0 is off-screen.
+    assert_eq!(
+        insp_rows[0]["rect"],
+        Value::Null,
+        "off-screen row 0 must carry null rect"
+    );
+
+    // Row 1 is visible on-screen.
+    let r1 = &insp_rows[1]["rect"];
+    assert!(r1.is_array(), "visible row 1 must carry an array rect");
+    assert_eq!(r1, &json!([220.0, 60.0, 160.0, 21.0]));
+    assert!(
+        r1[2].as_f64().unwrap_or(0.0) > 0.0,
+        "width must be non-zero"
+    );
+    assert!(
+        r1[3].as_f64().unwrap_or(0.0) > 0.0,
+        "height must be non-zero"
     );
 }

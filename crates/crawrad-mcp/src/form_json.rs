@@ -147,6 +147,18 @@ pub fn form_read_answer(
     ))
 }
 
+/// Builds the audited answer pair for `form.read`.
+pub fn form_read(
+    doc: Option<&crawrad_doc::Doc>,
+    center_view: &str,
+    is_dirty: bool,
+) -> crate::run_tool::Answer {
+    match form_read_answer(doc, center_view, is_dirty) {
+        Ok(res) => (res, "applied"),
+        Err(refused) => refused,
+    }
+}
+
 #[cfg(test)]
 #[path = "test/form_json/test.rs"]
 mod tests;

@@ -6,7 +6,7 @@ use makepad_code_editor::notes_panel_view::{
 };
 use makepad_widgets::*;
 
-use super::{IdeApp, layout};
+use super::{IdeApp, layout, xywh};
 
 impl IdeApp {
     pub(super) fn refresh_notes(&mut self, cx: &mut Cx) {
@@ -15,7 +15,7 @@ impl IdeApp {
         self.paint_notes(cx);
     }
 
-    fn notes_view(&self) -> NotesPanelViewRef {
+    pub(super) fn notes_view(&self) -> NotesPanelViewRef {
         let tab = self.dock().item(layout::tab_of(Panel::Notes));
         tab.notes_panel_view(id!(notes_view))
     }
@@ -56,7 +56,29 @@ impl IdeApp {
         }
     }
 
-    pub(super) fn notes_json(&self) -> serde_json::Value {
-        serde_json::from_str(&self.notes_view().rows_json()).unwrap_or_default()
+    pub(crate) fn measured_notes_rects(&self, cx: &Cx) -> Vec<(usize, [f64; 4])> {
+        if !self.notes_rects.is_empty() {
+            return (self.notes_rects.iter())
+                .filter(|(_, r)| r.size.x > 0.0 && r.size.y > 0.0)
+                .map(|(i, r)| (*i, xywh(*r)))
+                .collect();
+        }
+        let list = self.notes_view().portal_list();
+        let count = self.notes_view().rows_count();
+        let mut rects = Vec::new();
+        for i in 0..count {
+            if let Some((_, item)) = list.get_item(i) {
+                let r = item.area().rect(cx);
+                if r.size.x > 0.0 && r.size.y > 0.0 {
+                    rects.push((i, xywh(r)));
+                }
+            }
+        }
+        rects
+    }
+
+    pub(super) fn notes_json(&self, cx: &Cx) -> serde_json::Value {
+        let rects = self.measured_notes_rects(cx);
+        serde_json::from_str(&self.notes_view().rows_json_with_rects(&rects)).unwrap_or_default()
     }
 }

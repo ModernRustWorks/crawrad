@@ -597,5 +597,28 @@ live_design! {
         }
     }
 
-
+    // Why: owner's decision 24/11/2026 — title bar was cramped, Form check badge lives at
+    // the left end of the centre dock's bottom strip, surviving switches across all tabs.
+    pub CrawradFormCheckBadge = <Button> {
+        width: Fit, height: 22.0,
+        margin: { left: (CRAWRAD_ESPACO_M), right: (CRAWRAD_ESPACO_M) },
+        padding: { left: (CRAWRAD_ESPACO_M), right: (CRAWRAD_ESPACO_M), top: 0., bottom: 0. },
+        align: { y: 0.5 },
+        draw_bg: {
+            color_dither: 0.0
+            border_size: 1.0
+            border_radius: (CRAWRAD_RAIO_BOTAO)
+            color: (CRAWRAD_TRANSPARENTE)
+            color_hover: (CRAWRAD_CONTROLE)
+            color_down: (CRAWRAD_PAINEL)
+            border_color_1: (CRAWRAD_TRANSPARENTE)
+            border_color_2: (CRAWRAD_TRANSPARENTE)
+        }
+        draw_text: {
+            color: (CRAWRAD_TEXTO_TERCIARIO)
+            color_hover: (CRAWRAD_TEXTO_PRIMARIO)
+            text_style: <THEME_FONT_REGULAR> { font_size: (CRAWRAD_FONTE_CORPO) }
+        }
+        text: "No form open"
+    }
 }

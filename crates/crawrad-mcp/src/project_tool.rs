@@ -171,6 +171,20 @@ pub fn workspace_info(
     ToolCallResult::success_json(result, "Project workspace info retrieved.")
 }
 
+/// Builds the audited answer pair for `project.info` from raw host paths.
+pub fn workspace_info_answer(
+    root: Option<&Path>,
+    active_file: Option<&Path>,
+    center_view: &str,
+    is_dirty: bool,
+    open_files: &[PathBuf],
+) -> Answer {
+    let r = root.map(|p| p.display().to_string());
+    let a = active_file.map(|p| p.display().to_string());
+    let o = open_files.iter().map(|p| p.display().to_string()).collect();
+    (workspace_info(r, a, center_view, is_dirty, o), "applied")
+}
+
 /// Parses arguments for `project.create_file`.
 pub fn parse_create_file_args(args: &Value) -> Result<(&str, &str, bool), Answer> {
     let Some(path_str) = cargo_tool::nonempty(args, "path") else {
@@ -264,6 +278,104 @@ pub fn add_dependency_in_project(root: Option<PathBuf>, args: &Value) -> Answer 
         Err(refused) => return refused,
     };
     crate::run_tool::in_project(root, |d| cargo_tool::add_dependency(d, crate_name, args))
+}
+
+/// Dispatches workspace inspection and dependency queries.
+pub fn dispatch_workspace(name: &str, root: Option<PathBuf>, args: &Value) -> Option<Answer> {
+    match name {
+        "project.get_tree" => Some(get_tree(root, args)),
+        "project.get_dependencies" => Some(get_dependencies(root)),
+        "project.add_dependency" => Some(add_dependency_in_project(root, args)),
+        "project.build" => Some(crate::run_tool::in_project(root, |d| {
+            cargo_tool::run(d, args)
+        })),
+        _ => None,
+    }
+}
+
+/// The target of an open command.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum OpenDestination {
+    /// Opens an entire project folder.
+    Project(PathBuf),
+    /// Opens a visual form file (`.crawform`).
+    Form(PathBuf),
+    /// Opens a generic file in the text editor.
+    File(PathBuf),
+}
+
+/// Evaluates unsaved changes guard and resolves the target destination for `project.open`.
+pub fn plan_open(args: &Value, has_unsaved_changes: bool) -> Result<OpenDestination, Answer> {
+    let target_path = check_open_path(args)?;
+    if target_path.is_dir() && has_unsaved_changes {
+        return Err(unsaved_changes_refusal());
+    }
+    if target_path.is_dir() {
+        Ok(OpenDestination::Project(target_path))
+    } else if target_path.extension().is_some_and(|ext| ext == "crawform") {
+        Ok(OpenDestination::Form(target_path))
+    } else {
+        Ok(OpenDestination::File(target_path))
+    }
+}
+
+/// Prepares parameters and verifies guards for `project.create_file`.
+pub fn prepare_create_file<'a>(
+    args: &'a Value,
+    root: Option<&Path>,
+    pending_review: bool,
+    disable_gate: bool,
+) -> Result<(&'a str, &'a str, bool, PathBuf, String), Answer> {
+    let (path_str, content, open_in_editor) = parse_create_file_args(args)?;
+    let target_path = crate::project_tree::resolve(path_str, root);
+    if let Some(busy) = crate::edit::check_review_busy(pending_review, disable_gate, path_str) {
+        return Err(busy);
+    }
+    let path = target_path.display().to_string();
+    Ok((path_str, content, open_in_editor, target_path, path))
+}
+
+/// Writes a newly created file to disk, creating parent folders if needed.
+pub fn write_created_file(
+    target_path: &Path,
+    content: &str,
+    path_str: &str,
+) -> Result<usize, Answer> {
+    if let Some(parent) = target_path.parent() {
+        let _ = std::fs::create_dir_all(parent);
+    }
+    std::fs::write(target_path, content)
+        .map(|()| content.len())
+        .map_err(|e| {
+            (
+                ToolCallResult::error_text(
+                    "io-error",
+                    format!("Failed to create file '{path_str}': {e}"),
+                ),
+                "error",
+            )
+        })
+}
+
+/// Validates arguments and state guards for creating a new project.
+pub fn check_create_guards(
+    args: &Value,
+    has_unsaved_changes: bool,
+    has_unsaved_doc: bool,
+) -> Result<(&str, &str, &str, bool, Option<&str>), Answer> {
+    let parsed = create_args(args)?;
+    if has_unsaved_changes {
+        return Err(unsaved_changes_refusal());
+    }
+    if has_unsaved_doc {
+        return Err(unsaved_work_refusal());
+    }
+    Ok(parsed)
+}
+
+/// Shapes the success message after opening a project destination.
+pub fn open_destination_result(path: &Path) -> ToolCallResult {
+    ToolCallResult::success_text(format!("Opened '{}' in the IDE.", path.display()))
 }
 
 #[cfg(test)]

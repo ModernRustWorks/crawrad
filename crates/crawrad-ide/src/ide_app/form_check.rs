@@ -18,6 +18,18 @@ const CHECK_THEME: crawrad_designer::form_check::Theme = crawrad_designer::form_
     surface: crawrad_ir::Color::rgb(0x25, 0x25, 0x38),
 };
 
+/// As cores do selo, COPIADAS de `theme/tokens.rs`.
+///
+/// Copying an RGB is the kind of thing that ages silently: the palette changes and
+/// the badge keeps the old colour. The copy itself cannot be avoided — the `live!`
+/// macro resolves `(NAME)` as a RUST expression, so it cannot reach a DSL constant.
+/// What CAN be avoided is the DRIFT: the test `as_cores_do_selo_seguem_os_tokens`
+/// reads `tokens.rs` and fails if any of these four stops matching.
+const COLOR_ERROR: Vec4 = vec4(226.0 / 255.0, 114.0 / 255.0, 107.0 / 255.0, 1.0);
+const COLOR_WARNING: Vec4 = vec4(217.0 / 255.0, 164.0 / 255.0, 65.0 / 255.0, 1.0);
+const COLOR_OK: Vec4 = vec4(124.0 / 255.0, 180.0 / 255.0, 107.0 / 255.0, 1.0);
+const COLOR_MUTED: Vec4 = vec4(152.0 / 255.0, 152.0 / 255.0, 155.0 / 255.0, 1.0);
+
 impl IdeApp {
     /// A web project's form is a white page, badged in the bar.
     pub(super) fn sync_page_look(&mut self, cx: &mut Cx) {
@@ -40,6 +52,8 @@ impl IdeApp {
 
     /// Checks the form again when it changed, and repaints what shows it.
     pub(super) fn check_form(&mut self, cx: &mut Cx) {
+        let had_doc = self.form_check_had_doc;
+        let has_doc = self.host.doc().is_some();
         let reg = self.designer.registry.clone();
         let changed = match (self.host.doc(), reg) {
             (Some(d), Some(reg)) => {
@@ -59,11 +73,14 @@ impl IdeApp {
                     lang.hash(&mut hasher);
                     rev ^= hasher.finish();
                 }
-                self.form_check
-                    .refresh(ir_to_check, &reg, CHECK_THEME, &form, rev)
+                let findings_changed =
+                    self.form_check
+                        .refresh(ir_to_check, &reg, CHECK_THEME, &form, rev);
+                findings_changed || !had_doc
             }
-            _ => !std::mem::take(&mut self.form_check).findings.is_empty(),
+            _ => !std::mem::take(&mut self.form_check).findings.is_empty() || had_doc,
         };
+        self.form_check_had_doc = has_doc;
         if changed {
             self.paint_form_check(cx);
         }
@@ -89,16 +106,45 @@ impl IdeApp {
             (v.chips, v.note, v.fix_all),
             rows.collect(),
         );
-        let chip = self.ui.button(id!(form_check_chip));
-        chip.set_text(
+        let (text, color) = match self.host.doc() {
+            Some(_) => {
+                let (errors, warnings) = self.form_check.counts();
+                let color = if errors > 0 {
+                    COLOR_ERROR
+                } else if warnings > 0 {
+                    COLOR_WARNING
+                } else {
+                    COLOR_OK
+                };
+                (
+                    format!("Form check \u{00b7} {}", self.form_check.summary()),
+                    color,
+                )
+            }
+            None => ("No form open".to_string(), COLOR_MUTED),
+        };
+        let badge = self
+            .painel(Panel::Design)
+            .button(id!(center_tabs_bar.form_check_badge));
+        badge.set_text(cx, &text);
+        badge.apply_over(
             cx,
-            &format!("Form check \u{00b7} {}", self.form_check.summary()),
+            live! {
+                draw_text: {
+                    color: (color),
+                    color_hover: (color),
+                }
+            },
         );
-        chip.set_visible(cx, self.host.doc().is_some());
+        badge.set_visible(cx, true);
     }
 
     pub(super) fn form_check_actions(&mut self, cx: &mut Cx, actions: &Actions) {
-        if self.ui.button(id!(form_check_chip)).clicked(actions) {
+        if self
+            .painel(Panel::Design)
+            .button(id!(center_tabs_bar.form_check_badge))
+            .clicked(actions)
+        {
             return self.show_panel(cx, Panel::FormCheck);
         }
         let tab = self.dock().item(layout::tab_of(Panel::FormCheck));
