@@ -50,6 +50,59 @@ FONT_CRATES = [
 ]
 SKIP = {"target", ".git", ".crawrad-cache"}
 
+# makepad-widgets 1.0.0 ships Liberation Mono 1.04, which is licensed under the
+# OLD Liberation agreement (GPL-2.0 with a font exception), while 2.x is OFL-1.1.
+# Its themes reference the file by name (theme_desktop_dark.rs, theme_mobile_*),
+# so it cannot simply be dropped: it is REPLACED by our OFL 2.1.5 copy, same
+# family and same file name. Upstream fixed their own copy after we reported it
+# (makepad/makepad#1556), but that fix is not in the released crate we pin.
+FONT_SUBSTITUTIONS = {
+    ("makepad_widgets", "LiberationMono-Regular.ttf"):
+        ROOT / "crates" / "crawrad-runtime-makepad" / "resources" / "LiberationMono-Regular.ttf",
+}
+# Text that only appears in a font under the old Liberation agreement. Anything
+# carrying it must never reach the bundle, and therefore never the installer.
+FORBIDDEN_LICENCE = "Use of this Liberation font software is subject to the license agreement"
+
+
+def substitute_fonts(resources: Path) -> None:
+    """Swap the non-OFL fonts a dependency brought in for our own copies."""
+    for (crate, nome), source in FONT_SUBSTITUTIONS.items():
+        destination = resources / crate / "resources" / nome
+        if not destination.is_file():
+            continue
+        if not source.is_file():
+            raise SystemExit(f"font substitution source is missing: {source}")
+        shutil.copy2(source, destination)
+        # OFL-1.1 asks for the licence to travel with the font, so the notice
+        # beside our copy is placed beside the replacement too.
+        for notice in source.parent.glob("OFL-*.txt"):
+            shutil.copy2(notice, destination.parent / notice.name)
+        print(f"  font: {crate}/{nome} replaced by our OFL copy", flush=True)
+
+
+def assert_fonts_are_redistributable(resources: Path) -> None:
+    """Fail the bundle if any font still carries the old Liberation agreement.
+
+    This runs on what is about to be PACKAGED, not on what the repository holds,
+    because the font that put us at risk came from a dependency's resources and
+    not from our own tree.
+    """
+    culpados = []
+    for f in sorted(resources.rglob("*.ttf")) + sorted(resources.rglob("*.otf")):
+        dados = f.read_bytes()
+        if (FORBIDDEN_LICENCE.encode("ascii") in dados
+                or FORBIDDEN_LICENCE.encode("utf-16-be") in dados):
+            culpados.append(f.relative_to(resources).as_posix())
+    if culpados:
+        raise SystemExit(
+            "these bundled fonts carry the old Liberation agreement "
+            "(GPL-2.0 with font exception), not OFL:\n  "
+            + "\n  ".join(culpados)
+            + "\nAdd each to FONT_SUBSTITUTIONS with an OFL replacement."
+        )
+    print("  font licences: every bundled font is redistributable", flush=True)
+
 
 def run(cmd: list[str], env: dict[str, str] | None = None) -> None:
     print("+", " ".join(cmd), flush=True)
@@ -148,10 +201,12 @@ def main() -> None:
             src = Path(pkg["manifest_path"]).parent / "resources"
             if src.is_dir():
                 copy_tree(src, resources / pkg["name"].replace("-", "_") / "resources")
+    substitute_fonts(resources)
     # `crate://self/...` in the IDE's own theme.
     ide_assets = ROOT / "crates" / "crawrad-ide" / "assets"
     copy_tree(ide_assets, resources / "assets")
     copy_tree(ide_assets, resources / "crawrad_ide" / "assets")
+    assert_fonts_are_redistributable(resources)
 
     members = []
     for pkg in local_closure(meta, SDK_ROOTS):
