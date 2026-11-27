@@ -7,16 +7,15 @@
 use crate::ide_app::IdeApp;
 use crate::ide_app::source::Center;
 use crawrad_actions::ViewAffinity;
-use crawrad_actions::capability::CapabilityError;
 use crawrad_agent::chat_history;
 /// The hash the AI diff review keys on: one function, the agent's.
 pub use crawrad_agent::diff_review::hex_sha256;
 use crawrad_host::{HostModel, ViewCenter};
 use crawrad_mcp::audit::AuditLogger;
 pub use crawrad_mcp::listener::McpRequest;
-use crawrad_mcp::project_tool;
 use crawrad_mcp::project_tree::canonical_key;
-use crawrad_mcp::protocol::{JsonRpcRequest, JsonRpcResponse, ToolCallResult};
+use crawrad_mcp::protocol::{JsonRpcResponse, ToolCallResult};
+use crawrad_mcp::review_tool;
 use crawrad_mcp::tools::tools_list_result;
 use crawrad_mcp::view_tool::Drive;
 use makepad_widgets::Cx;
@@ -83,13 +82,11 @@ impl McpServer {
         if trimmed.is_empty() {
             return String::new();
         }
-        let req: JsonRpcRequest = match serde_json::from_str(trimmed) {
+        let req = match crawrad_mcp::protocol::parse_raw_request(trimmed) {
             Ok(r) => r,
-            Err(e) => {
+            Err(err_json) => {
                 self.record_audit("invalid_json", &json!(trimmed), "error");
-                let resp =
-                    JsonRpcResponse::error(Value::Null, -32700, format!("Parse error: {e}"), None);
-                return serde_json::to_string(&resp).unwrap_or_default();
+                return err_json;
             }
         };
         // JSON-RPC 2.0: If id is None, it is a notification and MUST NOT receive a response.
@@ -163,60 +160,69 @@ impl McpServer {
         let (name, args) = crawrad_mcp::tools::unwrap_action_execute(name, args);
         let rewritten = crawrad_mcp::edit::absolute_path_arg(args, &[app.raiz(), app.membro()]);
         let args = rewritten.as_ref().unwrap_or(args);
+        // Guardrail: runs for EVERY command, before anything is touched.
+        // A dialog owns the IDE while it is open — a person cannot reach past
+        // it, and neither may the MCP. The refusal says what to do, so the
+        // caller closes the dialog and sends the command again.
+        if let Some(refusal) = crawrad_mcp::guardrails::check(
+            name,
+            crawrad_mcp::guardrails::State {
+                modal_open: app.modal_open(),
+            },
+        ) {
+            self.record_audit(name, args, "rejected");
+            let text = format!("{} {}", refusal.message, refusal.fix);
+            return ToolCallResult::error_text(refusal.code, &text);
+        }
+
         // Guard: refuses to save while a review is pending
-        if !self.disable_diff_review_gate
-            && crawrad_mcp::tools::is_save_tool(name)
-            && app.has_any_pending_diff_review()
-        {
-            self.record_audit("action.execute", args, "rejected");
-            return ToolCallResult::error_text(
-                "pending-diff-review",
-                "Cannot save while a diff review is pending. Accept or reject the diff first.",
-            );
+        if let Err(refused) = crawrad_mcp::protocol::check_pending_review_save_guard(
+            self.disable_diff_review_gate,
+            name,
+            app.has_any_pending_diff_review(),
+        ) {
+            return self.audited("action.execute", args, refused);
         }
         // The tools that only read a part of the view: what each answers and
         // the line it says, audited and answered alike.
         let read = match name {
-            "editor.get_completion" => Some((app.completion_json(cx), "Completion list read.")),
-            "editor.get_choices" => Some((app.nav.choices_json(), "Definition choices read.")),
-            "view.get_inspector" => Some((
-                crawrad_actions::inspector_model::rows_json(&app.linhas_do_inspector()),
-                "Object Inspector read.",
+            "editor.get_completion" => Some(app.completion_json(cx)),
+            "editor.get_choices" => Some(app.nav.choices_json()),
+            "view.get_inspector" => Some(crawrad_actions::inspector_model::rows_json(
+                &app.linhas_do_inspector(),
             )),
-            "editor.get_rename" => Some((app.nav.rename.to_json(), "Rename dialog read.")),
-            "editor.get_references" => Some((app.nav.references.to_json(), "References read.")),
-            "editor.get_hover" => Some((app.hover_json(), "Hover card read.")),
-            "view.get_dialog" => Some((app.dialog_json(cx), "Dialog read.")),
-            "view.get_status_bar" => Some((app.status_bar_json(), "Status bar read.")),
-            "view.get_history" => Some((app.history_tab_json(cx), "History view read.")),
-            "view.get_designer" => Some((app.designer_json(cx), "Designer bar read.")),
-            "view.get_welcome" => Some((app.welcome_json(cx), "Welcome page read.")),
-            "view.get_explorer" => Some((app.explorer_drawn.clone(), "Explorer read.")),
-            "view.get_notes" => Some((app.notes_json(), "Notes panel read.")),
-            "view.get_tests" => Some((app.tests_json(), "Tests panel read.")),
-            "form.check" => Some((app.form_check_json(), "Form checked.")),
-            "view.sizes" => Some((app.sizes_json(), "Sizes preview read.")),
-            "strings.list" => Some((app.strings_list_json(args), "Strings read.")),
-            "view.get_rail" => Some((app.rail_json(), "Activity rail read.")),
-            "view.get_toolbox" => Some((app.toolbox_json(cx), "Toolbox read.")),
-            "view.set_toolbox_filter" => {
-                Some((app.set_toolbox_filter(cx, &args["text"]), "Filtered."))
-            }
-            "view.get_chat" => Some((app.chat_messages_json(cx), "Chat messages read.")),
-            "view.get_extension_views" => {
-                Some((app.extension_views_json(cx), "Extension views read."))
-            }
-            "editor.get_line_marks" => Some((app.line_marks_json(), "Line marks read.")),
-            "editor.get_semantic_tokens" => Some((app.semantic_json(), "Semantic tokens read.")),
-            "editor.get_code_lenses" => Some((app.code_lenses_json(), "Code lenses read.")),
-            "editor.get_code_actions" => Some((app.code_actions_json(cx), "Code actions read.")),
-            "editor.get_signature_help" => Some((app.signature_json(), "Parameter card read.")),
-            "editor.get_decorations" => Some((app.squiggles_json(), "Decorations read.")),
+            "editor.get_rename" => Some(app.nav.rename.to_json()),
+            "editor.get_references" => Some(app.nav.references.to_json()),
+            "editor.get_hover" => Some(app.hover_json()),
+            "view.get_dialog" => Some(app.dialog_json(cx)),
+            "view.get_status_bar" => Some(app.status_bar_json()),
+            "view.get_history" => Some(app.history_tab_json(cx)),
+            "view.get_designer" => Some(app.designer_json(cx)),
+            "view.get_welcome" => Some(app.welcome_json(cx)),
+            "view.get_explorer" => Some(app.explorer_drawn.clone()),
+            "view.get_notes" => Some(app.notes_json()),
+            "view.get_tests" => Some(app.tests_json()),
+            "form.check" => Some(app.form_check_json()),
+            "view.sizes" => Some(app.sizes_json()),
+            "strings.list" => Some(app.strings_list_json(args)),
+            "view.get_rail" => Some(app.rail_json()),
+            "view.get_toolbox" => Some(app.toolbox_json(cx)),
+            "view.set_toolbox_filter" => Some(app.set_toolbox_filter(cx, &args["text"])),
+            "view.get_chat" => Some(app.chat_messages_json(cx)),
+            "view.get_extension_views" => Some(app.extension_views_json(cx)),
+            "editor.get_line_marks" => Some(app.line_marks_json()),
+            "editor.get_semantic_tokens" => Some(app.semantic_json()),
+            "editor.get_code_lenses" => Some(app.code_lenses_json()),
+            "editor.get_code_actions" => Some(app.code_actions_json(cx)),
+            "editor.get_signature_help" => Some(app.signature_json()),
+            "editor.get_decorations" => Some(app.squiggles_json()),
             _ => None,
         };
-        if let Some((answer, said)) = read {
+        if let Some(answer) = read {
             self.record_audit(name, args, "applied");
-            return ToolCallResult::success_json(answer, said);
+            if let Some(res) = crawrad_mcp::view_tool::view_read_result(name, answer) {
+                return res;
+            }
         }
         let open = app.open_dialog_spec();
         if let Some(asked) = crawrad_mcp::dialog_tool::plan(name, args, open.as_ref()) {
@@ -260,15 +266,24 @@ impl McpServer {
                 let result = params.map(|(key, lang, text)| app.strings_set(cx, key, lang, text));
                 return self.audited(name, args, crawrad_mcp::strings_tool::answer(result));
             }
-            "code.read" | "editor.read_file" => return self.tool_code_read(app, args),
+            "code.read" | "editor.read_file" => {
+                return self.tool_code_read(&app.host, &app.diff_reviews, args);
+            }
             "code.edit" | "editor.edit_file" => return self.tool_code_edit(app, args),
             "editor.get_buffer_content" => return self.tool_editor_get_buffer_content(app, args),
             "editor.apply_edit" => return self.tool_editor_apply_edit(app, args),
             "form.read" | "designer.get_active_form" => return self.tool_form_read(&app.host),
-            "designer.list_components" => return self.tool_designer_list_components(&app.host),
-            "designer.get_selection" => return self.tool_designer_get_selection(&app.host),
+            "designer.list_components" => {
+                let a = crawrad_mcp::designer_tool::list_components(app.host.doc());
+                return self.audited(name, &json!({}), a);
+            }
+            "designer.get_selection" => {
+                let a = crawrad_mcp::designer_tool::get_selection(app.host.doc());
+                return self.audited(name, &json!({}), a);
+            }
             "designer.get_component_properties" => {
-                return self.tool_designer_get_component_properties(&app.host, args);
+                let a = crawrad_mcp::designer_tool::get_component_properties(app.host.doc(), args);
+                return self.audited(name, args, a);
             }
             "designer.add_component"
             | "designer.set_component_properties"
@@ -304,15 +319,15 @@ impl McpServer {
                     .as_ref()
                     .map(|(n, ..)| (n.as_ref(), sub_rows.as_slice()));
                 let open = app.open_menu.map(|m| format!("{m:?}"));
-                let mut state = crawrad_actions::menu::open_menu_json(
+                let hint = app.menu_hint.as_ref().map(|(_, why)| why.clone());
+                return crawrad_mcp::view_tool::open_menu_result(
                     open,
                     app.menu_highlight(),
                     &rows,
                     sub,
                     app.menu_rects_json(cx),
+                    hint,
                 );
-                state["hint"] = serde_json::json!(app.menu_hint.as_ref().map(|(_, why)| why));
-                return ToolCallResult::success_json(state, "Open menu read.");
             }
             "view.capture" => {
                 let dpi = cx.windows[app.window_id(cx)].window_geom.dpi_factor;
@@ -326,31 +341,21 @@ impl McpServer {
                 return self.audited(name, args, answer);
             }
             "designer.set_grid_size" => {
-                let Some(size) = args.get("size").and_then(|v| v.as_f64()) else {
-                    return ToolCallResult::error_text(
-                        "bad-args",
-                        "designer.set_grid_size needs `size`",
-                    );
+                let size = match crawrad_mcp::designer_tool::set_grid_size_arg(args) {
+                    Ok(s) => s,
+                    Err(e) => return e,
                 };
-                app.set_grid_size(cx, size as f32);
+                app.set_grid_size(cx, size);
                 self.record_audit(name, args, "applied");
                 return ToolCallResult::success_json(app.designer_json(cx), "Grid size set.");
             }
             "designer.set_language" => {
-                let Some(code) = args.get("code").and_then(|v| v.as_str()) else {
-                    return ToolCallResult::error_text(
-                        "bad-args",
-                        "designer.set_language needs `code`",
-                    );
+                let code = match crawrad_mcp::designer_tool::set_language_arg(args) {
+                    Ok(c) => c,
+                    Err(e) => return e,
                 };
                 if let Err(valids) = app.set_design_language(Some(code)) {
-                    let mut list = vec!["en".to_string()];
-                    list.extend(valids);
-                    let valid_list = list.join(", ");
-                    return ToolCallResult::error_text(
-                        "unknown-language",
-                        format!("Unknown language '{code}'. Valid languages: {valid_list}"),
-                    );
+                    return crawrad_mcp::designer_tool::unknown_language_error(code, valids);
                 }
                 app.reabrir_no_canvas(cx);
                 app.check_form(cx);
@@ -410,7 +415,8 @@ impl McpServer {
             return self.tool_project_info(&app.host);
         }
         if name == "project.get_tree" {
-            return self.tool_project_get_tree(&app.host, args);
+            let a = crawrad_mcp::project_tool::get_tree(app.host.workspace_root(), args);
+            return self.audited(name, args, a);
         }
         if name == "project.create_file" {
             return self.tool_project_create_file(app, cx, args);
@@ -422,18 +428,20 @@ impl McpServer {
             return self.tool_project_delete_file(app, cx, args);
         }
         if name == "project.get_dependencies" {
-            return self.tool_project_get_dependencies(&app.host);
+            let a = crawrad_mcp::project_tool::get_dependencies(app.host.workspace_root());
+            return self.audited(name, &json!({}), a);
         }
         if name == "project.install_extension" || name == "project.uninstall_extension" {
             let done = app.extension_tool(cx, name, args);
-            self.record_audit(name, args, if done.is_ok() { "applied" } else { "error" });
-            return match done {
-                Ok(said) => ToolCallResult::success_json(json!({ "status": said }), said),
-                Err(said) => ToolCallResult::error_text("extension-refused", said),
-            };
+            let a = crawrad_mcp::project_tool::extension_tool_result(done);
+            return self.audited(name, args, a);
         }
         if name == "project.add_dependency" {
-            return self.tool_project_add_dependency(&app.host, args);
+            let a = crawrad_mcp::project_tool::add_dependency_in_project(
+                app.host.workspace_root(),
+                args,
+            );
+            return self.audited(name, args, a);
         }
         if name == "project.create" {
             return self.tool_project_create(app, cx, args);
@@ -442,17 +450,32 @@ impl McpServer {
             return self.tool_project_open(app, cx, args);
         }
         if name == "project.build" {
-            return self.tool_project_build(&app.host, args);
+            let a = crawrad_mcp::run_tool::in_project(app.host.workspace_root(), |d| {
+                crawrad_mcp::cargo_tool::run(d, args)
+            });
+            return self.audited(name, args, a);
         }
         // 7. Build & Run tools
         if name == "build.check" {
-            return self.tool_build_check(&app.host);
+            let a = crawrad_mcp::run_tool::check_in_project(app.host.workspace_root());
+            return self.audited(name, &json!({}), a);
         }
         if name == "build.build" {
-            return self.tool_build_build(&app.host, args);
+            let a = crawrad_mcp::run_tool::build_in_project(app.host.workspace_root(), args);
+            return self.audited(name, args, a);
         }
         if name == "build.get_diagnostics" {
-            return self.tool_build_get_diagnostics(&app.host);
+            let a = crawrad_mcp::run_tool::diagnostics_in_project(app.host.workspace_root());
+            return self.audited(name, &json!({}), a);
+        }
+        // The diff review, reachable from outside: a write tool answers
+        // "pending_approval" and the edit waits in the editor. Without these the
+        // caller is told to wait for a human and has no way to finish.
+        if name == "review.status" {
+            return self.tool_review_status(&app.diff_reviews);
+        }
+        if name == "review.accept" || name == "review.reject" {
+            return self.tool_review_decide(app, cx, args, name == "review.accept");
         }
         if name == "run.start" {
             // The form IS the program: generate first, as the IDE's Run does.
@@ -466,7 +489,8 @@ impl McpServer {
             return self.tool_run_start(&app.host, args);
         }
         if name == "run.stop" {
-            return self.tool_run_stop();
+            let a = self.running_process.stop();
+            return self.audited(name, &json!({}), a);
         }
         if name == "debug.state" {
             let state = app.host.debug_state_json();
@@ -484,30 +508,17 @@ impl McpServer {
             .into_iter()
             .find(|a| a.id == name);
         if let Some(action) = action_opt {
-            if let Some(why) = crawrad_mcp::dialogs::modal_refusal(app.modal_open(), action.label) {
-                self.record_audit(name, args, "rejected");
-                let text = format!("Action '{name}' was not run: {why}.");
-                return ToolCallResult::error_text("action-disabled", text);
+            let is_design = app.center() == Center::Design;
+            if let Err((refusal, outcome)) = crawrad_mcp::action_tool::check_action_preconditions(
+                &action,
+                args,
+                app.modal_open(),
+                is_design,
+            ) {
+                self.record_audit(name, args, outcome);
+                return refusal;
             }
 
-            // Validate arguments against action.input_schema()
-            if let Err(err_msg) = crawrad_mcp::tools::validate_arguments(&action, args) {
-                self.record_audit(name, args, "error");
-                return ToolCallResult::error_text("invalid-params", &err_msg);
-            }
-
-            // Context Guard: View Guard declared on action descriptor
-            match action.view {
-                needs @ ViewAffinity::Design if app.center() != Center::Design => {
-                    return self.wrong_view(name, args, needs);
-                }
-                needs @ ViewAffinity::Code if app.center() == Center::Design => {
-                    return self.wrong_view(name, args, needs);
-                }
-                _ => {}
-            }
-
-            // Context Guard: Action enabled predicate with realistic project context
             let crawrad_args = convert_json_args_to_crawrad(args);
             let registry = &crawrad_project::installed::ide_catalog().catalog;
             let ctx = crawrad_actions::Context {
@@ -521,73 +532,30 @@ impl McpServer {
                 text: app.editor_text(),
             };
 
-            if !action.enabled.allows(&ctx) {
-                self.record_audit(name, args, "rejected");
-                let instruction = match Some(action.enabled.need).filter(|n| !n.met(&ctx)) {
-                    Some(n) => format!("It needs {}. {}", n.reason(), n.remedy()),
-                    None => "Check active selection and IDE state and resend.".to_string(),
-                };
-                return ToolCallResult::error_text(
-                    "action-disabled",
-                    format!(
-                        "Action '{}' is currently disabled in the IDE context: {instruction}",
-                        action.id
-                    ),
-                );
+            if let Err((refusal, outcome)) =
+                crawrad_mcp::action_tool::check_action_enabled(&action, &ctx)
+            {
+                self.record_audit(name, args, outcome);
+                return refusal;
             }
 
-            // Execute action producing Efeito
+            let snap_antes = crawrad_mcp::action_tool::StateSnapshot::capture(
+                app.doc(),
+                app.center().as_str(),
+                app.is_editor_dirty(),
+            );
+
             let efeito = (action.execute)(&ctx);
 
-            let rev_antes = app.doc().map(|d| d.revision());
-            let sel_antes = app.doc().map(|d| d.selection().to_vec());
-            let centro_antes = app.center();
-            let sujo_antes = app.is_editor_dirty();
-
-            // Apply effect via IDE app on UI thread
             match app.apply_effect(cx, efeito) {
                 Ok(()) => {
-                    let rev_depois = app.doc().map(|d| d.revision());
-                    let sel_depois = app.doc().map(|d| d.selection().to_vec());
-                    let centro_depois = app.center();
-                    let sujo_depois = app.is_editor_dirty();
-
-                    let mudou = rev_antes != rev_depois
-                        || sel_antes != sel_depois
-                        || centro_antes != centro_depois
-                        || sujo_antes != sujo_depois;
-
+                    let snap_depois = crawrad_mcp::action_tool::StateSnapshot::capture(
+                        app.doc(),
+                        app.center().as_str(),
+                        app.is_editor_dirty(),
+                    );
                     self.record_audit(name, args, "applied");
-                    if mudou {
-                        ToolCallResult::success_json(
-                            json!({
-                                "action": name,
-                                "mutated": true,
-                                "revision_before": rev_antes,
-                                "revision_after": rev_depois,
-                                "selection": sel_depois,
-                                "center_view": centro_depois.as_str(),
-                                "is_dirty": sujo_depois,
-                            }),
-                            format!(
-                                "Action '{}' applied successfully (rev: {}).",
-                                name,
-                                rev_depois.unwrap_or(0)
-                            ),
-                        )
-                    } else {
-                        ToolCallResult::success_json(
-                            json!({
-                                "action": name,
-                                "mutated": false,
-                                "revision": rev_depois,
-                                "selection": sel_depois,
-                                "center_view": centro_depois.as_str(),
-                                "is_dirty": sujo_depois,
-                            }),
-                            format!("Action '{}' executed (no document or state change).", name),
-                        )
-                    }
+                    crawrad_mcp::action_tool::format_action_result(name, &snap_antes, &snap_depois)
                 }
                 Err(e) => {
                     self.record_audit(name, args, "error");
@@ -616,65 +584,74 @@ impl McpServer {
                             .flatten();
                     }
 
-                    let ext_messages = app.take_extension_messages();
+                    let msgs: Vec<Value> = app
+                        .take_extension_messages()
+                        .iter()
+                        .map(|(lvl, msg)| json!({ "level": format!("{lvl:?}"), "message": msg }))
+                        .collect();
                     let status_msg = efeito.status.clone();
                     let _ = app.apply_effect(cx, efeito);
                     self.record_audit(name, args, "applied");
-
-                    let mut data_map = serde_json::Map::new();
-                    data_map.insert("capability".to_string(), json!(cap_id));
-                    data_map.insert(
-                        "status".to_string(),
-                        json!(status_msg.unwrap_or_else(|| "executed".to_string())),
-                    );
-                    if let Some(res) = ext_result {
-                        data_map.insert("result".to_string(), res);
-                    }
-                    if !ext_messages.is_empty() {
-                        let msgs: Vec<Value> = ext_messages
-                            .iter()
-                            .map(|(lvl, msg)| {
-                                json!({
-                                    "level": format!("{:?}", lvl),
-                                    "message": msg
-                                })
-                            })
-                            .collect();
-                        data_map.insert("messages".to_string(), json!(msgs));
-                    }
-
-                    ToolCallResult::success_json(
-                        Value::Object(data_map),
-                        format!("Capability '{}' executed successfully.", cap_id),
+                    crawrad_mcp::action_tool::format_capability_result(
+                        &cap_id, status_msg, ext_result, &msgs,
                     )
                 }
                 Err(cap_err) => {
                     self.record_audit(name, args, "rejected");
-                    match cap_err {
-                        CapabilityError::ViewMismatch { required, .. } => {
-                            let (code, msg) = crawrad_mcp::edit::wrong_view(required);
-                            ToolCallResult::error_text(code, msg)
-                        }
-                        CapabilityError::MissingParameter {
-                            param,
-                            capability_id,
-                        } => ToolCallResult::error_text(
-                            "invalid-params",
-                            format!(
-                                "Missing required parameter '{param}' for capability '{capability_id}'"
-                            ),
-                        ),
-                        CapabilityError::Disabled(id) => ToolCallResult::error_text(
-                            "action-disabled",
-                            format!("Capability '{id}' is currently disabled in the IDE context."),
-                        ),
-                        other => ToolCallResult::error_text("execution-failed", other.to_string()),
-                    }
+                    crawrad_mcp::action_tool::format_capability_error(cap_err)
                 }
             }
         } else {
             self.record_audit(name, args, "error");
             ToolCallResult::error_text("unknown-tool", format!("Unknown tool: '{name}'"))
+        }
+    }
+    /// What is waiting in the editor, so the caller can decide knowing what it decides.
+    /// Takes the manager, not the shell: the state already lives in `crawrad-agent`.
+    fn tool_review_status(&mut self, reviews: &crate::ide_app::AiDiffReviews) -> ToolCallResult {
+        let Some(review) = reviews.any_pending() else {
+            return review_tool::none_pending();
+        };
+        review_tool::pending(
+            &review.file_path.display().to_string(),
+            &review.author_tool,
+            review.total_additions(),
+            review.total_deletions(),
+            review.hunks.len(),
+        )
+    }
+
+    /// Accepts or rejects the whole review, the same as the bar's two buttons.
+    fn tool_review_decide(
+        &mut self,
+        app: &mut IdeApp,
+        cx: &mut Cx,
+        args: &Value,
+        accept: bool,
+    ) -> ToolCallResult {
+        let tool = review_tool::tool_name(accept);
+        let path = review_tool::path_asked(args).or_else(|| app.any_reviewed_path());
+        let Some(path) = path else {
+            self.record_audit(tool, args, "rejected");
+            return review_tool::no_review(None);
+        };
+        if !app.has_pending_diff_review(&path) {
+            self.record_audit(tool, args, "rejected");
+            return review_tool::no_review(Some(&path.display().to_string()));
+        }
+        let outcome = match accept {
+            true => app.accept_diff_review(cx, &path),
+            false => app.reject_diff_review(cx, &path),
+        };
+        match outcome {
+            Ok(_) => {
+                self.record_audit(tool, args, "applied");
+                review_tool::decided(&path.display().to_string(), accept)
+            }
+            Err(e) => {
+                self.record_audit(tool, args, "error");
+                review_tool::failed(e)
+            }
         }
     }
 
@@ -685,26 +662,27 @@ impl McpServer {
         ToolCallResult::error_text(code, said)
     }
 
-    fn tool_code_read(&mut self, app: &IdeApp, args: &Value) -> ToolCallResult {
+    /// Takes what it uses — window and manager — not the whole shell.
+    fn tool_code_read(
+        &mut self,
+        host: &HostModel,
+        reviews: &crate::ide_app::AiDiffReviews,
+        args: &Value,
+    ) -> ToolCallResult {
         // View guard: code actions require Code view (or FormSource)
-        if app.host.center() == ViewCenter::Design {
+        if host.center() == ViewCenter::Design {
             return self.wrong_view("code.read", args, ViewAffinity::Code);
         }
-
-        let path_str = match crawrad_mcp::cargo_tool::required(args, "code.read", &["path"]) {
-            Ok(found) => found[0],
-            Err(e) => {
-                self.record_audit("code.read", args, "error");
-                return ToolCallResult::error_text("invalid-params", e);
-            }
+        let path_str = match crawrad_mcp::edit::parse_code_read_path(args) {
+            Ok(p) => p,
+            Err(refused) => return self.audited("code.read", args, refused),
         };
-
         let path_buf = PathBuf::from(path_str);
-        let predicted = app
-            .get_pending_diff_review(&path_buf)
+        let predicted = reviews
+            .get_pending_review(&path_buf)
             .map(|r| r.predicted_hash.clone());
         let at = (path_str, path_buf.as_path());
-        self.paged_read("code.read", &app.host, args, at, predicted)
+        self.paged_read("code.read", host, args, at, predicted)
     }
 
     fn tool_code_edit(&mut self, app: &mut IdeApp, args: &Value) -> ToolCallResult {
@@ -712,42 +690,24 @@ impl McpServer {
         if app.center() == Center::Design {
             return self.wrong_view("code.edit", args, ViewAffinity::Code);
         }
-
-        let keys = ["path", "base_hash", "content"];
-        let (path_str, base_hash, content) =
-            match crawrad_mcp::cargo_tool::required(args, "code.edit", &keys) {
-                Ok(found) => (found[0], found[1], found[2]),
-                Err(e) => {
-                    self.record_audit("code.edit", args, "error");
-                    return ToolCallResult::error_text("invalid-params", e);
-                }
-            };
-
+        let (path_str, base_hash, content) = match crawrad_mcp::edit::parse_code_edit_args(args) {
+            Ok(found) => found,
+            Err(refused) => return self.audited("code.edit", args, refused),
+        };
         let pending = app.has_pending_diff_review(std::path::Path::new(path_str));
         if let Some(busy) = self.review_busy(pending, "code.edit", args, path_str) {
             return busy;
         }
         let ckey = canonical_key(path_str);
         // Section C: Verify read before edit
-        let Some(expected_hash) = self.session_read_hashes.get(&ckey) else {
-            self.record_audit("code.edit", args, "rejected");
-            return ToolCallResult::error_text(
-                "no-prior-read",
-                format!(
-                    "File '{}' has not been read in this session. Call 'code.read' first.",
-                    path_str
-                ),
-            );
-        };
-        if expected_hash != base_hash {
-            self.record_audit("code.edit", args, "rejected");
-            return ToolCallResult::error_text(
-                "hash-mismatch",
-                format!(
-                    "base_hash mismatch for '{}'. Expected '{}', got '{}'. Call 'code.read' to refresh.",
-                    path_str, expected_hash, base_hash
-                ),
-            );
+        if let Err((refusal, outcome)) = crawrad_mcp::edit::verify_read_before_edit(
+            &self.session_read_hashes,
+            &ckey,
+            path_str,
+            base_hash,
+        ) {
+            self.record_audit("code.edit", args, outcome);
+            return refusal;
         }
         let current = app.host.read_text(std::path::Path::new(path_str), &ckey);
         let edit = (current.unwrap_or_default(), content.to_string());
@@ -757,40 +717,32 @@ impl McpServer {
     }
 
     fn tool_form_read(&mut self, host: &HostModel) -> ToolCallResult {
-        let Some(doc) = host.doc() else {
-            return self.no_form("form.read", &json!({}));
-        };
-        let (mut form, count) = crawrad_mcp::form_json::form(doc);
-        form["center_view"] = json!(host.center().as_str());
-        form["is_dirty"] = json!(host.is_dirty());
-        self.record_audit("form.read", &json!({}), "applied");
-        let said = format!(
-            "Active form inspected (rev: {}, {count} child nodes)",
-            doc.revision()
-        );
-        ToolCallResult::success_json(form, said)
+        let center = host.center().as_str();
+        match crawrad_mcp::form_json::form_read_answer(host.doc(), center, host.is_dirty()) {
+            Ok(res) => {
+                self.record_audit("form.read", &json!({}), "applied");
+                res
+            }
+            Err(refused) => self.audited("form.read", &json!({}), refused),
+        }
     }
 
     fn tool_project_info(&mut self, host: &HostModel) -> ToolCallResult {
         let root = host.workspace_root().map(|p| p.display().to_string());
-        let active_file = host.active_file().map(|p| p.display().to_string());
-
-        let open_buffers: Vec<String> = host
+        let active = host.active_file().map(|p| p.display().to_string());
+        let open: Vec<String> = host
             .open_file_paths()
             .into_iter()
             .map(|p| p.display().to_string())
             .collect();
-
-        let result = json!({
-            "workspace_root": root,
-            "active_file": active_file,
-            "center_view": host.center().as_str(),
-            "is_dirty": host.is_dirty(),
-            "open_buffers": open_buffers,
-        });
-
         self.record_audit("project.info", &json!({}), "applied");
-        ToolCallResult::success_json(result, "Project workspace info retrieved.")
+        crawrad_mcp::project_tool::workspace_info(
+            root,
+            active,
+            host.center().as_str(),
+            host.is_dirty(),
+            open,
+        )
     }
 
     fn tool_project_create(
@@ -805,8 +757,11 @@ impl McpServer {
                 Err(refused) => return self.audited("project.create", args, refused),
             };
         if app.has_anything_to_save() {
-            self.record_audit("project.create", args, "error");
-            return ToolCallResult::error_text("unsaved-changes", project_tool::UNSAVED_SWITCH);
+            return self.audited(
+                "project.create",
+                args,
+                crawrad_mcp::project_tool::unsaved_changes_refusal(),
+            );
         }
         let framework = match crawrad_project::frameworks::resolve_framework(framework) {
             Ok(f) => f,
@@ -820,9 +775,11 @@ impl McpServer {
             .doc()
             .is_some_and(|d| d.revision() != app.rev_salva)
         {
-            self.record_audit("project.create", args, "rejected");
-            let said = "The open form has unsaved changes: run file.save_all or close it";
-            return ToolCallResult::error_text("unsaved-work", said);
+            return self.audited(
+                "project.create",
+                args,
+                crawrad_mcp::project_tool::unsaved_work_refusal(),
+            );
         }
         let made = crate::ide_app::dialogs::new_project::create_project_template(
             &PathBuf::from(folder),
@@ -840,24 +797,17 @@ impl McpServer {
     }
 
     fn tool_project_open(&mut self, app: &mut IdeApp, cx: &mut Cx, args: &Value) -> ToolCallResult {
-        let Some(path_str) = crawrad_mcp::cargo_tool::nonempty(args, "path") else {
-            self.record_audit("project.open", args, "error");
-            let said = "Missing or empty 'path' parameter";
-            return ToolCallResult::error_text("invalid-params", said);
+        let target_path = match crawrad_mcp::project_tool::check_open_path(args) {
+            Ok(path) => path,
+            Err(refused) => return self.audited("project.open", args, refused),
         };
 
-        let target_path = PathBuf::from(path_str);
-        if !target_path.exists() {
-            self.record_audit("project.open", args, "error");
-            return ToolCallResult::error_text(
-                "not-found",
-                format!("Path '{}' does not exist.", path_str),
-            );
-        }
-
         if target_path.is_dir() && app.has_anything_to_save() {
-            self.record_audit("project.open", args, "error");
-            return ToolCallResult::error_text("unsaved-changes", project_tool::UNSAVED_SWITCH);
+            return self.audited(
+                "project.open",
+                args,
+                crawrad_mcp::project_tool::unsaved_changes_refusal(),
+            );
         }
         if target_path.is_dir() {
             sync_workspace_mcp_config(&target_path, &self.instance_id);
@@ -872,10 +822,9 @@ impl McpServer {
         ToolCallResult::success_text(format!("Opened '{}' in the IDE.", target_path.display()))
     }
 
-    fn tool_project_build(&mut self, host: &HostModel, args: &Value) -> ToolCallResult {
-        let root = host.workspace_root();
-        let a = crawrad_mcp::run_tool::in_project(root, |d| crawrad_mcp::cargo_tool::run(d, args));
-        self.audited("project.build", args, a)
+    fn tool_run_start(&mut self, host: &HostModel, args: &Value) -> ToolCallResult {
+        let a = self.running_process.start(host.workspace_root(), args);
+        self.audited("run.start", args, a)
     }
 }
 

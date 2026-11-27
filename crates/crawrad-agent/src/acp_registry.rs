@@ -751,6 +751,19 @@ pub fn agent_state(installed: bool, connected: bool, last_error: Option<&str>) -
     }
 }
 
+pub fn chat_status_line(state: AgentState, connected: bool) -> &'static str {
+    match (state, connected) {
+        (AgentState::Ready, true) => "🟢 Connected · ready",
+        (AgentState::Ready, false) => "🟢 Ready · connects on your first message",
+        (AgentState::SignedOut, true) | (AgentState::SignedOut, false) => {
+            "🟡 Signed out · sign in at Tools › Options › AI"
+        }
+        (AgentState::NotInstalled, true) | (AgentState::NotInstalled, false) => {
+            "⚪ No AI agent installed · set one up at Tools › Options › AI"
+        }
+    }
+}
+
 #[note("acp-registry-agentcard")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AgentCard {

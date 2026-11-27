@@ -510,6 +510,23 @@ pub fn agent_chip(
     AgentChip { text, link }
 }
 
+/// The three texts of the empty-chat hero, by label id: message count, session summary and the
+/// real state of the AI agent (never a fixed "connected").
+pub fn hero_labels(
+    messages: &[crate::session::ChatMessage],
+    agent: crate::acp_registry::AgentState,
+    connected: bool,
+) -> [(&'static str, String); 3] {
+    [
+        ("lbl_session_count", message_count_label(messages.len())),
+        ("lbl_session_status", session_summary(messages)),
+        (
+            "lbl_ready_status",
+            crate::acp_registry::chat_status_line(agent, connected).to_string(),
+        ),
+    ]
+}
+
 #[note("chat-layout-message-count-label")]
 pub fn message_count_label(count: usize) -> String {
     match count {

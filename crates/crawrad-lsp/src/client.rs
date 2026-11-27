@@ -59,6 +59,10 @@ pub struct LspClient {
     pending_requests: Arc<Mutex<HashMap<u64, ResponseCallback>>>,
     diagnostics_rx: Mutex<Receiver<PublishDiagnosticsParams>>,
     is_alive: Arc<AtomicBool>,
+    /// What the server last said about ITSELF — above all whether it managed to
+    /// load the project. An empty answer on a project that never loaded is not
+    /// "none found", and this is what lets the IDE tell the two apart.
+    says: crate::server_says::Watch,
     /// Set when the server sends `workspace/inlayHint/refresh` (it finished
     /// indexing, say): the IDE asks for the hints again.
     inlay_refresh: Arc<AtomicBool>,
@@ -182,6 +186,7 @@ impl LspClient {
         source: crate::locate::ServerSource,
     ) -> Result<Self, LspError> {
         let is_alive = Arc::new(AtomicBool::new(true));
+        let says = crate::server_says::Watch::new();
         let inlay_refresh = Arc::new(AtomicBool::new(false));
         let code_lens_refresh = Arc::new(AtomicBool::new(false));
         let semantic_refresh = Arc::new(AtomicBool::new(false));
@@ -225,6 +230,7 @@ impl LspClient {
             let is_alive_clone = Arc::clone(&is_alive);
             let pending_clone = Arc::clone(&pending_requests);
             let reply_tx = writer_tx.clone();
+            let says_clone = says.clone();
             let refresh = Arc::clone(&inlay_refresh);
             let lens_refresh = Arc::clone(&code_lens_refresh);
             let work = Arc::clone(&progress);
@@ -260,7 +266,12 @@ impl LspClient {
                             continue;
                         }
                         if !pull.on_push(&payload) {
-                            handle_incoming_message(&payload, &pending_clone, &diag_tx);
+                            handle_incoming_message(
+                                &payload,
+                                &pending_clone,
+                                &diag_tx,
+                                &says_clone,
+                            );
                         }
                     }
                     is_alive_clone.store(false, Ordering::SeqCst);
@@ -290,6 +301,7 @@ impl LspClient {
             pending_requests,
             diagnostics_rx: Mutex::new(diag_rx),
             is_alive,
+            says,
             inlay_refresh,
             code_lens_refresh,
             semantic_refresh,
@@ -663,6 +675,16 @@ impl LspClient {
     #[note("client-lspclient-take-inlay-refresh")]
     pub fn take_inlay_refresh(&self) -> bool {
         self.inlay_refresh.swap(false, Ordering::SeqCst)
+    }
+
+    /// What the server last said about its own health.
+    ///
+    /// The project failing to load, above all. Read it when an answer comes back
+    /// EMPTY: that is the one moment where "there are none" and "the server knows
+    /// nothing" look exactly the same.
+    #[note("client-server-health")]
+    pub fn server_health(&self) -> crate::server_says::Health {
+        self.says.health()
     }
 
     #[note("client-lspclient-take-code-lens-refresh")]
@@ -1237,6 +1259,7 @@ fn handle_incoming_message(
     payload: &str,
     pending: &Arc<Mutex<HashMap<u64, ResponseCallback>>>,
     diag_tx: &Sender<PublishDiagnosticsParams>,
+    says: &crate::server_says::Watch,
 ) {
     let Ok(val) = serde_json::from_str::<serde_json::Value>(payload) else {
         return;
@@ -1272,13 +1295,23 @@ fn handle_incoming_message(
     }
 
     // Case 2: Server notification
-    if let Some(method) = val.get("method").and_then(|m| m.as_str())
-        && method == "textDocument/publishDiagnostics"
-        && let Some(params) = val.get("params")
+    let Some(method) = val.get("method").and_then(|m| m.as_str()) else {
+        return;
+    };
+    let Some(params) = val.get("params") else {
+        return;
+    };
+
+    if method == "textDocument/publishDiagnostics"
         && let Ok(diag_params) = serde_json::from_value::<PublishDiagnosticsParams>(params.clone())
     {
         let _ = diag_tx.send(diag_params);
+        return;
     }
+
+    // Everything else the server says about ITSELF. Dropping these was how
+    // "the project did not load" became "no references found".
+    says.heard(method, params);
 }
 
 #[cfg(test)]

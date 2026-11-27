@@ -7,7 +7,7 @@ author:
 created: 
 title: "serves_view"
 tags: []
-signature: "pub fn serves_view (id : & str , code_in_front : bool) -> bool"
+signature: "pub fn serves_view (id : & str , front : Front) -> bool"
 ---
 
 Returns whether an action serves the currently active view.
@@ -19,7 +19,7 @@ of the view in front. An action of any view always serves.
 # Examples
 
 ```rust
-use crawrad_actions::key_routing::serves_view;
+use crawrad_actions::key_routing::{Front, serves_view};
 
-assert!(serves_view("file.save", true));
+assert!(serves_view("file.save", Front::Text));
 ```

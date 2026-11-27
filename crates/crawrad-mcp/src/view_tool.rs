@@ -136,6 +136,61 @@ pub fn panel_shown(panel: Panel) -> Answer {
     (ToolCallResult::success_json(data, said), "applied")
 }
 
+/// Static success description for read-only view inspection tools.
+pub fn view_read_message(name: &str) -> Option<&'static str> {
+    match name {
+        "editor.get_completion" => Some("Completion list read."),
+        "editor.get_choices" => Some("Definition choices read."),
+        "view.get_inspector" => Some("Object Inspector read."),
+        "editor.get_rename" => Some("Rename dialog read."),
+        "editor.get_references" => Some("References read."),
+        "editor.get_hover" => Some("Hover card read."),
+        "view.get_dialog" => Some("Dialog read."),
+        "view.get_status_bar" => Some("Status bar read."),
+        "view.get_history" => Some("History view read."),
+        "view.get_designer" => Some("Designer bar read."),
+        "view.get_welcome" => Some("Welcome page read."),
+        "view.get_explorer" => Some("Explorer read."),
+        "view.get_notes" => Some("Notes panel read."),
+        "view.get_tests" => Some("Tests panel read."),
+        "form.check" => Some("Form checked."),
+        "view.sizes" => Some("Sizes preview read."),
+        "strings.list" => Some("Strings read."),
+        "view.get_rail" => Some("Activity rail read."),
+        "view.get_toolbox" => Some("Toolbox read."),
+        "view.set_toolbox_filter" => Some("Filtered."),
+        "view.get_chat" => Some("Chat messages read."),
+        "view.get_extension_views" => Some("Extension views read."),
+        "editor.get_line_marks" => Some("Line marks read."),
+        "editor.get_semantic_tokens" => Some("Semantic tokens read."),
+        "editor.get_code_lenses" => Some("Code lenses read."),
+        "editor.get_code_actions" => Some("Code actions read."),
+        "editor.get_signature_help" => Some("Parameter card read."),
+        "editor.get_decorations" => Some("Decorations read."),
+        _ => None,
+    }
+}
+
+/// Formats the success envelope for a read-only view inspection tool call.
+pub fn view_read_result(name: &str, answer: Value) -> Option<ToolCallResult> {
+    let said = view_read_message(name)?;
+    Some(ToolCallResult::success_json(answer, said))
+}
+
+/// Formats the menu hierarchy state and status for `view.get_open_menu`.
+pub fn open_menu_result(
+    open: Option<String>,
+    highlight: Option<usize>,
+    rows: &[crawrad_actions::menu::Row],
+    sub: Option<(&str, &[crawrad_actions::menu::Row])>,
+    rects: Value,
+    hint: Option<String>,
+) -> ToolCallResult {
+    let mut state = crawrad_actions::menu::open_menu_json(open, highlight, rows, sub, rects);
+    state["hint"] = json!(hint);
+    ToolCallResult::success_json(state, "Open menu read.")
+}
+
 #[cfg(test)]
 #[path = "test/view_tool/test.rs"]
 mod tests;

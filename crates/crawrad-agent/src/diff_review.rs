@@ -499,6 +499,69 @@ mod tests {
         (mgr, path)
     }
 
+    /// Deciding one change takes it out of what is still pending — that is
+    /// what the bar at the top counts.
+    ///
+    /// The owner (23/11/2026): he accepted the change inline and the header kept
+    /// offering "Accept all" over a count that no longer matched the editor.
+    #[test]
+    fn a_decided_change_stops_counting_as_pending() {
+        let orig = "a
+b
+c
+d
+e
+f
+g
+h
+i
+j
+";
+        let prop = "a
+B
+c
+d
+e
+f
+g
+h
+i
+J
+";
+        let dir = std::env::temp_dir().join("crawrad_decided_change");
+        std::fs::create_dir_all(&dir).expect("temp dir");
+        let path = dir.join("f.txt");
+        std::fs::write(&path, orig).expect("write");
+
+        let difere = |a: &str, b: &str| a.lines().zip(b.lines()).filter(|(x, y)| x != y).count();
+
+        let mut mgr = DiffReviewManager::default();
+        mgr.propose_edit(
+            path.clone(),
+            orig.to_string(),
+            prop.to_string(),
+            "editor.apply_edit",
+        )
+        .expect("proposal accepted");
+        let r = mgr.get_pending_review(&path).expect("pending review");
+        assert_eq!(
+            difere(&r.original_content, &r.proposed_content),
+            2,
+            "two lines apart to begin with"
+        );
+
+        let fechou = mgr.decide_change(&path, 0, true).expect("decide change 0");
+        assert!(!fechou, "one decided, one still open");
+        let r = mgr.get_pending_review(&path).expect("still pending");
+        assert_eq!(
+            difere(&r.original_content, &r.proposed_content),
+            1,
+            "the accepted change must stop counting as pending"
+        );
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
     #[test]
     fn test_decide_change_accept_and_reject_lifecycle() {
         let (orig, prop) = (

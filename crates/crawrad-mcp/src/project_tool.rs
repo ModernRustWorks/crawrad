@@ -153,6 +153,119 @@ pub fn created(made: &Result<PathBuf, String>, name: &str, template: &str) -> An
     }
 }
 
+/// Builds the workspace and buffer status summary for `project.info`.
+pub fn workspace_info(
+    root: Option<String>,
+    active_file: Option<String>,
+    center_view: &str,
+    is_dirty: bool,
+    open_buffers: Vec<String>,
+) -> ToolCallResult {
+    let result = json!({
+        "workspace_root": root,
+        "active_file": active_file,
+        "center_view": center_view,
+        "is_dirty": is_dirty,
+        "open_buffers": open_buffers,
+    });
+    ToolCallResult::success_json(result, "Project workspace info retrieved.")
+}
+
+/// Parses arguments for `project.create_file`.
+pub fn parse_create_file_args(args: &Value) -> Result<(&str, &str, bool), Answer> {
+    let Some(path_str) = cargo_tool::nonempty(args, "path") else {
+        return Err((
+            ToolCallResult::error_text("invalid-params", "Missing 'path' parameter"),
+            "error",
+        ));
+    };
+    let content = args.get("content").and_then(Value::as_str).unwrap_or("");
+    let open_in_editor = args
+        .get("open_in_editor")
+        .and_then(Value::as_bool)
+        .unwrap_or(true);
+    Ok((path_str, content, open_in_editor))
+}
+
+/// Builds the success envelope for a created project file.
+pub fn file_created_result(path: &str, bytes_written: usize) -> ToolCallResult {
+    let created = json!({ "path": path, "bytes_written": bytes_written, "status": "created" });
+    ToolCallResult::success_json(created, format!("File '{path}' created successfully."))
+}
+
+/// Builds the success envelope for an opened file in editor tab.
+pub fn open_file_result(path_str: &str) -> ToolCallResult {
+    ToolCallResult::success_json(
+        json!({
+            "path": path_str,
+            "status": "opened"
+        }),
+        format!("Opened '{path_str}' in editor tab."),
+    )
+}
+
+/// Parses and validates the crate name argument for `project.add_dependency`.
+pub fn parse_add_dependency_arg(args: &Value) -> Result<&str, Answer> {
+    let Some(crate_name) = cargo_tool::nonempty(args, "crate_name") else {
+        return Err((
+            ToolCallResult::error_text("invalid-params", "Missing 'crate_name' parameter"),
+            "error",
+        ));
+    };
+    Ok(crate_name)
+}
+
+/// Builds the error response when unsaved changes exist in project.
+pub fn unsaved_changes_refusal() -> Answer {
+    (
+        ToolCallResult::error_text("unsaved-changes", UNSAVED_SWITCH),
+        "error",
+    )
+}
+
+/// Builds the refusal when the open visual form has unsaved work.
+pub fn unsaved_work_refusal() -> Answer {
+    let said = "The open form has unsaved changes: run file.save_all or close it";
+    (ToolCallResult::error_text("unsaved-work", said), "rejected")
+}
+
+/// Validates the path argument for `project.open`.
+pub fn check_open_path(args: &Value) -> Result<PathBuf, Answer> {
+    let Some(path_str) = cargo_tool::nonempty(args, "path") else {
+        let said = "Missing or empty 'path' parameter";
+        return Err((ToolCallResult::error_text("invalid-params", said), "error"));
+    };
+    let target = PathBuf::from(path_str);
+    if !target.exists() {
+        let said = format!("Path '{path_str}' does not exist.");
+        return Err((ToolCallResult::error_text("not-found", said), "error"));
+    }
+    Ok(target)
+}
+
+/// Builds the answer for extension installation or uninstallation.
+pub fn extension_tool_result(done: Result<String, String>) -> Answer {
+    match done {
+        Ok(said) => (
+            ToolCallResult::success_json(json!({ "status": said }), said),
+            "applied",
+        ),
+        Err(said) => (
+            ToolCallResult::error_text("extension-refused", said),
+            "error",
+        ),
+    }
+}
+
+/// Adds a crate dependency in the project root directory.
+pub fn add_dependency_in_project(root: Option<PathBuf>, args: &Value) -> Answer {
+    let crate_name = match parse_add_dependency_arg(args) {
+        Ok(name) => name,
+        Err(refused) => return refused,
+    };
+    crate::run_tool::in_project(root, |d| cargo_tool::add_dependency(d, crate_name, args))
+}
+
 #[cfg(test)]
 #[path = "test/project_tool/test.rs"]
 mod tests;

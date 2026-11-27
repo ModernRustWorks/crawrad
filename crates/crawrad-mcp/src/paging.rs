@@ -46,6 +46,18 @@ pub fn read_answer(
     (answer, said)
 }
 
+/// Directly formats a successful paged read response into a [`crate::protocol::ToolCallResult`].
+pub fn paged_read_success(
+    path: &str,
+    text: &str,
+    hash: &str,
+    args: &serde_json::Value,
+    predicted: Option<String>,
+) -> crate::protocol::ToolCallResult {
+    let (answer, said) = read_answer(path, text, hash, args, predicted);
+    crate::protocol::ToolCallResult::success_json(answer, said)
+}
+
 #[cfg(test)]
 #[path = "test/paging/test.rs"]
 mod tests;

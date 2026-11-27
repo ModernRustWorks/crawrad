@@ -282,3 +282,48 @@ fn operational_status_bare_command_and_installed_flag() {
     assert_eq!(op_missing.command, "stdio:crawrad-no-such-agent-xyz");
     assert!(!op_missing.is_installed);
 }
+
+#[test]
+fn chat_status_line_every_state() {
+    assert_eq!(
+        chat_status_line(AgentState::Ready, true),
+        "🟢 Connected · ready"
+    );
+    assert_eq!(
+        chat_status_line(AgentState::Ready, false),
+        "🟢 Ready · connects on your first message"
+    );
+    assert_eq!(
+        chat_status_line(AgentState::SignedOut, false),
+        "🟡 Signed out · sign in at Tools › Options › AI"
+    );
+    assert_eq!(
+        chat_status_line(AgentState::SignedOut, true),
+        "🟡 Signed out · sign in at Tools › Options › AI"
+    );
+    assert_eq!(
+        chat_status_line(AgentState::NotInstalled, false),
+        "⚪ No AI agent installed · set one up at Tools › Options › AI"
+    );
+    assert_eq!(
+        chat_status_line(AgentState::NotInstalled, true),
+        "⚪ No AI agent installed · set one up at Tools › Options › AI"
+    );
+}
+
+#[test]
+fn hero_labels_carry_the_real_agent_state() {
+    use crate::acp_registry::AgentState;
+    let labels = crate::chat_layout::hero_labels(&[], AgentState::NotInstalled, false);
+    assert_eq!(labels[0], ("lbl_session_count", "0 messages".to_string()));
+    assert_eq!(labels[1].0, "lbl_session_status");
+    assert_eq!(
+        labels[2],
+        (
+            "lbl_ready_status",
+            "⚪ No AI agent installed · set one up at Tools › Options › AI".to_string()
+        )
+    );
+    let ready = crate::chat_layout::hero_labels(&[], AgentState::Ready, true);
+    assert_eq!(ready[2].1, "🟢 Connected · ready");
+}

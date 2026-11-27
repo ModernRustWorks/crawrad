@@ -428,15 +428,8 @@ live_design! {
         }
     }
 
-    pub CrawradRefFileRow = <View> {
-        width: Fill, height: Fit,
-        flow: Overlay,
-        face = <View> {
-            width: Fill, height: Fit,
-            flow: Right,
-            spacing: (CRAWRAD_ESPACO_XS),
-            align: { y: 0.5 },
-            padding: { left: (CRAWRAD_ESPACO_S), right: (CRAWRAD_FOLGA_DA_BARRA), top: 3., bottom: 3. }
+    pub CrawradRefFileRow = <CrawradHeaderRowFrame> {
+        face = {
             chevron = <CrawradRowChevron> {}
             name = <CrawradLabel> { width: Fit, text: "" }
             folder = <CrawradLabelMuted> { width: Fit, text: "" }
@@ -445,7 +438,6 @@ live_design! {
             spacer = <View> { width: Fill, height: 1. }
             count = <CrawradLabelMuted> { width: Fit, text: "" }
         }
-        target = <CrawradListRowOverlay> { width: Fill, height: Fill }
     }
 
     pub CrawradRefHitRow = <View> {
@@ -656,21 +648,13 @@ live_design! {
         }
     }
 
-    pub CrawradViewHeaderRow = <View> {
-        width: Fill, height: Fit,
-        flow: Overlay,
-        face = <View> {
-            width: Fill, height: Fit,
-            flow: Right,
-            spacing: (CRAWRAD_ESPACO_XS),
-            align: { y: 0.5 },
-            padding: { left: (CRAWRAD_ESPACO_S), right: (CRAWRAD_FOLGA_DA_BARRA), top: 3., bottom: 3. }
+    pub CrawradViewHeaderRow = <CrawradHeaderRowFrame> {
+        face = {
             chevron = <CrawradRowChevron> {}
             title = <CrawradLabel> { width: Fit, text: "" }
             spacer = <View> { width: Fill, height: 1. }
             count = <CrawradLabelMuted> { width: Fit, text: "" }
         }
-        target = <CrawradListRowOverlay> { width: Fill, height: Fill }
     }
 
     pub CrawradViewItemRow = <View> {

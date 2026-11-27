@@ -1,6 +1,7 @@
 //! Model Context Protocol (MCP) data structures, action adapters, and stdio bridge for CrawRAD.
 #![forbid(unsafe_code)]
 
+pub mod action_tool;
 pub mod audit;
 pub mod capture_tool;
 pub mod cargo_tool;
@@ -11,12 +12,14 @@ pub mod dialogs;
 pub mod dialogs_table;
 pub mod edit;
 pub mod form_json;
+pub mod guardrails;
 pub mod listener;
 pub mod paging;
 pub mod project_tool;
 pub mod project_tree;
 pub mod properties;
 pub mod protocol;
+pub mod review_tool;
 pub mod route;
 pub mod run_tool;
 pub mod strings_tool;

@@ -3243,3 +3243,43 @@ fn external_event_with_signature_produces_typed_stub_makepad() {
         user_file.conteudo
     );
 }
+
+/// The window is the form's own size, whatever the components do.
+///
+/// It used to grow to swallow a component left outside the form's rect, adding
+/// `+30` horizontally and `+40` vertically. The app then opened bigger than it
+/// was drawn — the owner saw the extra margin on the right of the calculator,
+/// and stray components appearing at run time that the Designer had marked as
+/// outside. A component outside the form is simply not seen when it runs.
+#[test]
+fn the_window_is_the_form_not_the_components() {
+    let mut doc = Document::new("Form1", "Form");
+    {
+        let form = doc.node_mut("Form1").unwrap();
+        form.set_rect(Rect::new(0.0, 0.0, 640.0, 420.0));
+        form.set_name("Form1");
+    }
+
+    // way outside the form, to the right and below
+    let mut fugitivo = Node::new("label_fora", "Label");
+    fugitivo.set_name("label_fora");
+    fugitivo.set_rect(Rect::new(1180.0, 900.0, 240.0, 24.0));
+    let _ = doc.add_child("Form1", fugitivo);
+
+    let files = GeradorMakepad
+        .gerar(&doc, "meu_app", &crawrad_registry::Registry::builtin())
+        .expect("must generate successfully");
+    let dsl = files
+        .iter()
+        .find(|a| a.caminho.to_str().unwrap().ends_with("designer.rs"))
+        .map(|a| a.conteudo.clone())
+        .expect("the designer file must be generated");
+
+    assert!(
+        dsl.contains("inner_size: vec2(640.0, 420.0)"),
+        "the window must be 640x420, the form's size; it was:\n{}",
+        dsl.lines()
+            .find(|l| l.contains("inner_size"))
+            .unwrap_or("(no inner_size)")
+    );
+}

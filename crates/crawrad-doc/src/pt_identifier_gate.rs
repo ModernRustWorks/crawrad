@@ -8,7 +8,7 @@ use std::path::Path;
 
 /// Maximum allowed Portuguese identifier definitions across the workspace.
 /// Must equal the exact actual count; if the count decreases, this ratchet constant must be lowered in the same PR.
-pub const MAX_PT_IDENTIFIERS: usize = 2_141;
+pub const MAX_PT_IDENTIFIERS: usize = 2_136;
 
 /// Maximum allowed Portuguese directory and file paths across `crates/` and `components/`.
 pub const MAX_PT_PATHS: usize = 10;

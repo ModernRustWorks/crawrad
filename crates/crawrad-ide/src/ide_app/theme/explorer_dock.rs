@@ -35,6 +35,21 @@ live_design! {
     pub CrawradRowChevron = <CrawradRowGlyph> {
         draw_text: { color: (CRAWRAD_TEXTO_DESABILITADO) }
     }
+    // The frame every header row shares: the same box, the same breathing room,
+    // the same touch band on top. Whoever derives it only says what goes INSIDE
+    // `face`, in the order it appears — nothing here decides content.
+    pub CrawradHeaderRowFrame = <View> {
+        width: Fill, height: Fit,
+        flow: Overlay,
+        face = <View> {
+            width: Fill, height: Fit,
+            flow: Right,
+            spacing: (CRAWRAD_ESPACO_XS),
+            align: { y: 0.5 },
+            padding: { left: (CRAWRAD_ESPACO_S), right: (CRAWRAD_FOLGA_DA_BARRA), top: 3., bottom: 3. }
+        }
+        target = <CrawradListRowOverlay> { width: Fill, height: Fill }
+    }
     pub CrawradBadgeRow = <View> {
         width: Fill, height: Fit,
         flow: Overlay,

@@ -1199,6 +1199,35 @@ pub fn build_tools_list_with_registry(
         }),
     });
 
+    // The diff review. A write tool answers `status: "pending_approval"` and the
+    // edit waits in the editor: without these three, the caller is told to wait
+    // for a human and has no way to see the review or finish it.
+    list.push(ToolDefinition {
+        name: "review.status".to_string(),
+        description: "[Operation: Read] The diff review waiting in the editor, if any: which file, which tool proposed it, how many additions and deletions, and how many separate changes it holds".to_string(),
+        input_schema: json!({ "type": "object", "properties": {} }),
+    });
+    list.push(ToolDefinition {
+        name: "review.accept".to_string(),
+        description: "[Operation: Write] Accepts the whole diff review waiting in the editor, the same as the 'Accept all' button. The proposed content becomes the file's. Refused when no review is pending".to_string(),
+        input_schema: json!({
+            "type": "object",
+            "properties": {
+                "path": { "type": "string", "description": "The reviewed file; omit for the one shown in the editor" }
+            }
+        }),
+    });
+    list.push(ToolDefinition {
+        name: "review.reject".to_string(),
+        description: "[Operation: Write] Rejects the whole diff review waiting in the editor, the same as the 'Reject all' button. The file is left byte for byte as it was. Refused when no review is pending".to_string(),
+        input_schema: json!({
+            "type": "object",
+            "properties": {
+                "path": { "type": "string", "description": "The reviewed file; omit for the one shown in the editor" }
+            }
+        }),
+    });
+
     // 5. Dynamic capabilities and extension contributions from CapabilityRegistry
     if let Some(reg) = registry {
         let mut existing_names: std::collections::HashSet<String> =

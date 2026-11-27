@@ -334,6 +334,22 @@ fn component_folders_pure_function_orders_and_filters_scopes() {
 }
 
 #[test]
+fn component_folders_scans_config_folder_components() {
+    let tmp = unique_temp_dir("config_scan");
+    let config_dir = tmp.join("config");
+    let comp_dir = config_dir.join("components");
+    std::fs::create_dir_all(&comp_dir).expect("create config components dir");
+
+    let folders = component_folders(None, None, Some(&config_dir), None);
+    assert!(
+        folders.contains(&(comp_dir, ComponentScope::Mine)),
+        "components installed under config folder must be found with Mine scope"
+    );
+
+    let _ = std::fs::remove_dir_all(&tmp);
+}
+
+#[test]
 fn an_exe_built_in_a_checkout_finds_the_suite_that_comes_with_it() {
     let tmp = unique_temp_dir("checkout");
     let exe_dir = tmp.join("target").join("release");

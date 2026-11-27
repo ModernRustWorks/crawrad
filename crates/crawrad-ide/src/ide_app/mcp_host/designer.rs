@@ -2,12 +2,11 @@
 //! `crawrad_mcp::designer_tool`; here the IDE lends them the form and its actions.
 
 use super::*;
-use crawrad_host::HostModel;
 use crawrad_mcp::designer_tool::{self as tool, Designer};
 use crawrad_mcp::protocol::ToolCallResult;
 use crawrad_note::note;
 use makepad_widgets::Cx;
-use serde_json::{Value, json};
+use serde_json::Value;
 
 #[note("ide-app-mcp-host-designer-live")]
 struct Live<'a> {
@@ -26,15 +25,7 @@ impl Designer for Live<'_> {
     }
 
     fn run(&mut self, name: &str, args: &Value) -> Result<(), String> {
-        let Some(action) = crawrad_actions::catalogue()
-            .into_iter()
-            .find(|a| a.id == name)
-        else {
-            return Err(format!("Unknown action: '{name}'"));
-        };
-        if let Err(err_msg) = crawrad_mcp::tools::validate_arguments(&action, args) {
-            return Err(format!("Invalid arguments for '{name}': {err_msg}"));
-        }
+        let action = crawrad_mcp::action_tool::check_designer_action(name, args)?;
         let app = &mut *self.app;
         let ctx = crawrad_actions::Context {
             doc: app.doc(),
@@ -72,30 +63,6 @@ impl Designer for Live<'_> {
 }
 
 impl McpServer {
-    pub(super) fn tool_designer_list_components(&mut self, host: &HostModel) -> ToolCallResult {
-        let a = tool::list_components(host.doc());
-        self.audited("designer.list_components", &json!({}), a)
-    }
-
-    pub(super) fn tool_designer_get_selection(&mut self, host: &HostModel) -> ToolCallResult {
-        let a = tool::get_selection(host.doc());
-        self.audited("designer.get_selection", &json!({}), a)
-    }
-
-    pub(super) fn tool_designer_get_component_properties(
-        &mut self,
-        host: &HostModel,
-        args: &Value,
-    ) -> ToolCallResult {
-        let a = tool::get_component_properties(host.doc(), args);
-        self.audited("designer.get_component_properties", args, a)
-    }
-
-    #[note("ide-app-mcp-host-designer-mcpserver-no-form")]
-    pub(super) fn no_form(&mut self, name: &str, args: &Value) -> ToolCallResult {
-        self.audited(name, args, tool::no_form())
-    }
-
     #[note("ide-app-mcp-host-designer-mcpserver-tool-designer-on-form")]
     pub(super) fn tool_designer_on_form(
         &mut self,

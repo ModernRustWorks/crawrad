@@ -413,6 +413,8 @@ live_design! {
 
             welcome_container = <View> {
                 visible: false,
+                // No gutter: the page covers the card exactly and repeats its
+                // corners. With a gutter the card showed around the page.
                 width: Fill, height: Fill,
                 welcome_page = <CrawradWelcomePage> {}
             }

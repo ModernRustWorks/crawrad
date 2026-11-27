@@ -7,7 +7,7 @@ author:
 created: 
 title: "IdeApp::agent_card"
 tags: []
-signature: "fn agent_card (& self) -> acp_registry :: AgentCard"
+signature: "pub (crate) fn agent_card (& self) -> acp_registry :: AgentCard"
 ---
 
 The "Agent in use" card, from the config and the chat's live session.

@@ -16,6 +16,7 @@ live_design! {
     link crawrad;
     use link::widgets::*;
     use link::theme::*;
+    use link::shaders::*;
     use crate::borderless::*;
 
     WelcomeLink = <CrawradBorderlessButton> {
@@ -94,7 +95,20 @@ live_design! {
         width: Fill, height: Fill,
         flow: Down,
         show_bg: true,
-        draw_bg: { color: #1e1f22 }
+        // The page reproduces the card it sits on (CrawradOutlined, radius
+        // CRAWRAD_CARD_RADIUS = 6): same radius, all four corners, flush against
+        // it. Painting a square page over a rounded card was what squared off
+        // Welcome; rounding it differently only let the card show around it.
+        draw_bg: {
+            color: #1e1f22
+            uniform border_radius: 6.0
+            fn pixel(self) -> vec4 {
+                let sdf = Sdf2d::viewport(self.pos * self.rect_size);
+                sdf.box(0.5, 0.5, self.rect_size.x - 1.0, self.rect_size.y - 1.0, self.border_radius);
+                sdf.fill(self.color);
+                return sdf.result;
+            }
+        }
 
         tab_bar = <View> {
             width: Fill, height: 32.0,

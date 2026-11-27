@@ -7,7 +7,7 @@ author:
 created: 
 title: "not_here"
 tags: []
-signature: "pub fn not_here (id : & str , editor_focused : bool , code_in_front : bool) -> bool"
+signature: "pub fn not_here (id : & str , editor_focused : bool , front : Front) -> bool"
 ---
 
 Returns whether the key action should be ignored in the current focus.
@@ -50,7 +50,7 @@ action is its editing keyboard (the system's events do it, see
 # Examples
 
 ```rust
-use crawrad_actions::key_routing::not_here;
+use crawrad_actions::key_routing::{Front, not_here};
 
-assert!(not_here("edit.undo", true, true));
+assert!(not_here("edit.undo", true, Front::Text));
 ```

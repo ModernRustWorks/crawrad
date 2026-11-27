@@ -249,10 +249,30 @@ pub fn install_now(origin: &Path) -> Verdict {
     verdict
 }
 
+#[note("installation-is-packaged-location")]
+pub fn is_packaged_location(exe: &Path) -> bool {
+    exe.components().any(|c| {
+        c.as_os_str()
+            .to_str()
+            .is_some_and(|s| s.eq_ignore_ascii_case("WindowsApps"))
+    })
+}
+
+#[note("installation-choose-installation-dir")]
+pub fn choose_installation_dir(exe_dir: &Path, config: Option<&Path>) -> Option<PathBuf> {
+    if is_packaged_location(exe_dir) {
+        config.map(|c| c.join("components"))
+    } else {
+        Some(exe_dir.join("components"))
+    }
+}
+
 #[note("installation-installation-dir")]
 pub fn installation_dir() -> Option<PathBuf> {
     let exe = std::env::current_exe().ok()?;
-    Some(exe.parent()?.join("components"))
+    let exe_dir = exe.parent()?;
+    let config = crate::workspace::config_folder();
+    choose_installation_dir(exe_dir, config.as_deref())
 }
 
 #[cfg(test)]

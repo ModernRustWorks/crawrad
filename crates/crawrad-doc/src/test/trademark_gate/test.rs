@@ -10,9 +10,20 @@ fn repo_root() -> PathBuf {
 /// The files git tracks — what the project ships. A file only on this
 /// machine (a build folder, a scratch note) is not the project's.
 ///
-/// Without git (measured: the `rust:1.95-slim` image has none) the tree is
-/// walked instead, without `.git` and the `target` build folders.
+/// Prefers `.gate-tracked` recorded by `gate.ps1` before container runs,
+/// then falls back to `git ls-files -z`. Panics if both fail.
 fn tracked_files(root: &Path) -> Vec<String> {
+    let snapshot = root.join(".gate-tracked");
+    if snapshot.is_file()
+        && let Ok(bytes) = std::fs::read(&snapshot)
+    {
+        return String::from_utf8_lossy(&bytes)
+            .split('\0')
+            .filter(|f| !f.is_empty())
+            .map(str::to_string)
+            .collect();
+    }
+
     let mut git = std::process::Command::new("git");
     git.arg("-C").arg(root).args(["ls-files", "-z"]);
     #[cfg(windows)]
@@ -26,30 +37,12 @@ fn tracked_files(root: &Path) -> Vec<String> {
             .filter(|f| !f.is_empty())
             .map(str::to_string)
             .collect(),
-        _ => {
-            let mut files = Vec::new();
-            walk(root, root, &mut files);
-            files
-        }
-    }
-}
-
-fn walk(root: &Path, dir: &Path, out: &mut Vec<String>) {
-    let Ok(entries) = std::fs::read_dir(dir) else {
-        return;
-    };
-    for entry in entries.flatten() {
-        let path = entry.path();
-        let name = entry.file_name().to_string_lossy().into_owned();
-        if path.is_dir() {
-            // `target` and `target-*` are build folders; `targets/` (the
-            // code generators) is source and is read.
-            if name != ".git" && name != "target" && !name.starts_with("target-") {
-                walk(root, &path, out);
-            }
-        } else if let Ok(rel) = path.strip_prefix(root) {
-            out.push(rel.to_string_lossy().replace('\\', "/"));
-        }
+        _ => panic!(
+            "could not obtain repository tracked files: neither .gate-tracked nor \
+             `git ls-files -z` succeeded. Without tracked files the trademark \
+             measurement is invalid. `gate.ps1` records .gate-tracked before \
+             running container tests."
+        ),
     }
 }
 

@@ -31,14 +31,19 @@ pub fn next_step(current: f64, inward: bool) -> f64 {
     STEPS[next.min(STEPS.len() - 1)]
 }
 
-/// The zoom cell: the canvas zoom, plus the UI scale when it is not 100%.
+/// The zoom cell: the IDE scale always, and the canvas zoom only when the
+/// canvas is NOT at 100%.
+///
+/// At 100% the canvas readout says nothing and competes with the IDE one —
+/// side by side, two bare percentages read as a single confused number. When
+/// it differs it is worth saying, because then the form on screen is not at
+/// its real size. Both readouts are named, never bare.
 pub fn zoom_label(canvas_zoom: f64, ui_zoom: f64) -> String {
-    // Both readouts are named: two bare "100%" side by side read as one.
-    format!(
-        "Form {:.0}%  ·  IDE {:.0}%",
-        canvas_zoom * 100.0,
-        ui_zoom * 100.0
-    )
+    let ide = format!("IDE {:.0}%", ui_zoom * 100.0);
+    if (canvas_zoom - ONE).abs() < 0.005 {
+        return ide;
+    }
+    format!("Form {:.0}%  ·  {ide}", canvas_zoom * 100.0)
 }
 
 #[cfg(test)]

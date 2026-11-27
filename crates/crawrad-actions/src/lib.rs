@@ -2280,7 +2280,7 @@ fn base_catalogue() -> Vec<Action> {
             place: Place::TOP,
             shortcut: Some("Del"),
             params: &[],
-            view: ViewAffinity::Any,
+            view: ViewAffinity::Design,
             enabled: Need::Selection.only(),
             execute: |c| match removal(c, "Delete") {
                 Some(tx) => Effect::tx(tx).with_selection(Vec::new()),
@@ -2386,7 +2386,7 @@ fn base_catalogue() -> Vec<Action> {
             place: Place::TOP,
             shortcut: Some("Ctrl+D"),
             params: &[],
-            view: ViewAffinity::Any,
+            view: ViewAffinity::Design,
             enabled: Need::Selection.only(),
             execute: |c| match c
                 .ir()
@@ -6742,3 +6742,7 @@ mod style_rule_check_test;
 #[cfg(test)]
 #[path = "test/editor_text/test.rs"]
 mod editor_text_test;
+
+#[cfg(test)]
+#[path = "test/key_routing/test.rs"]
+mod key_routing_test;

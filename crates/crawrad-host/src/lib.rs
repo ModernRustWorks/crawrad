@@ -68,6 +68,11 @@ pub enum ViewCenter {
 }
 
 impl ViewCenter {
+    /// The visual designer canvas is in front (designer keys act only then).
+    pub fn is_design(self) -> bool {
+        self == Self::Design
+    }
+
     #[note("viewcenter-is-text")]
     pub fn is_text(self) -> bool {
         matches!(self, Self::FormSource | Self::Code)

@@ -251,6 +251,9 @@ impl Default for AcpConfig {
     }
 }
 
+#[cfg(test)]
+static CONFIG_OVERRIDE_DIR: std::sync::RwLock<Option<PathBuf>> = std::sync::RwLock::new(None);
+
 impl AcpConfig {
     #[note("acp-acpconfig-record-session-choice")]
     pub fn record_session_choice(&mut self, config_id: &str, value: &str) {
@@ -700,9 +703,49 @@ impl AcpConfig {
         ))
     }
 
-    pub fn default_path() -> PathBuf {
-        if let Some(app_data) = std::env::var_os("APPDATA") {
-            let base = PathBuf::from(&app_data);
+    #[cfg(test)]
+    pub fn set_config_dir_override(dir: Option<PathBuf>) {
+        if let Ok(mut lock) = CONFIG_OVERRIDE_DIR.write() {
+            *lock = dir;
+        }
+    }
+
+    fn active_appdata_dir() -> Option<PathBuf> {
+        #[cfg(test)]
+        if let Ok(lock) = CONFIG_OVERRIDE_DIR.read()
+            && let Some(ref dir) = *lock
+        {
+            return Some(dir.clone());
+        }
+        std::env::var_os("APPDATA").map(PathBuf::from)
+    }
+
+    /// Returns the configuration file path for writing.
+    /// Always points to CrawRAD's configuration path, never to legacy Aefos.
+    pub fn config_path_for_write() -> PathBuf {
+        Self::config_path_for_write_from(Self::active_appdata_dir().as_deref())
+    }
+
+    /// Returns the configuration file path for reading.
+    /// If CrawRAD config does not exist but legacy Aefos config exists, returns legacy Aefos path.
+    pub fn config_path_for_read() -> PathBuf {
+        Self::config_path_for_read_from(Self::active_appdata_dir().as_deref())
+    }
+
+    pub fn config_path_for_write_from(app_data: Option<&Path>) -> PathBuf {
+        if let Some(base) = app_data {
+            base.join("CrawRAD").join("acp_config.json")
+        } else if let Some(home) =
+            std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE"))
+        {
+            PathBuf::from(home).join(".crawrad").join("acp_config.json")
+        } else {
+            PathBuf::from("acp_config.json")
+        }
+    }
+
+    pub fn config_path_for_read_from(app_data: Option<&Path>) -> PathBuf {
+        if let Some(base) = app_data {
             let crawrad = base.join("CrawRAD").join("acp_config.json");
             if !crawrad.exists() {
                 let legacy = base.join("Aefos").join("acp_config.json");
@@ -714,7 +757,7 @@ impl AcpConfig {
         } else if let Some(home) =
             std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE"))
         {
-            let base = PathBuf::from(&home);
+            let base = PathBuf::from(home);
             let crawrad = base.join(".crawrad").join("acp_config.json");
             if !crawrad.exists() {
                 let legacy = base.join(".aefos").join("acp_config.json");
@@ -728,8 +771,13 @@ impl AcpConfig {
         }
     }
 
+    /// Legacy alias for `config_path_for_read`.
+    pub fn default_path() -> PathBuf {
+        Self::config_path_for_read()
+    }
+
     pub fn load() -> Self {
-        Self::load_from_file(&Self::default_path()).unwrap_or_default()
+        Self::load_from_file(&Self::config_path_for_read()).unwrap_or_default()
     }
 
     #[note("acp-acpconfig-load-from-file")]
@@ -836,7 +884,7 @@ impl AcpConfig {
     }
 
     pub fn save(&self) -> Result<(), std::io::Error> {
-        self.save_to_file(&Self::default_path())
+        self.save_to_file(&Self::config_path_for_write())
     }
 
     #[note("acp-acpconfig-save-to-file")]
@@ -936,3 +984,7 @@ pub fn format_model_label_pure(model: &str) -> String {
         m => format!("{m} ▾"),
     }
 }
+
+#[cfg(test)]
+#[path = "test/acp/test.rs"]
+mod tests;

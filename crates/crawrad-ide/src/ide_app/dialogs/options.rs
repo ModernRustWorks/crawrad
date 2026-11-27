@@ -814,7 +814,7 @@ impl IdeApp {
     }
 
     #[note("ide-app-dialogs-options-ideapp-agent-card")]
-    fn agent_card(&self) -> acp_registry::AgentCard {
+    pub(crate) fn agent_card(&self) -> acp_registry::AgentCard {
         let msg = self.chat.acp_status_msg.as_deref();
         acp_registry::agent_card(&self.acp_config, msg, self.chat.live.client().is_some())
     }

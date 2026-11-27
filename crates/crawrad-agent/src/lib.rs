@@ -47,8 +47,9 @@ pub use acp::{
 };
 pub use acp_live::{LiveAgent, LiveStatus};
 pub use acp_registry::{
-    AcpAgentEntry, AcpLaunch, agents_dir, current_platform, install_binary_agent, launch_for,
-    registry_agent, search_registry, spawn_background_refresh,
+    AcpAgentEntry, AcpLaunch, AgentState, agent_card, agent_state, agents_dir, chat_status_line,
+    current_platform, install_binary_agent, launch_for, registry_agent, search_registry,
+    spawn_background_refresh,
 };
 pub use agent_profile::{
     AgentProfile, CLAUDE_MODELS, GEMINI_AGY_MODELS, ModelSource, ModelSpec, OPENAI_MODELS,
@@ -210,3 +211,10 @@ mod acp_client_test;
 #[cfg(test)]
 #[path = "test/permission_dialog_test.rs"]
 mod permission_dialog_test;
+
+#[cfg(test)]
+extern crate self as crawrad_agent;
+
+#[cfg(test)]
+#[path = "bin/acp_check.rs"]
+pub mod acp_check;

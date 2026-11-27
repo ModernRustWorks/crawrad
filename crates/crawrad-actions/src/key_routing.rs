@@ -175,18 +175,49 @@ pub fn commands_with_scheme(p: &Press, from_field: bool, scheme: KeymapScheme) -
     out
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Front {
+    Design,
+    Text,
+    Other,
+}
+
+impl Front {
+    /// What is in front of the center area: the designer canvas, a text editor, or anything else
+    /// (history, previews, welcome) — where no designer key may reach the hidden form.
+    pub fn of(design: bool, text: bool) -> Self {
+        match (design, text) {
+            (true, _) => Self::Design,
+            (false, true) => Self::Text,
+            (false, false) => Self::Other,
+        }
+    }
+}
+
+/// Whether `cmd` must NOT run with `front` in front of the center area: designer gestures (arrows,
+/// Esc) only act on the visible canvas; a catalog action follows [`not_here`].
+pub fn blocked(cmd: &Comando, editor_focused: bool, front: Front) -> bool {
+    match cmd {
+        Comando::Acao(id) => not_here(id, editor_focused, front),
+        Comando::Seta { .. } | Comando::Cancelar => front != Front::Design,
+    }
+}
+
 #[note("key-routing-not-here")]
-pub fn not_here(id: &str, editor_focused: bool, code_in_front: bool) -> bool {
-    (editor_focused && e_do_editor_de_texto(id)) || !serves_view(id, code_in_front)
+pub fn not_here(id: &str, editor_focused: bool, front: Front) -> bool {
+    (editor_focused && e_do_editor_de_texto(id)) || !serves_view(id, front)
 }
 
 #[note("key-routing-serves-view")]
-pub fn serves_view(id: &str, code_in_front: bool) -> bool {
-    use crate::ViewAffinity::{Code, Design};
-    match crate::by_id(id).map(|a| a.view) {
-        Some(Code) => code_in_front,
-        Some(Design) => !code_in_front,
-        _ => true,
+pub fn serves_view(id: &str, front: Front) -> bool {
+    use crate::ViewAffinity;
+    let Some(action) = crate::by_id(id) else {
+        return true;
+    };
+    match action.view {
+        ViewAffinity::Design => front == Front::Design,
+        ViewAffinity::Code => front == Front::Text,
+        ViewAffinity::Any | ViewAffinity::ViewSwitch => true,
     }
 }
 

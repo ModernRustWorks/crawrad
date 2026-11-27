@@ -93,6 +93,21 @@ impl RunSlot {
     }
 }
 
+/// Runs `cargo check` in the workspace root.
+pub fn check_in_project(root: Option<PathBuf>) -> Answer {
+    in_project(root, cargo_tool::check)
+}
+
+/// Runs `cargo build` in the workspace root.
+pub fn build_in_project(root: Option<PathBuf>, args: &Value) -> Answer {
+    in_project(root, |d| cargo_tool::build(d, args))
+}
+
+/// Extracts diagnostics from the workspace root.
+pub fn diagnostics_in_project(root: Option<PathBuf>) -> Answer {
+    in_project(root, cargo_tool::diagnostics)
+}
+
 #[cfg(test)]
 #[path = "test/run_tool/test.rs"]
 mod tests;

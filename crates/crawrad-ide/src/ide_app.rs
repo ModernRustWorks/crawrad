@@ -615,14 +615,9 @@ pub struct IdeApp {
     grupos_abertos: GruposAbertos,
     /// The Object Inspector categories that are CLOSED.
     ///
-    /// CLOSED, rather than open, because the default is open: four of the five
-    /// start visible, and an open set would have to be seeded with
-    /// four names that are already in `ORDER`. The only closed category is seeded by
-    /// `inspector::categories_closed_on_open()`, derived directly from
-    /// `ORDER` — this shell writes `Advanced` nowhere.
-    ///
-    /// Only the effect of the `inspector.toggle_category` action modifies it, never a
-    /// click reading this field directly — the same rule as `grupos_abertos`.
+    /// Why CLOSED rather than open, and who may change it:
+    /// the shell module notes, under
+    /// *Why the Inspector tracks the CLOSED categories*.
     #[rust(inspector::categories_closed_on_open())]
     categorias_fechadas: GruposAbertos,
     /// The name/value splitter, moved only by `inspector.set_name_width`.
@@ -853,6 +848,19 @@ pub struct IdeApp {
     /// Is the decoupled notes dialog (Sidecar Code Notes) open?
     #[rust]
     nota_dialog_aberta: bool,
+    /// The source WITH the note's anchor, held until the note is actually saved.
+    ///
+    /// Opening the dialog used to write the anchor into the user's file at once;
+    /// cancelling then left `// [crawrad:note#id]` behind pointing at a note that
+    /// was never created. Nothing is written until Save.
+    #[rust]
+    note_anchor_pending: Option<String>,
+    /// Has this opening of the note dialog already claimed the keyboard?
+    ///
+    /// Claimed once per opening, not every frame: otherwise the caret would
+    /// jump back to the title while the user types in the body.
+    #[rust]
+    note_took_the_keyboard: bool,
     /// Headless model of the note dialog.
     #[rust]
     nota: Option<crawrad_project::note_dialog::NoteDialogModel>,
@@ -922,16 +930,9 @@ pub struct IdeApp {
     pub open_submenu: Option<(std::borrow::Cow<'static, str>, usize, Option<usize>)>,
     /// Where each rail button REMAINED on the last frame.
     ///
-    /// Exists because the context menu needs to know **which panel** the
-    /// right click hit, and only drawing knows: `PortalList` only delivers
-    /// items inside the draw loop (`portal_list.rs:1064`) and inside the
-    /// action loop — never in raw `MouseDown`, which is where right-clicks
-    /// arrive.
-    ///
-    /// Storing the MEASURED RECTANGLE, rather than computing an item height via a
-    /// constant, follows the same rule governing the top menu position:
-    /// *ask the screen for screen coordinates*. The top bar of this shell does not
-    /// start at `y = 0`, and hardcoding 34 there led to bugs.
+    /// Why the context menu cannot work without it:
+    /// the shell module notes, under
+    /// *Why the rail remembers where its buttons were drawn*.
     #[rust]
     rail_rects: Vec<(Panel, Rect)>,
     #[rust]
@@ -962,19 +963,9 @@ pub struct IdeApp {
     ultimo_toque: Option<(DVec2, f64)>,
     /// What is expanded and collapsed in the Explorer tree.
     ///
-    /// # Why this is a field HERE, and why it tracks the document with it
-    ///
-    /// The egui shell lacks this field, and its comment explains why: *"a
-    /// field there would be yet another state to clear on document switch, and
-    /// forgetting to clear has cost dearly here"*. There, the set lives in the
-    /// framework's own memory, keyed by the member directory.
-    ///
-    /// Makepad lacks this implicit memory, so ownership must be
-    /// explicit — bringing back the exact risk egui avoided for
-    /// free. The answer is [`Folds`], providing GUARD rather than discipline: the
-    /// set remembers **which document it belongs to**, and each read supplies
-    /// the current document. A different document rebuilds the set
-    /// immediately, leaving no calls that could be forgotten.
+    /// Why it is a field HERE, and why it tracks the document with it:
+    /// the shell module notes, under
+    /// *Why the Explorer folds are a field here*.
     #[rust]
     folds: Folds,
     /// The package manager: search, what is installed, and the two
@@ -1145,14 +1136,9 @@ enum Aberto {
         painel: Panel,
         /// WHERE the right click landed, in window logical pixels.
         ///
-        /// The menu opens at the pointer, rather than anchored to a button, which is
-        /// what enabled support for `Design` and `Chat`: neither has an item on the
-        /// rail (`rail::RAIL` is a subset of `Panel::ALL`), so anchoring to the rail
-        /// button would leave both **with no mouse entry point at all** — `Move To`
-        /// would only exist where an icon was already present.
-        ///
-        /// And this is what every context menu does: it appears where the pointer
-        /// is.
+        /// Why at the pointer and not anchored to the rail:
+        /// the shell module notes, under
+        /// *Why the panel menu opens at the pointer*.
         em: DVec2,
     },
     /// Settings/Manage popup menu on the Activity Rail gear icon.
@@ -1258,7 +1244,7 @@ mod maximize_tests;
 // function never called passes all of them. This one verifies the CALL.
 #[cfg(test)]
 #[path = "test/ide_app/wires.rs"]
-mod testes_dos_fios;
+mod wires;
 
 // The keyboard bridge gate: the catalog's 18 shortcuts, arrow keys, and `Esc`.
 #[cfg(test)]

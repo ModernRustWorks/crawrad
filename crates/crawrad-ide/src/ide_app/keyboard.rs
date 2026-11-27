@@ -7,7 +7,8 @@ use crawrad_actions::key_routing::{self, Press};
 use makepad_widgets::{KeyCode, KeyModifiers};
 // The active scheme, who owns a key and what a key does live beside the
 // catalog (ratchet); this keeps only the `KeyCode` translation.
-pub use crawrad_actions::key_routing::{Comando, active_scheme, not_here, set_active_scheme};
+pub use crawrad_actions::key_routing::set_active_scheme;
+pub use crawrad_actions::key_routing::{Comando, Front, active_scheme, blocked};
 use crawrad_note::note;
 pub use crawrad_runtime_makepad::keys::{arrow_direction, matches_shortcut};
 

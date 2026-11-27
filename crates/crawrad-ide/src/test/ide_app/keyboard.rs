@@ -892,18 +892,77 @@ fn rename_symbol_key_reaches_the_catalog_in_the_classic_scheme() {
 /// system's clipboard events (never twice); an action of any view always runs.
 #[test]
 fn a_key_with_two_owners_runs_the_view_in_front() {
+    use teclado::Front;
     // the designer in front, nothing focused in the editor
-    assert!(!teclado::not_here("edit.copy", false, false));
-    assert!(teclado::not_here("editor.copy", false, false));
+    assert!(!crawrad_actions::key_routing::not_here(
+        "edit.copy",
+        false,
+        Front::Design
+    ));
+    assert!(crawrad_actions::key_routing::not_here(
+        "editor.copy",
+        false,
+        Front::Design
+    ));
     // the code in front, the editor not focused (a panel has the keys)
-    assert!(teclado::not_here("edit.copy", false, true));
-    assert!(!teclado::not_here("editor.copy", false, true));
+    assert!(crawrad_actions::key_routing::not_here(
+        "edit.copy",
+        false,
+        Front::Text
+    ));
+    assert!(!crawrad_actions::key_routing::not_here(
+        "editor.copy",
+        false,
+        Front::Text
+    ));
     // the editor focused: the system's events copy, the catalog does not
-    assert!(teclado::not_here("editor.copy", true, true));
+    assert!(crawrad_actions::key_routing::not_here(
+        "editor.copy",
+        true,
+        Front::Text
+    ));
     // any view
     assert!(
-        !teclado::not_here("file.save", false, true)
-            && !teclado::not_here("file.save", false, false)
+        !crawrad_actions::key_routing::not_here("file.save", false, Front::Text)
+            && !crawrad_actions::key_routing::not_here("file.save", false, Front::Design)
+    );
+}
+
+#[test]
+fn key_front_maps_every_center() {
+    let key_front = |c: ViewCenter| teclado::Front::of(c.is_design(), c.is_text());
+    use crawrad_host::ViewCenter;
+    use teclado::Front;
+
+    assert_eq!(key_front(ViewCenter::Design), Front::Design);
+    assert_eq!(key_front(ViewCenter::FormSource), Front::Text);
+    assert_eq!(key_front(ViewCenter::Code), Front::Text);
+    assert_eq!(key_front(ViewCenter::History), Front::Other);
+    assert_eq!(key_front(ViewCenter::Sizes), Front::Other);
+    assert_eq!(key_front(ViewCenter::Translations), Front::Other);
+    assert_eq!(key_front(ViewCenter::Welcome), Front::Other);
+}
+
+#[test]
+fn key_front_delete_does_not_reach_hidden_form() {
+    let key_front = |c: ViewCenter| teclado::Front::of(c.is_design(), c.is_text());
+    use crawrad_actions::key_routing::not_here;
+    use crawrad_host::ViewCenter;
+
+    for center in [
+        ViewCenter::History,
+        ViewCenter::Sizes,
+        ViewCenter::Translations,
+        ViewCenter::Welcome,
+    ] {
+        assert!(
+            not_here("edit.delete", false, key_front(center)),
+            "edit.delete reached hidden form when center is {center:?}"
+        );
+    }
+    assert!(
+        !not_here("edit.delete", false, key_front(ViewCenter::Design)),
+        "edit.delete must reach form when center is Design"
     );
 }
 

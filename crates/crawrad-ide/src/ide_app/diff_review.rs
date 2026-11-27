@@ -123,6 +123,13 @@ impl IdeApp {
             .find(|p| self.has_pending_diff_review(p))
     }
 
+    /// Any file with a review waiting — the shown one first, otherwise whichever
+    /// is pending. A caller outside the IDE has no tab in front of it.
+    pub fn any_reviewed_path(&self) -> Option<std::path::PathBuf> {
+        self.reviewed_file()
+            .or_else(|| self.diff_reviews.any_pending().map(|r| r.file_path.clone()))
+    }
+
     pub(super) fn pending_review(&self) -> Option<&DiffReview> {
         self.get_pending_diff_review(&self.reviewed_file()?)
     }
@@ -153,7 +160,14 @@ impl IdeApp {
         };
         match self.diff_reviews.decide_change(&path, k, accept) {
             Ok(true) => drop(self.accept_diff_review(cx, &path)),
-            _ => self.show_center(cx, self.host.center()),
+            _ => {
+                // The bar at the top counts what is still UNDECIDED. Deciding a
+                // change inline and not refreshing it left "Accept all" offering
+                // to accept changes the user had already dealt with, over counts
+                // that no longer matched the editor.
+                self.update_diff_review_bar(cx);
+                self.show_center(cx, self.host.center());
+            }
         }
     }
 

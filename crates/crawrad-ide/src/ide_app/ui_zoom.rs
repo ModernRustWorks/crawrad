@@ -1,41 +1,7 @@
 //! **THE ZOOM OF THE WHOLE IDE** — menus, panels and the canvas together.
 //!
-//! # What the owner asked for, and had to say twice
-//!
-//! > *"WRONG, the zoom is not only in the designer area, it is across the ENTIRE IDE, WITHOUT
-//! > EXCEPTION"*
-//! >
-//! > *"IT NEVER CHANGED, IT HAS ALWAYS BEEN THIS, LOOK AT EGUI, it has always been like that"*
-//!
-//! He is right on both counts. The egui shell has always done this — its host
-//! consumes `Ctrl +` and moves `zoom_factor`, and the Settings window exposes
-//! the same lever with the words *"Scales the whole interface. Same as Ctrl +
-//! and Ctrl -"*. The first attempt here bound those keys to the CANVAS zoom,
-//! which is a different feature with a ruler and a `100%` of its own.
-//!
-//! # The lever, and the hole in it
-//!
-//! Makepad publishes `CxWindow::dpi_override` (`window.rs:256`): a DPI factor
-//! that replaces the one the desktop reported. Set it and every walk, every
-//! font and every shader measurement follows, because the whole layout is
-//! expressed in logical units.
-//!
-//! It is applied when a geometry change ARRIVES
-//! (`os/windows/windows.rs:115-117`), not when it is written — which is why
-//! [`crawrad_os::nudge_resize`] exists.
-//!
-//! **And the pointer is not remapped on Windows.** Measured: `macos.rs` calls
-//! `dpi_override_scale` on every pointer event (`:356-382`), while
-//! `os/windows/windows.rs` and `os/linux/x11/linux_x11.rs` call it **zero**
-//! times. The Windows position comes straight out of
-//! `get_mouse_pos_from_lparam`, divided by the DESKTOP's DPI
-//! (`win32_window.rs:778-783`). At 150% the drawing would scale and every click
-//! would land two thirds of the way to where it looks.
-//!
-//! So this module does that half itself — see
-//! [`IdeApp::com_ponteiro_na_escala`]. It is not a workaround bolted on: it is
-//! the same multiplication the framework already does on macOS, applied where
-//! the framework skipped it.
+//! Asked for twice, and why the first attempt bound the keys to the wrong zoom:
+//! the shell module notes, under *The zoom of the whole IDE*.
 
 use super::*;
 

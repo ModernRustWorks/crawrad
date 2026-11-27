@@ -24,6 +24,7 @@ pub mod references;
 pub mod rename;
 pub mod resolve;
 pub mod semantic;
+pub mod server_says;
 pub(crate) mod settler;
 pub mod signature;
 pub mod symbols;

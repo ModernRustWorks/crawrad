@@ -35,7 +35,7 @@ pub const GROUPS: &[(&str, &[&str])] = &[
     (
         "code",
         &[
-            "editor", "code", "lsp", "file", "build", "edit", "view", "ide", "dialog",
+            "editor", "code", "lsp", "file", "build", "edit", "review", "view", "ide", "dialog",
         ],
     ),
     (

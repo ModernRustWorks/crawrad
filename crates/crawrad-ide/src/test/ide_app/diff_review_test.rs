@@ -800,3 +800,87 @@ fn test_non_agent_review_accept_sets_buffer() {
         "Non-agent review accept sets the buffer to the proposed text"
     );
 }
+
+/// Generating rewrites the user's files — it waits for the review, like saving.
+///
+/// It did not: the owner saw the proposed line vanish from the editor while the
+/// bar at the top went on offering to accept it. Run triggers generation, the
+/// files were rewritten underneath, and the review's rendering went with them —
+/// leaving a bar that no longer matched anything on screen. Accepting afterwards
+/// would have written a stale original over the freshly generated code.
+#[test]
+fn generating_waits_for_the_review_just_like_saving() {
+    let (mut cx, mut app) = create_test_ide_app();
+    let temp_root = create_temp_workspace("generate_blocked_review");
+    let file_path = temp_root.join("src").join("lib.rs");
+    fs::write(&file_path, "pub fn compute() {}\n").expect("write lib.rs");
+
+    app.host.set_active_file(Some(file_path.clone()));
+    app.set_editor_buffer(file_path.clone(), "pub fn compute() {}\n".to_string());
+    app.acp_config.diff_review_mode = DiffReviewMode::WaitForApproval;
+    app.propose_diff_review(
+        file_path.clone(),
+        "pub fn compute() {}\n".to_string(),
+        "pub fn compute() -> i32 { 42 }\n".to_string(),
+        "code.edit",
+    )
+    .expect("propose");
+    assert!(app.has_any_pending_diff_review());
+
+    app.gerar_projeto(&mut cx);
+    assert!(
+        app.status.as_ref().is_some_and(|s| s
+            .to_lowercase()
+            .contains("cannot generate: diff review pending")),
+        "generating must refuse while a review is pending; status was {:?}",
+        app.status
+    );
+    assert!(
+        app.has_any_pending_diff_review(),
+        "the review must still be there, untouched"
+    );
+}
+
+/// An agent can see the review and finish it, instead of being told to wait
+/// for a human with no way to act.
+///
+/// A write tool answers `status: "pending_approval"` and the edit waits in the
+/// editor. Until these three tools existed, that was a dead end from outside
+/// the IDE: nothing could report what was waiting, and nothing could decide it.
+#[test]
+fn the_review_can_be_seen_and_decided_from_outside() {
+    let (mut cx, mut app) = create_test_ide_app();
+    let temp_root = create_temp_workspace("review_tools");
+    let file_path = temp_root.join("src").join("lib.rs");
+    fs::write(&file_path, "pub fn compute() {}\n").expect("write lib.rs");
+
+    app.host.set_active_file(Some(file_path.clone()));
+    app.set_editor_buffer(file_path.clone(), "pub fn compute() {}\n".to_string());
+    app.acp_config.diff_review_mode = DiffReviewMode::WaitForApproval;
+
+    assert!(app.any_reviewed_path().is_none(), "nothing waiting yet");
+
+    app.propose_diff_review(
+        file_path.clone(),
+        "pub fn compute() {}\n".to_string(),
+        "pub fn compute() -> i32 { 42 }\n".to_string(),
+        "editor.apply_edit",
+    )
+    .expect("propose");
+
+    let waiting = app
+        .any_reviewed_path()
+        .expect("the review must be findable");
+    assert!(
+        app.get_pending_diff_review(&waiting).is_some(),
+        "and readable: which file, who proposed it, how much it changes"
+    );
+
+    app.accept_diff_review(&mut cx, &waiting)
+        .expect("accepting from outside must work");
+    assert!(
+        !app.has_any_pending_diff_review(),
+        "once decided, nothing is left waiting"
+    );
+    assert!(app.any_reviewed_path().is_none());
+}

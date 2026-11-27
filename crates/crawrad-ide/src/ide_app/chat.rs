@@ -381,20 +381,12 @@ impl IdeApp {
             chat.view(&[LiveId::from_str(dot)])
                 .set_visible(cx, dot == chip.link.dot());
         }
-        let count_str =
-            crawrad_agent::chat_layout::message_count_label(self.chat.session.messages.len());
-        chat.label(id!(ai_messages_view
-            .ai_hero_view
-            .session_row
-            .lbl_session_count))
-            .set_text(cx, &count_str);
-
-        let resumo = crawrad_agent::chat_layout::session_summary(&self.chat.session.messages);
-        chat.label(id!(ai_messages_view
-            .ai_hero_view
-            .session_row
-            .lbl_session_status))
-            .set_text(cx, &resumo);
+        let hero = chat.view(id!(ai_messages_view.ai_hero_view));
+        let (msgs, agent) = (&self.chat.session.messages, self.agent_card().state);
+        let connected = self.chat.live.client().is_some();
+        for (label, text) in crawrad_agent::chat_layout::hero_labels(msgs, agent, connected) {
+            hero.label(&[LiveId::from_str(label)]).set_text(cx, &text);
+        }
 
         self.sync_model_button(cx);
         let offs = [self.chat.form_off, self.chat.selection_off];

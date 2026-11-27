@@ -92,9 +92,15 @@ pub const ALLOWED_SHELL_ROOT_FILES: &[&str] = &["ide_app.rs", "main.rs"];
 /// 36,906 lines: the Explorer's view model
 /// (`crawrad_project::explorer`) joined its rows out of the shell, paying for the
 /// editor's context menu and the menus' keyboard.
+/// Before, at 33,323 lines: non-UI MCP server and tool dispatch logic moved to `crawrad-mcp`.
+/// Lowered on 27/11/2026 from 33,063 to 32,794: the shell handed the REST of the MCP
+/// dispatch back to `crawrad-mcp` — `mcp_host.rs` and its `project`, `designer`,
+/// `editor` and `build_run` modules now only wire the IDE to the crate, and the
+/// editor's buffer, footer and the IDE zoom had their long rationale blocks
+/// condensed to what the code itself needs to say.
 /// Ratchet rule: This threshold can ONLY DECREASE as code is extracted into crates.
 /// The gate enforces equality: if lines decrease, the constant must be lowered in the same PR.
-pub const MAX_SHELL_SOURCE_LINES: usize = 33_063;
+pub const MAX_SHELL_SOURCE_LINES: usize = 32_794;
 
 /// Maximum allowed lines for any individual `.rs` file in `crates/crawrad-ide/src/` (outside `test/`).
 ///

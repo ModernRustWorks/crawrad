@@ -277,6 +277,73 @@ fn success_phrase_says_it_is_in_the_palette() {
 }
 
 // ---------------------------------------------------------------------------
+// 4 — PACKAGED (READ-ONLY) LOCATION HANDLING
+// ---------------------------------------------------------------------------
+
+/// A Windows path is only a path ON Windows: on Linux the backslash separates
+/// nothing, `C:\Program Files\WindowsApps\x` becomes ONE component, and the
+/// test failed for that reason — not for a defect. `WindowsApps` is the Store's own
+/// invention, so the rule it guards exists only here, and here is where it proves itself.
+#[cfg(windows)]
+#[test]
+fn is_packaged_location_detects_windows_apps_case_insensitively() {
+    assert!(is_packaged_location(Path::new(
+        r"C:\Program Files\WindowsApps\CrawRAD\crawrad-ide.exe"
+    )));
+    assert!(is_packaged_location(Path::new(
+        r"C:\program files\windowsapps\crawrad\crawrad-ide.exe"
+    )));
+    assert!(is_packaged_location(Path::new(
+        r"C:\Program Files\WindowsApps\CrawRAD"
+    )));
+    assert!(is_packaged_location(Path::new(
+        "/var/lib/WindowsApps/crawrad-ide"
+    )));
+
+    assert!(!is_packaged_location(Path::new(
+        r"C:\Program Files\CrawRAD\crawrad-ide.exe"
+    )));
+    assert!(!is_packaged_location(Path::new(
+        r"E:\DeveloperRust\rrad-wt-msix\target\debug\crawrad-ide.exe"
+    )));
+    assert!(!is_packaged_location(Path::new(
+        r"C:\Users\User\AppData\Local\Programs\CrawRAD\crawrad-ide.exe"
+    )));
+}
+
+/// A Windows path is only a path ON Windows: on Linux the backslash separates
+/// nothing, `C:\Program Files\WindowsApps\x` becomes ONE component, and the
+/// test failed for that reason — not for a defect. `WindowsApps` is the Store's own
+/// invention, so the rule it guards exists only here, and here is where it proves itself.
+#[cfg(windows)]
+#[test]
+fn choose_installation_dir_uses_config_for_packaged_and_exe_dir_for_normal() {
+    let packaged_dir = Path::new(r"C:\Program Files\WindowsApps\CrawRAD");
+    let normal_dir = Path::new(r"C:\Program Files\CrawRAD");
+    let config_dir = Path::new(r"C:\Users\User\AppData\Roaming\CrawRAD");
+
+    let packaged_choice = choose_installation_dir(packaged_dir, Some(config_dir));
+    assert_eq!(
+        packaged_choice,
+        Some(config_dir.join("components")),
+        "packaged location must install to user config folder"
+    );
+
+    let normal_choice = choose_installation_dir(normal_dir, Some(config_dir));
+    assert_eq!(
+        normal_choice,
+        Some(normal_dir.join("components")),
+        "normal location installs next to executable"
+    );
+
+    let packaged_no_config = choose_installation_dir(packaged_dir, None);
+    assert_eq!(
+        packaged_no_config, None,
+        "without config folder, packaged location returns None"
+    );
+}
+
+// ---------------------------------------------------------------------------
 // mock packages for testing
 // ---------------------------------------------------------------------------
 

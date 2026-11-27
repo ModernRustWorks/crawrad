@@ -1,45 +1,8 @@
 //! **THE EDITOR IS AN EDITOR** — what is typed, what survives, what is saved.
 //!
-//! # The defect this module exists to close
-//!
-//! The owner, with `form_main.rs` on screen:
-//!
-//! > *"now it's worse, NOTHING works, Ctrl+Arrows, Enter, Typing, as if
-//! > it were readonly, where is the working Editor?"*
-//!
-//! He was reading it exactly right, and the footer was agreeing with him in
-//! writing: it said `Read only`. The Makepad shell draws the code in a
-//! `CodeView`, which is the framework's editor with `read_only: true` wired in
-//! its own DSL (`makepad-code-editor-1.0.0/src/code_view.rs:22`), and every
-//! mutating arm of `CodeEditor` asks that flag before touching the text
-//! (`code_editor.rs:845`, `:874`, `:884`, `:893`, `:902`, `:912`).
-//!
-//! So the view was never an editor. It was a syntax-coloured viewer that
-//! happened to have a blinking cursor.
-//!
-//! # Turning it on is one line — and the other ninety are the reason
-//!
-//! `read_only` is `#[live(false)]` (`code_editor.rs:250`), so `apply_over` sets
-//! it at runtime. That alone would give a text box that **loses what you
-//! type**, because `CodeView::set_text` throws the session away
-//! (`code_view.rs:82`) and this shell rewrites the view on every tab switch.
-//!
-//! Three things had to come with it, and none is optional:
-//!
-//! 1. **The buffer survives** — `IdeApp::edicoes` keeps the text of every
-//!    file with unsaved work, so `Design` and back does not erase an hour.
-//! 2. **`Ctrl+S` writes the FILE** — and writes it back the way it was found,
-//!    mark and line endings included ([`crate::support::encoding::Encoding::to_bytes`]).
-//! 3. **What cannot be edited says so** — see [`pode_editar`].
-//!
-//! # What is NOT editable, and why that is not a gap
-//!
-//! | in front | editable? | because |
-//! |---|---|---|
-//! | the canvas | — | there is no text |
-//! | `Alt+F12`, the form source | **no** | it is PLANNED each time it is shown, from the document. Typing in it would be typing into something the next drag regenerates |
-//! | a unit that was never generated | **no** | what is on screen is a skeleton, not a file. Creating it is `Generate`'s job, and two creators would race |
-//! | any `.rs` on disk | **yes** | |
+//! Why this module exists — the owner reading `Read only` on a file he was trying
+//! to type into, and the three things that had to come with turning the flag off —
+//! is in the shell module notes, under *The editor is an editor*.
 
 use std::path::{Path, PathBuf};
 
@@ -148,19 +111,8 @@ impl IdeApp {
 
     /// **Reads back what was typed, and marks the tab.**
     ///
-    /// # Why it POLLS instead of listening
-    ///
-    /// Because there is nothing to listen to. `CodeEditor` does emit
-    /// `CodeEditorAction::TextDidChange`, and `CodeView` **drops every one of
-    /// them**: `for _action in self.editor.handle_event(...)`
-    /// (`code_view.rs:67`) — the loop variable is discarded and no widget
-    /// action is posted. From outside the widget the edit is invisible.
-    ///
-    /// The cost is a `join` over the lines once per sync, and it is paid only
-    /// while a writable file is in front. The honest limit: on a very large
-    /// file that is a copy of the whole text per sync, and the fix is a widget
-    /// of ours in place of `CodeView` — which is also what would give back
-    /// per-file undo history.
+    /// Why it POLLS instead of listening, and what that costs:
+    /// the shell module notes, under *Why the editor sync polls*.
     pub(super) fn colher_do_editor(&mut self, cx: &mut Cx) {
         let Some(arquivo) = self.editavel.clone().filter(|_| !self.remake_editor) else {
             return;

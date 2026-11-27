@@ -111,15 +111,11 @@ impl IdeApp {
             return;
         }
         self.status = None;
-        let no_editor = self.host.center().is_text();
+        let c = self.host.center();
+        let front = teclado::Front::of(c.is_design(), c.is_text());
         let teclado_do_texto = self.editor_com_foco(cx);
         for comando in comandos {
-            if no_editor && !matches!(comando, teclado::Comando::Acao(_)) {
-                continue;
-            }
-            if let teclado::Comando::Acao(id) = comando
-                && teclado::not_here(id, teclado_do_texto, no_editor)
-            {
+            if teclado::blocked(&comando, teclado_do_texto, front) {
                 continue;
             }
             match comando {

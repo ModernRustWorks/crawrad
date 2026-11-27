@@ -102,6 +102,72 @@ dependencies = [
 ]
 
 [[package]]
+name = "crawrad-component"
+version = "0.1.0"
+
+[[package]]
+name = "crawrad-ir"
+version = "0.1.0"
+dependencies = [
+ "crawrad-note",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
+name = "crawrad-note"
+version = "0.1.0"
+dependencies = [
+ "crawrad-note-format",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
+]
+
+[[package]]
+name = "crawrad-note-format"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
+]
+
+[[package]]
+name = "crawrad-os"
+version = "0.1.0"
+dependencies = [
+ "crawrad-note",
+ "windows-sys",
+]
+
+[[package]]
+name = "crawrad-runtime"
+version = "0.1.0"
+dependencies = [
+ "crawrad-component",
+ "crawrad-ir",
+ "crawrad-note",
+ "datagrid",
+ "rfd",
+ "thiserror",
+]
+
+[[package]]
+name = "crawrad-runtime-makepad"
+version = "0.1.0"
+dependencies = [
+ "crawrad-component",
+ "crawrad-ir",
+ "crawrad-note",
+ "crawrad-os",
+ "crawrad-runtime",
+ "datagrid",
+ "makepad-widgets",
+]
+
+[[package]]
 name = "crc32fast"
 version = "1.5.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -917,72 +983,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6c20b6793b5c2fa6553b250154b78d6d0db37e72700ae35fad9387a46f487c97"
 
 [[package]]
-name = "crawrad-component"
-version = "0.1.0"
-
-[[package]]
-name = "crawrad-ir"
-version = "0.1.0"
-dependencies = [
- "crawrad-note",
- "serde",
- "serde_json",
- "thiserror",
-]
-
-[[package]]
-name = "crawrad-note"
-version = "0.1.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "crawrad-note-format",
- "syn 2.0.119",
-]
-
-[[package]]
-name = "crawrad-note-format"
-version = "0.1.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.119",
-]
-
-[[package]]
-name = "crawrad-os"
-version = "0.1.0"
-dependencies = [
- "crawrad-note",
- "windows-sys",
-]
-
-[[package]]
-name = "crawrad-runtime"
-version = "0.1.0"
-dependencies = [
- "datagrid",
- "rfd",
- "crawrad-component",
- "crawrad-ir",
- "crawrad-note",
- "thiserror",
-]
-
-[[package]]
-name = "crawrad-runtime-makepad"
-version = "0.1.0"
-dependencies = [
- "datagrid",
- "makepad-widgets",
- "crawrad-component",
- "crawrad-ir",
- "crawrad-note",
- "crawrad-os",
- "crawrad-runtime",
-]
-
-[[package]]
 name = "rustversion"
 version = "1.0.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1317,9 +1317,9 @@ dependencies = [
 name = "web_greeter"
 version = "0.1.0"
 dependencies = [
- "makepad-widgets",
  "crawrad-runtime",
  "crawrad-runtime-makepad",
+ "makepad-widgets",
 ]
 
 [[package]]

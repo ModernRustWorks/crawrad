@@ -126,6 +126,27 @@ pub fn component(doc: &crawrad_doc::Doc, id: &str) -> Option<(Value, String)> {
     Some((answer, node.name().to_string()))
 }
 
+/// Builds the inspection result for `form.read`, combining document IR with active view state.
+pub fn form_read_answer(
+    doc: Option<&crawrad_doc::Doc>,
+    center_view: &str,
+    is_dirty: bool,
+) -> Result<crate::protocol::ToolCallResult, crate::run_tool::Answer> {
+    let Some(doc) = doc else {
+        return Err(crate::designer_tool::no_form());
+    };
+    let (mut form_val, count) = form(doc);
+    form_val["center_view"] = json!(center_view);
+    form_val["is_dirty"] = json!(is_dirty);
+    let said = format!(
+        "Active form inspected (rev: {}, {count} child nodes)",
+        doc.revision()
+    );
+    Ok(crate::protocol::ToolCallResult::success_json(
+        form_val, said,
+    ))
+}
+
 #[cfg(test)]
 #[path = "test/form_json/test.rs"]
 mod tests;

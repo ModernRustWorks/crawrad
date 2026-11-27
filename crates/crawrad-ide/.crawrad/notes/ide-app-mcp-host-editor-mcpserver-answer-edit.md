@@ -7,7 +7,7 @@ author:
 created: 
 title: "McpServer::answer_edit"
 tags: []
-signature: "pub (super) fn answer_edit (& mut self , tool : & str , args : & Value , (path_str , after) : (& str , & str) , landed : Result < Option < crawrad_agent :: diff_review :: DiffReview > , String > , mut answer : Value ,) -> ToolCallResult"
+signature: "pub (super) fn answer_edit (& mut self , tool : & str , args : & Value , (path_str , after) : (& str , & str) , landed : Result < Option < crawrad_agent :: diff_review :: DiffReview > , String > , answer : Value ,) -> ToolCallResult"
 ---
 
 Formats the edit tool answer for diff reviews and applied edits.

@@ -87,8 +87,16 @@ fn form_designer_rs_inner(
         .rect()
         .unwrap_or(crawrad_ir::Rect::new(0.0, 0.0, 800.0, 600.0));
 
-    let mut max_w = rect_form.w;
-    let mut max_h = rect_form.h;
+    // The window IS the form. It does not grow to swallow a component left
+    // outside the form's own rect: that silently broke what the Designer
+    // promises — the owner saw it as a window that got bigger at run time,
+    // with a margin on the right that was not in the design (the old code
+    // added `+30` horizontally and `+40` vertically per stray component).
+    // A component outside the form is simply not seen when the app runs,
+    // exactly as in the Designer, and the canvas already marks it with a
+    // numbered badge on the edge.
+    let max_w = rect_form.w;
+    let max_h = rect_form.h;
 
     let mut dsl_emitted = emitted.to_vec();
     dsl_emitted.sort_by_key(|n| {
@@ -134,9 +142,6 @@ fn form_designer_rs_inner(
         let rect = d
             .rect_in_form(&n.id)
             .unwrap_or(crawrad_ir::Rect::new(0.0, 0.0, 80.0, 24.0));
-
-        max_w = max_w.max(rect.x + rect.w + 30.0);
-        max_h = max_h.max(rect.y + rect.h + 40.0);
 
         let comp_dsl = components::emit_dsl(d, reg, n, rect.x, rect.y, rect.w, rect.h)?;
         components_dsl.push_str(&comp_dsl);

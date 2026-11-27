@@ -1,41 +1,7 @@
 //! **THE EDITOR FOOTER** — where the cursor is, and how the file is written.
 //!
-//! # What the owner asked for
-//!
-//! He put the two shells side by side and pointed at the band above
-//! `Design | Code`: the egui editor wrote `1: 1   Insert   UTF-8 LF` there, and
-//! this one had an empty strip. *"validate the editor footer"*.
-//!
-//! # Why it is not the same three cells
-//!
-//! Two of them are, and the third tells the truth instead of copying it.
-//!
-//! | cell | egui | here |
-//! |---|---|---|
-//! | position | `1: 1` | the same |
-//! | typing mode | `Insert` | **`Read only`** |
-//! | encoding | `UTF-8 LF` | the same |
-//!
-//! The middle one is the difference, and it is not a gap: the Makepad view is
-//! a `CodeView`, which is the framework's editor with `read_only: true`
-//! hard-wired (`makepad-code-editor-1.0.0/src/code_view.rs:22`). Writing
-//! `Insert` under a view that refuses every key would be the bar answering a
-//! question with the other shell's answer.
-//!
-//! The egui footer already had that word for a reason of its own — it writes
-//! `Read only` over the `.designer.rs`, because *"it accepts selection and not
-//! typing, and without saying why"*. Here the reason covers the whole view.
-//!
-//! # Where the numbers come from
-//!
-//! The position is read off the `CodeView`'s own session — `session.selections()`
-//! gives a `Selection` whose `cursor.position` is a `Position { line_index,
-//! byte_index }` (`makepad-code-editor-1.0.0/src/text.rs:208-211`). It is the
-//! editor's truth, not a count this shell keeps in parallel.
-//!
-//! **And `byte_index` is not a column.** The two only agree in pure ASCII, and
-//! the first line of every generated unit in this project is a Portuguese
-//! comment. [`crawrad_host::word_motion::column_of_byte`] converts, and it has a gate.
+//! The empty strip, next to the other shell's `1: 1   Insert   UTF-8 LF`:
+//! the shell module notes, under *The editor footer*.
 
 use super::*;
 use crawrad_runtime_makepad::breadcrumb::CrawradBreadcrumbWidgetRefExt;

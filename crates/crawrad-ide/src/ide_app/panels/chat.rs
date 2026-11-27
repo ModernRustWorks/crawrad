@@ -98,7 +98,7 @@ live_design! {
             margin: { top: (CRAWRAD_ESPACO_S) },
             lbl_ready_status = <CrawradLabelMuted> {
                 align: { x: 0.5 },
-                text: "🟢 Connected · ready"
+                text: "⚪ Checking the AI agent…"
             }
         }
     }

@@ -8,7 +8,7 @@ use crawrad_agent::markdown;
 use crawrad_agent::session::{self, ChatMessage, ChatSession, TurnOutcome};
 use std::time::Instant;
 
-fn main() {
+pub fn run_acp_check() {
     println!("=======================================================");
     println!("   CrawRAD - Agent Client Protocol (ACP) Test Suite    ");
     println!("=======================================================\n");
@@ -213,7 +213,9 @@ fn main() {
         );
         let _ = std::fs::remove_file(&tmp_path);
     }
-    let _ = config.save();
+    // `config.save()` is NOT called here: it writes to the user's REAL file and
+    // wipes out the agent they configured. The write path was already exercised
+    // just above, on the temporary one — which is what this check needs to prove.
 
     // Exercise every export of acp and agent_profile so acp_check stays clean without #[allow]
     config.add_custom_model_for_provider("Custom ACP Server", "temp-test-model");
@@ -279,4 +281,15 @@ fn main() {
     println!("\n=======================================================");
     println!("   ACP Test Completed Successfully!                    ");
     println!("=======================================================");
+}
+
+// This file is BOTH the `acp_check` binary and, under `#[cfg(test)]`, a module of
+// the library (see `lib.rs`), so that the purity test can call `run_acp_check`
+// directly instead of spawning a process. In that library build `main` is
+// genuinely unreachable, which is what the dead_code warning was pointing at.
+// The answer is to tell the compiler the truth -- `main` belongs to the binary
+// build only -- and not to silence it with `allow`.
+#[cfg(not(test))]
+fn main() {
+    run_acp_check();
 }

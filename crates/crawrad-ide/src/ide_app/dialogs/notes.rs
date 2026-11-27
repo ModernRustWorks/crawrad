@@ -28,6 +28,7 @@ impl IdeApp {
         let file = self.active_file_path_str().unwrap_or_default();
         self.nota = Some(NoteDialogModel::from_id(id, &file, &self.raiz_do_projeto()));
         self.nota_dialog_aberta = true;
+        self.note_took_the_keyboard = false;
         self.refresh(cx);
     }
 
@@ -108,6 +109,19 @@ impl IdeApp {
                 input.set_text(cx, val);
             }
         }
+
+        // The veil stops the pointer, but makepad's key focus is a separate
+        // thing: without this the editor behind keeps it, and what the user
+        // types into this dialog is written into their source file instead.
+        //
+        // Taken once per opening, and NOT guarded by "the field is empty":
+        // this dialog arrives with the title already filled in, so an
+        // empty-field guard would never fire — which is exactly how the leak
+        // survived its first fix.
+        if !self.note_took_the_keyboard {
+            cx.set_key_focus(dlg.text_input(id!(note_title_input)).area());
+            self.note_took_the_keyboard = true;
+        }
     }
 
     #[note("ide-app-dialogs-notes-ideapp-atender-nota")]
@@ -163,6 +177,7 @@ impl IdeApp {
 
         if dlg.button(id!(note_cancel)).clicked(actions) {
             self.nota_dialog_aberta = false;
+            self.note_anchor_pending = None;
         } else if dlg.button(id!(note_save)).clicked(actions) {
             self.save_note(cx);
         } else if dlg.button(id!(note_test)).clicked(actions) {
@@ -179,6 +194,13 @@ impl IdeApp {
 
     #[note("ide-app-dialogs-notes-ideapp-save-note")]
     fn save_note(&mut self, cx: &mut Cx) {
+        // The anchor goes in now, with the note: `save` renames an anchor that is
+        // already there, so it has to exist by the time we save — and only then.
+        if let Some(texto) = self.note_anchor_pending.take()
+            && texto != self.texto_na_vista
+        {
+            self.show_edited_source(cx, texto);
+        }
         let dlg = self.ui.view(id!(note_dialog.dlg));
         let save_result = self.nota.as_mut().map(|m| {
             m.title = dlg.text_input(id!(note_title_input)).text();
@@ -272,6 +294,7 @@ impl IdeApp {
         let (path, root) = (file.to_string_lossy(), self.raiz_do_projeto());
         self.nota = Some(NoteDialogModel::from_caret(&text, line, &path, &root).model);
         self.nota_dialog_aberta = true;
+        self.note_took_the_keyboard = false;
         self.refresh(cx);
         true
     }
@@ -296,11 +319,12 @@ impl IdeApp {
                 return view.redraw(cx);
             }
         };
-        if let Some((_, novo_texto)) = open.insert_anchor {
-            self.show_edited_source(cx, novo_texto);
-        }
+        // Held, not written: the anchor only reaches the file when the note is
+        // saved. Cancelling must leave the source byte for byte as it was.
+        self.note_anchor_pending = open.insert_anchor.map(|(_, texto)| texto);
         self.nota = Some(open.model);
         self.nota_dialog_aberta = true;
+        self.note_took_the_keyboard = false;
         self.refresh(cx);
     }
 }

@@ -346,6 +346,39 @@ pub fn wired(
     (ToolCallResult::success_json(data, said), "applied")
 }
 
+/// Parses the required `size` argument for `designer.set_grid_size`.
+pub fn set_grid_size_arg(args: &Value) -> Result<f32, ToolCallResult> {
+    let Some(size) = args.get("size").and_then(|v| v.as_f64()) else {
+        return Err(ToolCallResult::error_text(
+            "bad-args",
+            "designer.set_grid_size needs `size`",
+        ));
+    };
+    Ok(size as f32)
+}
+
+/// Parses the required `code` argument for `designer.set_language`.
+pub fn set_language_arg(args: &Value) -> Result<&str, ToolCallResult> {
+    let Some(code) = args.get("code").and_then(|v| v.as_str()) else {
+        return Err(ToolCallResult::error_text(
+            "bad-args",
+            "designer.set_language needs `code`",
+        ));
+    };
+    Ok(code)
+}
+
+/// Builds the error response when an unknown language code is requested in `designer.set_language`.
+pub fn unknown_language_error(code: &str, valids: Vec<String>) -> ToolCallResult {
+    let mut list = vec!["en".to_string()];
+    list.extend(valids);
+    let valid_list = list.join(", ");
+    ToolCallResult::error_text(
+        "unknown-language",
+        format!("Unknown language '{code}'. Valid languages: {valid_list}"),
+    )
+}
+
 #[cfg(test)]
 #[path = "test/designer_tool/test.rs"]
 mod tests;

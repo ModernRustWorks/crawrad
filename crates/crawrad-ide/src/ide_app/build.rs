@@ -302,6 +302,21 @@ impl IdeApp {
 
     #[note("ide-app-build-ideapp-gerar-projeto")]
     pub(super) fn gerar_projeto(&mut self, cx: &mut Cx) {
+        // Generating rewrites the user's files. With a diff review pending it
+        // threw the review's own rendering away — the proposed line vanished
+        // from the editor while the bar at the top went on offering to accept
+        // it — and accepting afterwards would have written a stale original
+        // over the freshly generated code. Saving already refuses here; so
+        // does generating.
+        if self.has_any_pending_diff_review() {
+            // Through `refusal`, so `generator::refused` recognises it: otherwise
+            // `run.start` over MCP would sail past a generation that never ran.
+            self.status = Some(crawrad_project::generator::refusal(format!(
+                "cannot generate: {}",
+                super::diff_review::REVIEW_PENDING
+            )));
+            return;
+        }
         if !self.save_before_build(cx) {
             return;
         }

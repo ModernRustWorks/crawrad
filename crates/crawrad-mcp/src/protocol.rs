@@ -56,6 +56,30 @@ impl JsonRpcResponse {
     }
 }
 
+/// Parses raw JSON-RPC request text, returning either the parsed request or an error response JSON.
+pub fn parse_raw_request(trimmed: &str) -> Result<JsonRpcRequest, String> {
+    serde_json::from_str(trimmed).map_err(|e| {
+        let resp = JsonRpcResponse::error(Value::Null, -32700, format!("Parse error: {e}"), None);
+        serde_json::to_string(&resp).unwrap_or_default()
+    })
+}
+
+/// Checks the pending diff review guard when a save tool is called.
+pub fn check_pending_review_save_guard(
+    disable_gate: bool,
+    name: &str,
+    has_pending_review: bool,
+) -> Result<(), crate::run_tool::Answer> {
+    if !disable_gate && crate::tools::is_save_tool(name) && has_pending_review {
+        let said = "Cannot save while a diff review is pending. Accept or reject the diff first.";
+        return Err((
+            ToolCallResult::error_text("pending-diff-review", said),
+            "rejected",
+        ));
+    }
+    Ok(())
+}
+
 #[note("protocol-initialize-result")]
 pub fn initialize_result() -> Value {
     serde_json::json!({

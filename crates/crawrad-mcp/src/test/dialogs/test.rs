@@ -15,6 +15,18 @@ fn esc_presses_cancel_or_else_close() {
     assert_eq!(NEW_PROJECT.cancel_control(), Some("np_cancel"));
 }
 
+/// A dialog absent from `veil_roots` is not modal: `modal_open` answers "no
+/// dialog", key dispatch hands the keystroke to the window behind, and typing
+/// in the dialog lands in the user's source file. That happened to the Note
+/// dialog, so every dialog that owns a veil is named here.
+#[test]
+fn a_dialog_with_a_veil_is_modal() {
+    let roots: Vec<_> = veil_roots().collect();
+    for veil in ["note_dialog", "shrink_dialog", "environment_dialog"] {
+        assert!(roots.contains(&veil), "{veil} owns a veil but is not modal");
+    }
+}
+
 #[test]
 fn every_veil_is_named_once() {
     let roots: Vec<_> = veil_roots().collect();

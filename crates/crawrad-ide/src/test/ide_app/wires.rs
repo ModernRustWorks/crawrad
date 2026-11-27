@@ -1340,11 +1340,11 @@ fn editor_keyboard_is_distinct_from_designer() {
     // 2. The designer gesture does not pass through the editor — and the catalog ACTION
     // keeps passing through, otherwise `Ctrl+S` and `F12` would die as well.
     assert!(
-        c.contains("letno_editor=self.host.center().is_text();"),
+        c.contains("letfront=teclado::Front::of(c.is_design(),c.is_text());"),
         "the bridge stopped asking if the editor is in front"
     );
     assert!(
-        c.contains("ifno_editor&&!matches!(comando,teclado::Comando::Acao(_)){continue;}"),
+        c.contains("ifteclado::blocked(&comando,teclado_do_texto,front){continue;}"),
         "the arrow key pushed the component with code in front again — or, \
          worse, the catalog action stopped passing and `Ctrl+S` died with the \
          editor open"
@@ -1356,9 +1356,7 @@ fn editor_keyboard_is_distinct_from_designer() {
     // transaction and `Del` deletes the selected component — behind a screen
     // nobody is looking at.
     assert!(
-        c.contains(
-            "ifletteclado::Comando::Acao(id)=comando&&teclado::not_here(id,teclado_do_texto,no_editor){continue;}"
-        ),
+        c.matches("teclado::blocked(").count() == 1 && !c.contains("teclado::not_here("),
         "`Ctrl+Z` and `Del` drove the designer again with the caret inside \
          a file"
     );
@@ -1630,5 +1628,29 @@ fn signal_wakes_debugger_chat_and_audio_without_polling_timers() {
     assert!(
         !shell.contains("pulso_do_audio"),
         "pulso_do_audio field must be removed from the shell"
+    );
+}
+
+#[test]
+fn chat_status_label_is_not_hardcoded() {
+    let dsl = include_str!("../../ide_app/panels/chat.rs");
+    let ready_status_decl = dsl
+        .find("lbl_ready_status")
+        .map(|idx| &dsl[idx..idx + 150])
+        .expect("lbl_ready_status not found in panels/chat.rs");
+    assert!(
+        !ready_status_decl.contains("Connected"),
+        "DSL default for lbl_ready_status must no longer contain 'Connected'"
+    );
+    assert!(
+        ready_status_decl.contains("⚪ Checking the AI agent…"),
+        "DSL default for lbl_ready_status should be '⚪ Checking the AI agent…'"
+    );
+
+    let chat_code = include_str!("../../ide_app/chat.rs");
+    // The texts (lbl_ready_status included) come from crawrad-agent's hero_labels; the IDE only sets them.
+    assert!(
+        chat_code.contains("chat_layout::hero_labels(msgs, agent, connected)"),
+        "refresh code must set the hero labels from hero_labels (real agent state)"
     );
 }
