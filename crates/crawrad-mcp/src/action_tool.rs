@@ -188,3 +188,83 @@ pub fn check_designer_action(name: &str, args: &Value) -> Result<Action, String>
     }
     Ok(action)
 }
+
+/// Runs a designer action, verifying enabled predicates and status results.
+pub fn run_designer_action(
+    action: &Action,
+    ctx: &Context<'_>,
+) -> Result<crawrad_actions::Effect, String> {
+    if !action.enabled.allows(ctx) {
+        return Err(format!(
+            "Action '{}' is currently disabled in the IDE context.",
+            action.id
+        ));
+    }
+    let effect = (action.execute)(ctx);
+    if let Some(status) = &effect.status
+        && effect.transaction.is_none()
+        && effect.selection.is_none()
+        && effect.file.is_none()
+    {
+        return Err(status.clone());
+    }
+    Ok(effect)
+}
+
+/// Prepares catalogue action execution by evaluating preconditions, enabled predicates,
+/// and capturing the initial snapshot.
+pub fn plan_action_execution(
+    action: &Action,
+    args: &Value,
+    modal_open: bool,
+    is_design: bool,
+    ctx: &Context<'_>,
+) -> Result<(crawrad_actions::Effect, StateSnapshot), Answer> {
+    check_action_preconditions(action, args, modal_open, is_design)?;
+    check_action_enabled(action, ctx)?;
+    let snap_antes = StateSnapshot::capture(
+        ctx.doc,
+        if is_design { "design" } else { "code" },
+        ctx.editor_dirty,
+    );
+    let effect = (action.execute)(ctx);
+    Ok((effect, snap_antes))
+}
+
+/// Formats the result or failure of applying an action effect.
+pub fn finish_action_execution(
+    name: &str,
+    snap_antes: &StateSnapshot,
+    applied: Result<(), String>,
+    doc: Option<&crawrad_doc::Doc>,
+    center_view: &str,
+    is_dirty: bool,
+) -> Answer {
+    match applied {
+        Ok(()) => {
+            let snap_depois = StateSnapshot::capture(doc, center_view, is_dirty);
+            (
+                format_action_result(name, snap_antes, &snap_depois),
+                "applied",
+            )
+        }
+        Err(e) => (ToolCallResult::error_text("effect-error", e), "error"),
+    }
+}
+
+/// Formats the success response for capability dispatch execution from raw messages.
+pub fn finish_capability_messages(
+    cap_id: &str,
+    status_msg: Option<String>,
+    ext_result: Option<Value>,
+    msgs: &[(impl std::fmt::Debug, String)],
+) -> Answer {
+    let json_msgs: Vec<Value> = msgs
+        .iter()
+        .map(|(lvl, msg)| json!({ "level": format!("{lvl:?}"), "message": msg }))
+        .collect();
+    (
+        format_capability_result(cap_id, status_msg, ext_result, &json_msgs),
+        "applied",
+    )
+}

@@ -1574,8 +1574,11 @@ fn mcp_run_start_generates_before_cargo_run() {
     let generated_at = arm
         .find("app.gerar_projeto(cx);")
         .expect("run.start stopped generating");
+    // The extraction inlined `tool_run_start` into the arm, so the guard now looks for the
+    // call it became. What it protects is unchanged: generating must come BEFORE running,
+    // or `cargo run` builds the previous version of the form.
     let run_at = arm
-        .find("self.tool_run_start(")
+        .find("self.running_process.start(")
         .expect("run.start stopped running");
     assert!(
         generated_at < run_at,

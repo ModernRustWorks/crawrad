@@ -191,6 +191,22 @@ pub fn open_menu_result(
     ToolCallResult::success_json(state, "Open menu read.")
 }
 
+/// Builds the open menu result from raw IDE menu query parts.
+pub fn build_open_menu_result(
+    open_menu: Option<impl std::fmt::Debug>,
+    highlight: Option<usize>,
+    rows: &[crawrad_actions::menu::Row],
+    sub_rows: &[crawrad_actions::menu::Row],
+    open_submenu_name: Option<&str>,
+    rects: Value,
+    menu_hint: Option<&(impl std::fmt::Debug, String)>,
+) -> ToolCallResult {
+    let sub = open_submenu_name.map(|n| (n, sub_rows));
+    let open = open_menu.map(|m| format!("{m:?}"));
+    let hint = menu_hint.map(|(_, why)| why.clone());
+    open_menu_result(open, highlight, rows, sub, rects, hint)
+}
+
 #[cfg(test)]
 #[path = "test/view_tool/test.rs"]
 mod tests;

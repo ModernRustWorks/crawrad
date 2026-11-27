@@ -108,6 +108,33 @@ pub fn diagnostics_in_project(root: Option<PathBuf>) -> Answer {
     in_project(root, cargo_tool::diagnostics)
 }
 
+/// Dispatches build verification, full build, and diagnostics tools.
+pub fn dispatch_build(name: &str, root: Option<PathBuf>, args: &Value) -> Option<Answer> {
+    match name {
+        "build.check" => Some(check_in_project(root)),
+        "build.build" => Some(build_in_project(root, args)),
+        "build.get_diagnostics" => Some(diagnostics_in_project(root)),
+        _ => None,
+    }
+}
+
+/// Shapes the response for `debug.state`.
+pub fn debug_state_answer(st: Value) -> Answer {
+    let text = st.to_string();
+    (ToolCallResult::success_json(st, text), "applied")
+}
+
+/// Shapes the response for `debug.set_breakpoints`.
+pub fn debug_set_breakpoints_answer(res: Result<Value, String>) -> Answer {
+    match res {
+        Ok(set) => (
+            ToolCallResult::success_json(set, "breakpoints set"),
+            "applied",
+        ),
+        Err(why) => (ToolCallResult::error_text("invalid-params", why), "error"),
+    }
+}
+
 #[cfg(test)]
 #[path = "test/run_tool/test.rs"]
 mod tests;

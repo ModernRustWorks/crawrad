@@ -253,6 +253,8 @@ pub struct TestsPanelView {
     last_click: Option<(usize, std::time::Instant)>,
     #[rust]
     drawn: Vec<serde_json::Value>,
+    #[rust]
+    row_rects: Vec<(usize, Rect)>,
 }
 
 impl Widget for TestsPanelView {
@@ -266,6 +268,7 @@ impl Widget for TestsPanelView {
 
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
         self.drawn.clear();
+        self.row_rects.clear();
         while let Some(step) = self.view.draw_walk(cx, scope, walk).step() {
             let list = step.as_portal_list();
             let Some(mut list) = list.borrow_mut() else {
@@ -301,6 +304,9 @@ impl Widget for TestsPanelView {
                 item.label(id!(face.note)).set_text(cx, note);
                 item.draw_all(cx, scope);
                 let r = item.area().rect(cx);
+                if r.size.x > 0.0 && r.size.y > 0.0 {
+                    self.row_rects.push((i, r));
+                }
                 self.drawn.push(serde_json::json!({
                     "depth": depth, "mark": mark, "text": text, "note": note,
                     "open": open > 0.5, "selected": selected,
@@ -389,12 +395,44 @@ impl TestsPanelView {
         TestsPanelAction::None
     }
 
+    /// Where each visible row was drawn during the last frame.
+    pub fn captured_rects(&self) -> Vec<(usize, Rect)> {
+        self.row_rects.clone()
+    }
+
+    /// Number of total rows currently loaded in the panel.
+    pub fn rows_count(&self) -> usize {
+        self.rows.len()
+    }
+
     /// The drawn rows, for the MCP read.
     pub fn rows_json(&self) -> String {
+        self.rows_json_with_rects(&[])
+    }
+
+    /// Serializes every row with its on-screen rectangle (null when not drawn or off-screen).
+    pub fn rows_json_with_rects(&self, rects: &[(usize, [f64; 4])]) -> String {
+        let rows: Vec<serde_json::Value> = self
+            .rows
+            .iter()
+            .enumerate()
+            .map(|(i, (depth, mark, text, note, open, selected))| {
+                let rect = rects.iter().find(|(n, _)| *n == i).map(|(_, r)| *r);
+                serde_json::json!({
+                    "depth": depth,
+                    "mark": mark,
+                    "text": text,
+                    "note": note,
+                    "open": open,
+                    "selected": selected,
+                    "rect": rect,
+                })
+            })
+            .collect();
         serde_json::json!({
             "summary": self.view.label(id!(summary)).text(),
             "chips": CHIPS.iter().map(|c| self.view.view(&[*c]).label(id!(label)).text()).collect::<Vec<_>>(),
-            "rows": self.drawn,
+            "rows": rows,
         })
         .to_string()
     }
@@ -407,14 +445,39 @@ impl TestsPanelViewRef {
         }
     }
 
+    /// Where each visible row was drawn during the last frame.
+    pub fn captured_rects(&self) -> Vec<(usize, Rect)> {
+        self.borrow()
+            .map(|inner| inner.captured_rects())
+            .unwrap_or_default()
+    }
+
+    /// Returns the internal portal list widget for direct geometry inspection.
+    pub fn portal_list(&self) -> PortalListRef {
+        if let Some(inner) = self.borrow() {
+            inner.view.portal_list(id!(list))
+        } else {
+            PortalListRef::default()
+        }
+    }
+
+    /// Number of total rows currently loaded in the panel.
+    pub fn rows_count(&self) -> usize {
+        self.borrow().map(|inner| inner.rows_count()).unwrap_or(0)
+    }
+
     pub fn action(&self, actions: &Actions) -> TestsPanelAction {
         self.borrow_mut()
             .map_or(TestsPanelAction::None, |mut inner| inner.action(actions))
     }
 
     pub fn rows_json(&self) -> String {
+        self.rows_json_with_rects(&[])
+    }
+
+    pub fn rows_json_with_rects(&self, rects: &[(usize, [f64; 4])]) -> String {
         self.borrow()
-            .map_or_else(|| "{}".into(), |inner| inner.rows_json())
+            .map_or_else(|| "{}".into(), |inner| inner.rows_json_with_rects(rects))
     }
 }
 
