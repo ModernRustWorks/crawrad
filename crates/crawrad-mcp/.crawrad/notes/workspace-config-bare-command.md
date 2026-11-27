@@ -23,5 +23,5 @@ use crawrad_mcp::workspace_config::bare_command;
 
 let cmd = bare_command();
 assert!(cmd.starts_with("crawrad-mcp-bridge"), "the name the alias is declared under");
-assert!(!cmd.contains('\') && !cmd.contains('/'), "a bare name, never a path");
+assert!(!cmd.contains('\\') && !cmd.contains('/'), "a bare name, never a path");
 ```

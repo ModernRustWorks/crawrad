@@ -90,4 +90,17 @@ fn the_bare_name_matches_the_alias_the_manifest_declares() {
         xml.contains(&format!(r#"Alias="{}""#, "crawrad-mcp-bridge.exe")),
         "the alias in the manifest and the name written to .mcp.json disagree"
     );
+
+    // THE THIRD LINK. An alias pointing at a binary nobody ships resolves to
+    // nothing, and the Store build loses its MCP server again by another door -
+    // silently, because the manifest and the config would still agree with each
+    // other. So the bundler's own list is checked here too: alias, written name
+    // and shipped binary are one chain, and no link may be cut on its own.
+    let bundler =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tools/bundle/bundle.py");
+    let py = std::fs::read_to_string(&bundler).expect("the bundler must be readable");
+    assert!(
+        py.contains("\"crawrad-mcp-bridge\""),
+        "the bundler no longer ships crawrad-mcp-bridge, so the manifest's          execution alias points at a binary that is not in the package"
+    );
 }
