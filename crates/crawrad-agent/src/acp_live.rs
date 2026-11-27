@@ -140,6 +140,17 @@ impl LiveAgent {
         rx
     }
 
+    /// The live failure, when the warm-up or the connection failed.
+    ///
+    /// The chip and the hero footer both read this, so they cannot give the
+    /// panel two different verdicts at the same time.
+    pub fn live_failure(&self) -> Option<&str> {
+        match self.status() {
+            LiveStatus::Failed(e) => Some(e.as_str()),
+            _ => None,
+        }
+    }
+
     #[note("acp-live-liveagent-status")]
     pub fn status(&self) -> &LiveStatus {
         &self.status

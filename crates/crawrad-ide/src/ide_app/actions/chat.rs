@@ -44,6 +44,16 @@ impl IdeApp {
             self.open_options(cx);
             self.secao = options::Category::AiAcp;
             self.redraw_options(cx);
+        } else if chat_panel
+            .button(id!(ai_agent_chip_row.ai_agent_chip.btn_chip))
+            .clicked(actions)
+            || chat_panel
+                .button(id!(ai_agent_chip_row.btn_chip))
+                .clicked(actions)
+        {
+            if self.is_agent_failing() {
+                self.open_acp_diagnostic(cx);
+            }
         } else if self.chat_tool("btn_ai_attach").clicked(actions) {
             let p = self.painel(Panel::Chat).view(id!(ai_context_popup));
             let abrir = !p.visible();

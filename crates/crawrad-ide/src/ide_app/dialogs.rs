@@ -1,5 +1,7 @@
 //! THE DIALOG CATALOG of the shell
 
+#[path = "dialogs/acp_diagnostic.rs"]
+pub mod acp_diagnostic;
 #[path = "dialogs/actions.rs"]
 mod actions;
 #[path = "dialogs/build.rs"]

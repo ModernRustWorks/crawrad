@@ -21,5 +21,5 @@ its widget.
 ```rust
 use crawrad_project::options::NumberChoice;
 
-assert_eq!(NumberChoice::ALL.len(), 4);
+assert_eq!(NumberChoice::ALL.len(), 5);
 ```

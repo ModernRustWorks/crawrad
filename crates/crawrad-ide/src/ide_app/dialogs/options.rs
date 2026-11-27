@@ -552,7 +552,7 @@ impl IdeApp {
                         self.apply_agent_click_result(cx, res);
                     }
                 }
-                AgentState::Ready => {}
+                AgentState::Ready | AgentState::Failed => {}
             }
             self.redraw_options(cx);
         }
@@ -815,7 +815,15 @@ impl IdeApp {
 
     #[note("ide-app-dialogs-options-ideapp-agent-card")]
     pub(crate) fn agent_card(&self) -> acp_registry::AgentCard {
-        let msg = self.chat.acp_status_msg.as_deref();
+        // The chip reads the LIVE failure; the hero footer reads this card. If
+        // the live failure does not reach here, the panel says "ACP unavailable"
+        // at the top and "Ready" at the bottom, at the same time -- which is the
+        // contradiction the owner reported. Same source, one verdict.
+        let msg = self
+            .chat
+            .acp_status_msg
+            .as_deref()
+            .or_else(|| self.chat.live.live_failure());
         acp_registry::agent_card(&self.acp_config, msg, self.chat.live.client().is_some())
     }
 

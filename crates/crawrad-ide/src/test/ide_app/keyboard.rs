@@ -57,6 +57,23 @@ fn modificadores(a: crawrad_runtime_makepad::keys::Chord) -> KeyModifiers {
 /// written `Ctrl+...` follow it, so a test that presses one must press the right key.
 const APPLE: bool = cfg!(target_vendor = "apple");
 
+/// **The active keyboard scheme is PROCESS-wide** (`ESQUEMA_ATIVO`, an `AtomicU8`
+/// in `crawrad_actions::key_routing`), and cargo runs tests on PARALLEL THREADS OF
+/// THE SAME PROCESS. A test that SWITCHES the scheme and one that READS the ambient
+/// scheme cannot run at the same time: while the first sits in `Classic`, the second
+/// does not find F5/Ctrl+F5/F9/Ctrl+D, because in Classic those chords belong to
+/// other actions.
+///
+/// This broke the gate INTERMITTENTLY on 26/11/2026 — the same commit passed at
+/// 20:22 and failed at 21:38, with `main` untouched in between. A test that decides
+/// a merge must not depend on the scheduler's draw.
+///
+/// Every test that touches the ambient scheme takes this lock first.
+fn scheme_guard() -> std::sync::MutexGuard<'static, ()> {
+    static LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+    LOCK.lock().unwrap_or_else(|e| e.into_inner())
+}
+
 /// **With the cursor in a file, EDITING keys belong to the editor — and IDE keys
 /// remain with the IDE.**
 ///
@@ -76,6 +93,7 @@ const APPLE: bool = cfg!(target_vendor = "apple");
 /// The proof is DERIVED from the catalog — the list comes from `crawrad_actions::catalogo()` and
 /// not from here —, because an id list written in this test would fall behind
 /// the day the ninth `edit.*` was created.
+
 #[test]
 fn o_teclado_de_edicao_e_do_editor_e_o_da_ide_continua_da_ide() {
     let com_atalho: Vec<_> = crawrad_actions::catalogue()
@@ -146,6 +164,7 @@ fn o_teclado_de_edicao_e_do_editor_e_o_da_ide_continua_da_ide() {
 /// fails until `tecla_por_nome` knows what `K` is.
 #[test]
 fn todo_atalho_do_catalogo_e_alcancavel_pela_ponte() {
+    let _scheme = scheme_guard();
     let mut mudos = Vec::new();
     let mut vistos = 0;
     // THE TWO CHORDS, and the second for the same reason as the first:
@@ -199,6 +218,7 @@ fn todo_atalho_do_catalogo_e_alcancavel_pela_ponte() {
 /// fails stating what was lost.
 #[test]
 fn del_apaga_o_componente_selecionado() {
+    let _scheme = scheme_guard();
     let comandos = teclado::comandos(KeyCode::Delete, &nada(), false);
     assert!(
         comandos.contains(&Comando::Acao("edit.delete")),
@@ -214,6 +234,7 @@ fn del_apaga_o_componente_selecionado() {
 /// equality. It is the same rule as egui (`main.rs:5199-5217`).
 #[test]
 fn a_comparacao_de_modificadores_e_exata() {
+    let _scheme = scheme_guard();
     let ctrl = KeyModifiers {
         control: true,
         ..Default::default()
@@ -253,6 +274,7 @@ fn a_comparacao_de_modificadores_e_exata() {
 /// someone changed the grid in the options, for an unrelated reason.
 #[test]
 fn cada_acorde_da_seta_pede_o_modo_certo() {
+    let _scheme = scheme_guard();
     use crawrad_designer::ArrowNudge;
     let shift = KeyModifiers {
         shift: true,
@@ -290,6 +312,7 @@ fn cada_acorde_da_seta_pede_o_modo_certo() {
 /// `Esc` cancels the gesture — outside a field.
 #[test]
 fn esc_cancela_o_gesto() {
+    let _scheme = scheme_guard();
     assert!(teclado::comandos(KeyCode::Escape, &nada(), false).contains(&Comando::Cancelar));
 }
 
@@ -302,6 +325,7 @@ fn esc_cancela_o_gesto() {
 /// `KeyDownUnhandled` that feeds this path. The field decides.
 #[test]
 fn inside_field_arrows_and_esc_are_not_gestures() {
+    let _scheme = scheme_guard();
     for tecla in [
         KeyCode::ArrowLeft,
         KeyCode::ArrowRight,
@@ -325,6 +349,7 @@ fn inside_field_arrows_and_esc_are_not_gestures() {
 /// itself indicates that via `KeyDownUnhandled`.
 #[test]
 fn unhandled_field_keys_remain_shortcuts() {
+    let _scheme = scheme_guard();
     if cfg!(target_vendor = "apple") {
         return;
     }
@@ -353,6 +378,7 @@ fn unhandled_field_keys_remain_shortcuts() {
 /// original argument, and still is.
 #[test]
 fn shift_com_seta_redimensiona_e_nao_move() {
+    let _scheme = scheme_guard();
     use crawrad_designer::ArrowNudge;
     let shift = KeyModifiers {
         shift: true,
@@ -468,6 +494,7 @@ fn a_casca_nao_escreve_tecla_de_atalho() {
 /// owner found the IDE.
 #[test]
 fn a_tecla_chega_ao_despacho() {
+    let _scheme = scheme_guard();
     let corpo = method_body("handle_key_down");
     assert!(
         corpo.contains("self.tecla(cx,ke,false)"),
@@ -662,6 +689,7 @@ fn a_vista_e_a_trava_do_efeito_chegam_a_tela() {
 
 #[test]
 fn keyboard_schemes_toggle_build_and_run_commands() {
+    let _scheme = scheme_guard();
     let f5 = KeyCode::F5;
     let f9 = KeyCode::F9;
     let ctrl_shift_b = KeyModifiers {
@@ -968,6 +996,7 @@ fn key_front_delete_does_not_reach_hidden_form() {
 
 #[test]
 fn ctrl_alt_d_n_m_open_the_three_note_kinds() {
+    let _scheme = scheme_guard();
     let m = KeyModifiers {
         control: !APPLE,
         logo: APPLE,

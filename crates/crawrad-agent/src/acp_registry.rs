@@ -704,6 +704,7 @@ pub enum AgentState {
     Ready,
     NotInstalled,
     SignedOut,
+    Failed,
 }
 
 impl AgentState {
@@ -712,6 +713,7 @@ impl AgentState {
             Self::Ready => "Ready",
             Self::NotInstalled => "Not installed",
             Self::SignedOut => "Signed out",
+            Self::Failed => "Failed",
         }
     }
 
@@ -720,6 +722,7 @@ impl AgentState {
             Self::Ready => None,
             Self::NotInstalled => Some("Install"),
             Self::SignedOut => Some("Sign in"),
+            Self::Failed => Some("Diagnose"),
         }
     }
 
@@ -734,6 +737,7 @@ impl AgentState {
             }
             Self::NotInstalled => format!("The command {program} was not found."),
             Self::SignedOut => "The agent asks you to sign in.".to_string(),
+            Self::Failed => "The agent failed to connect or start.".to_string(),
         }
     }
 }
@@ -744,10 +748,12 @@ pub fn agent_state(installed: bool, connected: bool, last_error: Option<&str>) -
         AgentState::Ready
     } else if last_error.is_some_and(crate::client::is_auth_required) {
         AgentState::SignedOut
-    } else if installed {
-        AgentState::Ready
-    } else {
+    } else if !installed {
         AgentState::NotInstalled
+    } else if last_error.is_some() {
+        AgentState::Failed
+    } else {
+        AgentState::Ready
     }
 }
 
@@ -760,6 +766,9 @@ pub fn chat_status_line(state: AgentState, connected: bool) -> &'static str {
         }
         (AgentState::NotInstalled, true) | (AgentState::NotInstalled, false) => {
             "⚪ No AI agent installed · set one up at Tools › Options › AI"
+        }
+        (AgentState::Failed, true) | (AgentState::Failed, false) => {
+            "🔴 Connection failed · sending messages will not work"
         }
     }
 }

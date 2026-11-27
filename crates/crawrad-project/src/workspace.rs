@@ -57,7 +57,12 @@ use std::path::{Path, PathBuf};
 pub const EXTENSION: &str = "crawform";
 
 #[note("workspace-recent-limit")]
-const RECENT_LIMIT: usize = 10;
+pub const RECENT_LIMIT: usize = 10;
+
+/// Default number of recent projects retained.
+pub const DEFAULT_RECENT_LIMIT: u32 = RECENT_LIMIT as u32;
+/// The range of recent project limits the IDE accepts.
+pub const RECENT_LIMIT_RANGE: std::ops::RangeInclusive<u32> = 1..=50;
 
 #[note("workspace-manifest")]
 pub const MANIFEST: &str = "Cargo.toml";
@@ -253,15 +258,23 @@ fn recent_folders_file() -> Option<PathBuf> {
 
 #[note("workspace-read-recent")]
 pub fn read_recent() -> Vec<PathBuf> {
-    let list = with_settings(|s| s.recent_folders(RECENT_LIMIT)).unwrap_or_default();
+    let limit = read_preferences().recent_limit as usize;
+    let list = with_settings(|s| s.recent_folders(limit)).unwrap_or_default();
     prune(&list, |p| p.is_dir())
 }
 
 #[note("workspace-save-recent")]
 pub fn save_recent(list: &[PathBuf]) {
+    let limit = read_preferences().recent_limit as usize;
     with_settings(|s| {
-        for p in list.iter().rev() {
+        for p in list.iter().take(limit).rev() {
             let _ = s.push_recent_folder(p);
+        }
+        let all = s.recent_folders(usize::MAX);
+        if all.len() > limit {
+            for extra in &all[limit..] {
+                let _ = s.forget_recent_folder(extra);
+            }
         }
     });
 }
@@ -292,21 +305,38 @@ pub fn to_text(list: &[PathBuf]) -> String {
     text
 }
 
-#[note("workspace-register-recent")]
-pub fn register_recent(list: &[PathBuf], new_path: &Path) -> Vec<PathBuf> {
+pub fn register_recent_with_limit(list: &[PathBuf], new_path: &Path, limit: usize) -> Vec<PathBuf> {
     let mut out = Vec::with_capacity(list.len() + 1);
+    if limit == 0 {
+        return out;
+    }
     out.push(new_path.to_path_buf());
     for p in list {
-        if p != new_path && out.len() < RECENT_LIMIT {
+        if p != new_path && out.len() < limit {
             out.push(p.clone());
         }
     }
     out
 }
 
+#[note("workspace-register-recent")]
+pub fn register_recent(list: &[PathBuf], new_path: &Path) -> Vec<PathBuf> {
+    let limit = read_preferences().recent_limit as usize;
+    register_recent_with_limit(list, new_path, limit)
+}
+
 #[note("workspace-remember-recent")]
 pub fn remember_recent(folder: &Path) {
-    with_settings(|s| s.push_recent_folder(folder));
+    let limit = read_preferences().recent_limit as usize;
+    with_settings(|s| {
+        let _ = s.push_recent_folder(folder);
+        let all = s.recent_folders(usize::MAX);
+        if all.len() > limit {
+            for extra in &all[limit..] {
+                let _ = s.forget_recent_folder(extra);
+            }
+        }
+    });
 }
 
 #[note("workspace-last-project-form")]
@@ -409,9 +439,10 @@ pub fn welcome_rows() -> Vec<WelcomeRow> {
 
 #[note("workspace-prune")]
 pub fn prune(list: &[PathBuf], exists: impl Fn(&Path) -> bool) -> Vec<PathBuf> {
+    let limit = read_preferences().recent_limit as usize;
     list.iter()
         .filter(|p| exists(p))
-        .take(RECENT_LIMIT)
+        .take(limit)
         .cloned()
         .collect()
 }
@@ -1000,6 +1031,8 @@ pub struct Preferences {
     pub history_enabled: bool,
     /// Maximum number of local history revisions kept per file (default: 10, range: 1..=100).
     pub history_limit: u32,
+    /// Maximum number of recent projects retained in the recent list (default: 10, range: 1..=50).
+    pub recent_limit: u32,
     /// Window in seconds within which subsequent saves replace the previous snapshot (default: 10, range: 0..=3600).
     pub history_merge_seconds: u32,
     /// Maximum file size in kilobytes eligible for local history recording (default: 5120 KB = 5 MB, range: 1..=1048576).
@@ -1052,6 +1085,7 @@ impl Default for Preferences {
             default_projects_dir: None,
             history_enabled: true,
             history_limit: 10,
+            recent_limit: DEFAULT_RECENT_LIMIT,
             history_merge_seconds: 10,
             history_max_file_kb: 5120,
             save_before_build: false,
@@ -1151,6 +1185,7 @@ pub const KEY_COLOR_RECENT: &str = "color-recent";
 pub const KEY_DEFAULT_PROJECTS_DIR: &str = "default-projects-dir";
 pub const KEY_HISTORY_ENABLED: &str = "history-enabled";
 pub const KEY_HISTORY_LIMIT: &str = "history-limit";
+pub const KEY_RECENT_LIMIT: &str = "recent-limit";
 pub const KEY_HISTORY_MERGE_SECONDS: &str = "history-merge-seconds";
 pub const KEY_HISTORY_MAX_FILE_KB: &str = "history-max-file-kb";
 pub const KEY_SAVE_BEFORE_BUILD: &str = "save-before-build";
@@ -1379,6 +1414,11 @@ pub fn preferences_from_text(text: &str) -> Preferences {
             && (1..=1_048_576).contains(&max_kb)
         {
             p.history_max_file_kb = max_kb;
+        } else if (c == KEY_RECENT_LIMIT || c == "recent-projects-limit")
+            && let Ok(limit) = v.parse::<u32>()
+            && RECENT_LIMIT_RANGE.contains(&limit)
+        {
+            p.recent_limit = limit;
         } else if c == KEY_DESIGNER_SCALE
             && let Ok(zoom) = v.parse::<f64>()
             && ((crawrad_runtime::ZOOMS[0] as f64)
@@ -1412,7 +1452,7 @@ pub fn preferences_to_text(p: Preferences) -> String {
         .collect::<Vec<_>>()
         .join(",");
     let mut text = format!(
-        "{KEY_WELCOME}={}\n{KEY_KEYMAP_SCHEME}={}\n{KEY_EDITOR_FONT_SIZE}={}\n{KEY_EDITOR_TAB_SIZE}={}\n{KEY_EDITOR_LINE_NUMBERS}={}\n{KEY_EDITOR_INLAY_HINTS}={}\n{KEY_EDITOR_COLOR_SCHEME}={}\n{KEY_EDITOR_COLOR_BASE}={}\neditor-color-keyword={}\neditor-color-typename={}\neditor-color-function={}\neditor-color-identifier={}\neditor-color-comment={}\neditor-color-number={}\neditor-color-string={}\neditor-color-delimiter={}\neditor-color-bg={}\n{KEY_DEFAULT_PROJECTS_DIR}={dir}\n{KEY_HISTORY_ENABLED}={}\n{KEY_HISTORY_LIMIT}={}\n{KEY_HISTORY_MERGE_SECONDS}={}\n{KEY_HISTORY_MAX_FILE_KB}={}\n{KEY_EDITOR_CURRENT_LINE}={}\n{KEY_EDITOR_BREADCRUMB_CHEVRON}={}\n{KEY_SAVE_BEFORE_BUILD}={}\n{KEY_AUTO_SAVE}={}\n{KEY_SAVE_DESKTOP}={}\n{KEY_DESKTOP_PROFILE}={}\n{KEY_RECOVER_COPIES}={}\n{KEY_RECOVER_MINUTES}={}\n{KEY_DESIGNER_GRID}={}\n{KEY_DESIGNER_SNAP}={}\n{KEY_DESIGNER_SHOW_GRID}={}\n{KEY_DESIGNER_SHOW_TAB_ORDER}={}\n{KEY_DESIGNER_SCALE}={}\n{KEY_IDE_SCALE}={}\n{KEY_COLOR_RECENT}={recent}\n",
+        "{KEY_WELCOME}={}\n{KEY_KEYMAP_SCHEME}={}\n{KEY_EDITOR_FONT_SIZE}={}\n{KEY_EDITOR_TAB_SIZE}={}\n{KEY_EDITOR_LINE_NUMBERS}={}\n{KEY_EDITOR_INLAY_HINTS}={}\n{KEY_EDITOR_COLOR_SCHEME}={}\n{KEY_EDITOR_COLOR_BASE}={}\neditor-color-keyword={}\neditor-color-typename={}\neditor-color-function={}\neditor-color-identifier={}\neditor-color-comment={}\neditor-color-number={}\neditor-color-string={}\neditor-color-delimiter={}\neditor-color-bg={}\n{KEY_DEFAULT_PROJECTS_DIR}={dir}\n{KEY_HISTORY_ENABLED}={}\n{KEY_HISTORY_LIMIT}={}\n{KEY_HISTORY_MERGE_SECONDS}={}\n{KEY_HISTORY_MAX_FILE_KB}={}\n{KEY_RECENT_LIMIT}={}\n{KEY_EDITOR_CURRENT_LINE}={}\n{KEY_EDITOR_BREADCRUMB_CHEVRON}={}\n{KEY_SAVE_BEFORE_BUILD}={}\n{KEY_AUTO_SAVE}={}\n{KEY_SAVE_DESKTOP}={}\n{KEY_DESKTOP_PROFILE}={}\n{KEY_RECOVER_COPIES}={}\n{KEY_RECOVER_MINUTES}={}\n{KEY_DESIGNER_GRID}={}\n{KEY_DESIGNER_SNAP}={}\n{KEY_DESIGNER_SHOW_GRID}={}\n{KEY_DESIGNER_SHOW_TAB_ORDER}={}\n{KEY_DESIGNER_SCALE}={}\n{KEY_IDE_SCALE}={}\n{KEY_COLOR_RECENT}={recent}\n",
         p.welcome_on_startup,
         p.keymap_scheme.id(),
         p.editor_font_size,
@@ -1434,6 +1474,7 @@ pub fn preferences_to_text(p: Preferences) -> String {
         p.history_limit,
         p.history_merge_seconds,
         p.history_max_file_kb,
+        p.recent_limit,
         p.editor_current_line,
         p.editor_breadcrumb_chevron,
         p.save_before_build,

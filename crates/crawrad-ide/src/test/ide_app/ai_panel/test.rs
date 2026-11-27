@@ -64,7 +64,7 @@ fn sem_comentario() -> String {
 /// Each needle in this list was once on screen and claimed a fact about the
 /// open form, or an action on disk, that never happened.
 #[test]
-fn o_painel_de_ia_nao_fabrica_mais_veredito_sobre_o_formulario() {
+fn the_ai_panel_no_longer_invents_a_verdict_about_the_form() {
     const FABRICADAS: &[(&str, &str)] = &[
         (
             "correctly aligned",
@@ -91,10 +91,10 @@ fn o_painel_de_ia_nao_fabrica_mais_veredito_sobre_o_formulario() {
         ),
     ];
 
-    let codigo = sem_comentario();
+    let code = sem_comentario();
     for (agulha, porque) in FABRICADAS {
         assert!(
-            !codigo.contains(agulha),
+            !code.contains(agulha),
             "the phrase `{agulha}` returned to the AI panel. It is {porque}. The panel \
              is a mockup and has only ONE reply, `IdeApp::RESPOSTA_DE_MAQUETE`, \
              which opens by saying it is not wired."
@@ -107,41 +107,41 @@ fn o_painel_de_ia_nao_fabrica_mais_veredito_sobre_o_formulario() {
 /// via streaming and persistent history.
 #[test]
 fn no_not_wired_yet_text_or_mockup_response_exists_in_shell() {
-    let codigo = sem_comentario();
+    let code = sem_comentario();
     assert!(
-        !codigo.contains("RESPOSTA_DE_MAQUETE"),
+        !code.contains("RESPOSTA_DE_MAQUETE"),
         "the RESPOSTA_DE_MAQUETE constant was banned by Issue #180: the chat panel is now truly connected via ACP"
     );
     assert!(
-        !codigo.contains("Not wired yet"),
+        !code.contains("Not wired yet"),
         "the 'Not wired yet' text was removed from the chat shell by Issue #180"
     );
 }
 
 /// The panel carries a VISIBLE mockup badge in its own header.
 #[test]
-fn o_cabecalho_do_painel_de_ia_tem_selo_de_maquete() {
-    let codigo = sem_comentario();
-    let i = codigo
+fn the_ai_panel_header_carries_the_mock_up_badge() {
+    let code = sem_comentario();
+    let i = code
         .find("ai_header = <CrawradPanelHeader>")
         .expect("AI panel header is missing from src/ide_app.rs");
-    let fim = codigo[i..]
+    let fim = code[i..]
         .find("ai_toggles_bar")
         .expect("AI panel header is no longer before the toggles bar");
-    let cabecalho = &codigo[i..i + fim];
+    let header = &code[i..i + fim];
 
     assert!(
-        cabecalho.contains("ai_mock_badge"),
+        header.contains("ai_mock_badge"),
         "the mockup badge was removed from the AI panel header. Without it the panel \
          once again pretends to be a connected assistant."
     );
     assert!(
-        cabecalho.contains("text: \"No agent\""),
+        header.contains("text: \"No agent\""),
         "the badge lost the wording that makes it a badge. It has to SAY on screen, \
          and not just in code, that it is a mockup."
     );
     assert!(
-        cabecalho.contains("(CRAWRAD_AVISO)"),
+        header.contains("(CRAWRAD_AVISO)"),
         "the badge stopped using the theme warning token. Hardcoded warning colors \
          are rejected by `nenhuma_cor_a_mao_sobrou_fora_da_maquete_do_canvas`."
     );
@@ -153,7 +153,7 @@ fn o_cabecalho_do_painel_de_ia_tem_selo_de_maquete() {
 /// changing the number to another plausible one is precisely the mutation this test
 /// must reject.
 #[test]
-fn nenhum_horario_literal_sobrou_na_casca() {
+fn no_literal_clock_time_is_left_in_the_shell() {
     let mut achados = Vec::new();
     for (n, linha) in CASCA.lines().enumerate() {
         let t = linha.trim_start();
@@ -189,57 +189,57 @@ fn nenhum_horario_literal_sobrou_na_casca() {
 /// Slash commands (`/slash-commands`) of the AI Chat are mapped in dispatch.
 #[test]
 fn os_comandos_de_barra_estao_no_despacho_do_chat() {
-    let codigo = sem_comentario();
+    let code = sem_comentario();
     assert!(
-        codigo.contains("fn despachar_slash_command"),
+        code.contains("fn despachar_slash_command"),
         "the slash command dispatcher is missing from ide_app.rs"
     );
     assert!(
-        codigo.contains("\"new\" =>")
-            && codigo.contains("\"memory\" =>")
-            && codigo.contains("\"mcp\" =>"),
+        code.contains("\"new\" =>")
+            && code.contains("\"memory\" =>")
+            && code.contains("\"mcp\" =>"),
         "essential commands /new, /memory, and /mcp must be present in chat dispatch"
     );
 }
 
 /// Modal AI dialogs (Memory and MCP) are declared in the DSL and instantiated in the shell.
 #[test]
-fn os_dialogos_de_ia_estao_na_dsl_e_na_casca() {
-    let codigo = sem_comentario();
+fn the_ai_dialogs_are_in_the_dsl_and_in_the_shell() {
+    let code = sem_comentario();
     assert!(
-        codigo.contains("memory_dialog = <CrawradMemoryDialog> {}"),
+        code.contains("memory_dialog = <CrawradMemoryDialog> {}"),
         "memory dialog is not instantiated in the shell tree"
     );
     assert!(
-        codigo.contains("mcp_dialog = <CrawradMcpDialog> {}"),
+        code.contains("mcp_dialog = <CrawradMcpDialog> {}"),
         "MCP dialog is not instantiated in the shell tree"
     );
 }
 
 /// The AI Chat welcome Hero screen (Ref 01) and its 6 shortcut cards are in the DSL.
 #[test]
-fn a_tela_hero_de_ia_e_seus_cards_estao_na_dsl() {
-    let codigo = sem_comentario();
+fn the_ai_hero_screen_and_its_cards_are_in_the_dsl() {
+    let code = sem_comentario();
     assert!(
-        codigo.contains("ai_hero_view = <CrawradAiHeroView>")
-            || codigo.contains("ai_hero_view = <View>"),
+        code.contains("ai_hero_view = <CrawradAiHeroView>")
+            || code.contains("ai_hero_view = <View>"),
         "the AI Chat welcome hero screen is missing from the DSL"
     );
     assert!(
-        codigo.contains("What are we building today?"),
+        code.contains("What are we building today?"),
         "chat hero title is not in the DSL"
     );
     assert!(
-        codigo.contains("btn_card_explain")
-            && codigo.contains("btn_card_refactor")
-            && codigo.contains("btn_card_test")
-            && codigo.contains("btn_card_document")
-            && codigo.contains("btn_card_find")
-            && codigo.contains("btn_card_optimize"),
+        code.contains("btn_card_explain")
+            && code.contains("btn_card_refactor")
+            && code.contains("btn_card_test")
+            && code.contains("btn_card_document")
+            && code.contains("btn_card_find")
+            && code.contains("btn_card_optimize"),
         "the 6 shortcut cards (Explain, Refactor, Test, Document, Find, Optimize) must be in the DSL"
     );
     assert!(
-        codigo.contains("btn_ai_memory") && codigo.contains("btn_ai_mcp"),
+        code.contains("btn_ai_memory") && code.contains("btn_ai_mcp"),
         "Memory and MCP quick shortcut buttons must be in the utilities bar"
     );
 }
@@ -247,23 +247,23 @@ fn a_tela_hero_de_ia_e_seus_cards_estao_na_dsl() {
 /// The slash commands pop-up menu and the thinking card are in the DSL and shell.
 #[test]
 fn o_popup_de_slash_commands_e_o_thinking_estao_na_dsl() {
-    let codigo = sem_comentario();
+    let code = sem_comentario();
     assert!(
-        codigo.contains("ai_slash_popup = <CrawradAiSlashPopup>")
-            || codigo.contains("ai_slash_popup = <View>"),
+        code.contains("ai_slash_popup = <CrawradAiSlashPopup>")
+            || code.contains("ai_slash_popup = <View>"),
         "slash commands pop-up is missing from the DSL"
     );
     assert!(
-        codigo.contains("thinking_card = <CrawradAiThinkingCard>")
-            || codigo.contains("thinking_card = <CrawradCard>"),
+        code.contains("thinking_card = <CrawradAiThinkingCard>")
+            || code.contains("thinking_card = <CrawradCard>"),
         "thinking card is missing from the DSL"
     );
     assert!(
-        codigo.contains("btn_cmd_explain")
-            && codigo.contains("btn_cmd_refactor")
-            && codigo.contains("btn_cmd_test")
-            && codigo.contains("btn_cmd_docs")
-            && codigo.contains("btn_cmd_find"),
+        code.contains("btn_cmd_explain")
+            && code.contains("btn_cmd_refactor")
+            && code.contains("btn_cmd_test")
+            && code.contains("btn_cmd_docs")
+            && code.contains("btn_cmd_find"),
         "essential command pop-up shortcuts must be present"
     );
 }
@@ -271,17 +271,17 @@ fn o_popup_de_slash_commands_e_o_thinking_estao_na_dsl() {
 /// The model selection dropdown menu (Ref 09) is declared in the DSL and shell.
 #[test]
 fn model_selector_is_in_dsl_and_shell() {
-    let codigo = sem_comentario();
+    let code = sem_comentario();
     assert!(
-        codigo.contains("ai_model_dropdown = <CrawradAiModelDropdown>")
-            || codigo.contains("ai_model_dropdown = <View>"),
+        code.contains("ai_model_dropdown = <CrawradAiModelDropdown>")
+            || code.contains("ai_model_dropdown = <View>"),
         "model dropdown menu is missing from the DSL"
     );
     // The items come from the agent's configOptions, drawn in generic slots
     assert!(
-        codigo.contains("opt_0 = <CrawradMenuSlot>")
-            && codigo.contains("opt_15 = <CrawradMenuSlot>")
-            && codigo.contains("btn_ai_effort = <CrawradButton>"),
+        code.contains("opt_0 = <CrawradMenuSlot>")
+            && code.contains("opt_15 = <CrawradMenuSlot>")
+            && code.contains("btn_ai_effort = <CrawradButton>"),
         "the 16 menu slots and the effort button must be in the DSL"
     );
 }
@@ -289,38 +289,38 @@ fn model_selector_is_in_dsl_and_shell() {
 /// ACP (Agent Client Protocol) settings are present in the Options dialog DSL.
 #[test]
 fn as_configuracoes_de_acp_estao_na_dsl_do_options() {
-    let codigo = sem_comentario();
+    let code = sem_comentario();
     assert!(
-        codigo.contains("opt_ai = <View>"),
+        code.contains("opt_ai = <View>"),
         "AI and ACP options page (opt_ai) must be in the Options DSL"
     );
     assert!(
-        codigo.contains("opt_ai_provider")
-            && codigo.contains("opt_ai_model")
-            && codigo.contains("opt_ai_endpoint")
-            && codigo.contains("opt_ai_test_btn"),
+        code.contains("opt_ai_provider")
+            && code.contains("opt_ai_model")
+            && code.contains("opt_ai_endpoint")
+            && code.contains("opt_ai_test_btn"),
         "essential ACP configuration fields (provider, model, endpoint, and test button) must be in the DSL"
     );
     assert!(
-        !codigo.contains("opt_ai_token"),
+        !code.contains("opt_ai_token"),
         "per ADR 0029 and Issue #183, the IDE does not store auth token/API key in DSL or plain text"
     );
     assert!(
-        codigo.contains("btn_ai_settings"),
+        code.contains("btn_ai_settings"),
         "the settings button (gear) must be in the AI panel header"
     );
 }
 
 /// The /acp command and opening ACP via /settings are in chat dispatch.
 #[test]
-fn o_comando_acp_esta_no_despacho_do_chat() {
-    let codigo = sem_comentario();
+fn the_acp_command_is_in_the_chat_dispatch() {
+    let code = sem_comentario();
     assert!(
-        codigo.contains("\"acp\" =>"),
+        code.contains("\"acp\" =>"),
         "/acp slash command must be mapped in chat dispatch"
     );
     assert!(
-        codigo.contains("Category::AiAcp"),
+        code.contains("Category::AiAcp"),
         "chat options shortcut must direct to AiAcp category"
     );
 }
@@ -328,43 +328,43 @@ fn o_comando_acp_esta_no_despacho_do_chat() {
 /// Plan cards (ACP / Ref 29) and auto-approval controls are in the DSL and dispatch.
 #[test]
 fn os_cards_de_plano_e_auto_aprovacao_estao_na_dsl_e_no_despacho() {
-    let codigo = sem_comentario();
+    let code = sem_comentario();
     assert!(
-        (codigo.contains("plan_card = <CrawradAiPlanCard>")
-            || codigo.contains("plan_card = <CrawradCard>"))
-            && codigo.contains("btn_plan_approve")
-            && codigo.contains("btn_plan_reject")
-            && codigo.contains("btn_plan_auto_approve"),
+        (code.contains("plan_card = <CrawradAiPlanCard>")
+            || code.contains("plan_card = <CrawradCard>"))
+            && code.contains("btn_plan_approve")
+            && code.contains("btn_plan_reject")
+            && code.contains("btn_plan_auto_approve"),
         "plan card and action buttons (approve, reject, auto-approve) must be in the DSL"
     );
     assert!(
-        codigo.contains("\"plan\" =>"),
+        code.contains("\"plan\" =>"),
         "/plan slash command must be mapped in chat dispatch"
     );
     assert!(
-        codigo.contains("auto_approve_plans"),
+        code.contains("auto_approve_plans"),
         "auto-approval configuration for plans must be connected to the app"
     );
 }
 
 /// The send queue (Queued Messages) is present in the DSL and structured with send, edit, and remove actions.
 #[test]
-fn o_card_de_queued_messages_esta_na_dsl_e_tem_fluxo_de_fila() {
-    let codigo = sem_comentario();
+fn the_queued_messages_card_is_in_the_dsl_and_has_a_queue_flow() {
+    let code = sem_comentario();
     assert!(
-        codigo.contains("ai_queue_card = <CrawradAiQueueCard>")
-            && codigo.contains("CrawradAiQueueCard = <CrawradOutlined>")
-            && codigo.contains("badge_queue_count")
-            && codigo.contains("btn_queue_toggle")
-            && codigo.contains("btn_q_send")
-            && codigo.contains("btn_q_edit")
-            && codigo.contains("btn_q_del"),
+        code.contains("ai_queue_card = <CrawradAiQueueCard>")
+            && code.contains("CrawradAiQueueCard = <CrawradOutlined>")
+            && code.contains("badge_queue_count")
+            && code.contains("btn_queue_toggle")
+            && code.contains("btn_q_send")
+            && code.contains("btn_q_edit")
+            && code.contains("btn_q_del"),
         "send queue card and action buttons must be present in chat DSL"
     );
     assert!(
-        codigo.contains(
+        code.contains(
             "if self.chat.busy {\n            let attachments = std::mem::take(&mut self.chat.attachments);"
-        ) && codigo.contains("self.enfileirar_ai_prompt(cx, &prompt, attachments, images);"),
+        ) && code.contains("self.enfileirar_ai_prompt(cx, &prompt, attachments, images);"),
         "normal send must auto-queue when agent is busy (ai_busy)"
     );
 
@@ -382,34 +382,34 @@ fn o_card_de_queued_messages_esta_na_dsl_e_tem_fluxo_de_fila() {
 /// The model selection dropdown menu is positioned anchored above the `btn_ai_model` button.
 #[test]
 fn model_menu_positioning_anchors_above_footer_button() {
-    let codigo = sem_comentario();
+    let code = sem_comentario();
     assert!(
-        codigo.contains("position_config_menu"),
+        code.contains("position_config_menu"),
         "dynamic positioning calculation routine for model dropdown must exist in the shell"
     );
     assert!(
-        codigo.contains("CrawradAiModelDropdown = <CrawradOutlined>")
-            && codigo.contains("margin: { left: 44.0"),
+        code.contains("CrawradAiModelDropdown = <CrawradOutlined>")
+            && code.contains("margin: { left: 44.0"),
         "model dropdown menu DSL must have initial margin anchored to the left"
     );
 }
 
 /// Context popup (+) and slash command popup (/) anchor above the input bar.
 #[test]
-fn o_posicionamento_dos_popups_de_contexto_e_slash_ancoram_acima_do_prompt() {
-    let codigo = sem_comentario();
+fn the_context_and_slash_popups_anchor_above_the_prompt() {
+    let code = sem_comentario();
     assert!(
-        codigo.contains("posicionar_context_popup"),
+        code.contains("posicionar_context_popup"),
         "dynamic positioning routine for context popup (+) must exist in the shell"
     );
     assert!(
-        codigo.contains("posicionar_slash_popup"),
+        code.contains("posicionar_slash_popup"),
         "dynamic positioning routine for command popup (/) must exist in the shell"
     );
     assert!(
-        codigo.contains("CrawradAiContextPopup = <CrawradOutlined>")
-            && codigo.contains("btn_ai_attach")
-            && codigo.contains("CrawradContextButton"),
+        code.contains("CrawradAiContextPopup = <CrawradOutlined>")
+            && code.contains("btn_ai_attach")
+            && code.contains("CrawradContextButton"),
         "context popup DSL and + button must be integrated"
     );
 }
@@ -418,18 +418,18 @@ fn o_posicionamento_dos_popups_de_contexto_e_slash_ancoram_acima_do_prompt() {
 /// the user speaks, transcribes in a disabled state, and re-enables everything when recording ends.
 #[test]
 fn o_fluxo_de_gravacao_de_audio_desabilita_prompt_e_envio_ate_conclusao() {
-    let codigo = sem_comentario();
+    let code = sem_comentario();
     assert!(
-        codigo.contains("set_prompt_input_recording_state"),
+        code.contains("set_prompt_input_recording_state"),
         "visual/edit state toggle routine for audio prompt must exist"
     );
     // One path for both states; how it looks comes from `crawrad_audio::prompt::look`
     assert!(
-        codigo.contains("prompt_input.set_is_read_only(cx, recording)"),
+        code.contains("prompt_input.set_is_read_only(cx, recording)"),
         "prompt must be marked read-only during recording and re-enabled upon completion"
     );
     assert!(
-        codigo.contains("btn_send.set_enabled(cx, !recording)"),
+        code.contains("btn_send.set_enabled(cx, !recording)"),
         "send button must be disabled during recording and re-enabled for clicking upon completion"
     );
     let (on, off) = (
@@ -442,12 +442,12 @@ fn o_fluxo_de_gravacao_de_audio_desabilita_prompt_e_envio_ate_conclusao() {
         "Send drawn disabled only while recording"
     );
     assert!(
-        codigo.contains("if self.chat.audio_gravando {\n            return;\n        }"),
+        code.contains("if self.chat.audio_gravando {\n            return;\n        }"),
         "send_ai_prompt must not execute send while audio recording is active"
     );
-    let tema = super::tests::TEMA_COMPLETO;
+    let theme = super::tests::TEMA_COMPLETO;
     assert!(
-        tema.contains("uniform color_disabled: (CRAWRAD_BORDA_CONTROLE)"),
+        theme.contains("uniform color_disabled: (CRAWRAD_BORDA_CONTROLE)"),
         "CrawradCircleButton send button must have disabled visual state declared in the DSL"
     );
 }
@@ -456,22 +456,22 @@ fn o_fluxo_de_gravacao_de_audio_desabilita_prompt_e_envio_ate_conclusao() {
 /// that look up the nested path under `chat_base.ai_input_bar` and prevent premature dismissal on MouseDown.
 #[test]
 fn model_and_context_comboboxes_have_helpers_supporting_base_chat() {
-    let codigo = sem_comentario();
+    let code = sem_comentario();
     // One helper finds every tool-bar button under chat_base.ai_input_bar.ai_tools_bar
     assert!(
-        codigo.contains("fn chat_tool(&self, name: &str) -> ButtonRef")
-            && codigo.contains("live_id!(chat_base),")
-            && codigo.contains("live_id!(ai_tools_bar),"),
+        code.contains("fn chat_tool(&self, name: &str) -> ButtonRef")
+            && code.contains("live_id!(chat_base),")
+            && code.contains("live_id!(ai_tools_bar),"),
         "chat_tool must look under chat_base.ai_input_bar.ai_tools_bar first"
     );
     assert!(
-        codigo.contains("fn get_chat_input_bar(&self) -> ViewRef")
-            && codigo.contains("chat_base.ai_input_bar"),
+        code.contains("fn get_chat_input_bar(&self) -> ViewRef")
+            && code.contains("chat_base.ai_input_bar"),
         "get_chat_input_bar must navigate under chat_base to measure the floating input bar"
     );
     assert!(
-        codigo.contains(r#"self.chat_tool("btn_ai_model").clicked(actions)"#)
-            && codigo.contains(r#"self.chat_tool("btn_ai_attach").clicked(actions)"#),
+        code.contains(r#"self.chat_tool("btn_ai_model").clicked(actions)"#)
+            && code.contains(r#"self.chat_tool("btn_ai_attach").clicked(actions)"#),
         "click dispatch in chat panel must use get_btn_ai_model and get_btn_ai_attach helpers"
     );
 }
@@ -538,7 +538,7 @@ fn dois_turnos_consecutivos_usam_session_id_e_depois_resume() {
 }
 
 #[test]
-fn prompt_de_40000_caracteres_vai_no_stdin_e_nao_nos_argumentos() {
+fn a_40000_character_prompt_goes_on_stdin_not_in_the_arguments() {
     use crawrad_agent::{SessionSupport, build_cli_args_for_session};
 
     // Creates a large prompt with 40,000 characters (above the Windows limit of 32,766)
@@ -563,7 +563,7 @@ fn prompt_de_40000_caracteres_vai_no_stdin_e_nao_nos_argumentos() {
 }
 
 #[test]
-fn apply_turn_result_marca_sessao_iniciada_e_mutacao_falha() {
+fn apply_turn_result_marks_the_session_started_and_a_failed_mutation() {
     use crawrad_agent::{ChatSession, TurnOutcome};
 
     let mut session = ChatSession::default();
@@ -612,7 +612,7 @@ fn apply_turn_result_captura_conversation_id_do_agy_via_json() {
 }
 
 #[test]
-fn apply_turn_result_recupera_de_aviso_silencioso_do_agy_exit_0() {
+fn apply_turn_result_recovers_from_a_silent_agy_warning_on_exit_0() {
     use crawrad_agent::{ChatSession, SessionSupport, TurnOutcome};
 
     let mut session = ChatSession {
@@ -670,7 +670,7 @@ fn claude_pinned_protected_against_arbitrary_json_in_response() {
 }
 
 #[test]
-fn apply_turn_result_recupera_de_sessao_perdida_ou_expirada() {
+fn apply_turn_result_recovers_from_a_lost_or_expired_session() {
     use crawrad_agent::{ChatSession, TurnOutcome};
 
     let mut session = ChatSession::default();
@@ -712,7 +712,7 @@ fn apply_turn_result_resets_session_when_first_turn_fails() {
 }
 
 #[test]
-fn troca_de_projeto_reseta_sessao_cli() {
+fn switching_project_resets_the_cli_session() {
     use crawrad_agent::ChatSession;
     use std::path::Path;
 
@@ -735,7 +735,7 @@ fn troca_de_projeto_reseta_sessao_cli() {
 }
 
 #[test]
-fn comando_clear_reseta_sessao_cli_para_novo_uuid() {
+fn the_clear_command_resets_the_cli_session_to_a_new_uuid() {
     use crawrad_agent::ChatSession;
 
     let mut session = ChatSession::default();
@@ -749,12 +749,12 @@ fn comando_clear_reseta_sessao_cli_para_novo_uuid() {
     assert!(!session.session_started);
 
     // Next message allocates a new ID
-    let id_novo = session.ensure_cli_session_id().to_string();
-    assert_ne!(id_inicial, id_novo);
+    let new_id = session.ensure_cli_session_id().to_string();
+    assert_ne!(id_inicial, new_id);
 }
 
 #[test]
-fn agy_passa_prompt_em_flag_e_suporta_sessao_capturada() {
+fn agy_passes_the_prompt_in_a_flag_and_supports_a_captured_session() {
     use crawrad_agent::{SessionSupport, build_cli_args_for_session};
 
     let prompt = "Hello Gemini";
@@ -806,7 +806,7 @@ fn agy_passa_prompt_em_flag_e_suporta_sessao_capturada() {
 }
 
 #[test]
-fn invocacao_respeita_diretorio_do_projeto() {
+fn the_invocation_respects_the_project_directory() {
     use crawrad_agent::{PromptDelivery, SessionSupport, build_cli_invocation_with_options};
     use std::path::PathBuf;
 
@@ -872,8 +872,8 @@ fn invocacao_codex_usa_stdin_e_hifen() {
 /// Code gate: no `contains("claude")`, `contains("gemini")`, or `contains("agy")`
 /// may exist outside the profiles module to guess agent behavior.
 #[test]
-fn nenhum_contains_de_agente_fora_do_modulo_de_perfis() {
-    let acp_rs = include_str!("../../../../crawrad-agent/src/acp.rs");
+fn no_agent_contains_check_outside_the_profiles_module() {
+    let acp_rs = include_str!("../../../../../crawrad-agent/src/acp.rs");
     let ide_app_rs = sem_comentario();
 
     for forbidden in &[
@@ -900,7 +900,7 @@ fn nenhum_contains_de_agente_fora_do_modulo_de_perfis() {
 
 /// Renaming a profile's `display_name` does not alter its functional behavior.
 #[test]
-fn renomear_display_name_de_perfil_nao_muda_comportamento() {
+fn renaming_a_profile_display_name_changes_no_behavior() {
     let profile =
         crawrad_agent::agent_profile::find_profile_by_id("claude").expect("claude profile");
     assert_eq!(profile.id, "claude");
@@ -959,7 +959,7 @@ fn chosen_model_id_matches_model() {
 
 /// An unknown key in acp_config.json survives a read-modify-write cycle.
 #[test]
-fn chave_desconhecida_em_acp_config_json_sobrevive_ao_save() {
+fn an_unknown_key_in_acp_config_json_survives_the_save() {
     let tmp_path =
         std::env::temp_dir().join(format!("acp_unknown_test_{}.json", std::process::id()));
 
@@ -988,9 +988,9 @@ fn chave_desconhecida_em_acp_config_json_sobrevive_ao_save() {
     config.save_to_file(&tmp_path).expect("save config");
 
     // Reads back as generic JSON to check if unknown keys survived
-    let texto_salvo = std::fs::read_to_string(&tmp_path).expect("read saved");
+    let saved_text = std::fs::read_to_string(&tmp_path).expect("read saved");
     let json_recarregado: serde_json::Value =
-        serde_json::from_str(&texto_salvo).expect("parse json");
+        serde_json::from_str(&saved_text).expect("parse json");
 
     assert_eq!(
         json_recarregado["aefos_custom_telemetry_key"], "telemetry_payload_xyz",
@@ -1012,15 +1012,15 @@ fn chave_desconhecida_em_acp_config_json_sobrevive_ao_save() {
 /// (the two vendor-named commands were folded into it).
 #[test]
 fn the_use_command_switches_profile_without_blocking_ui() {
-    let codigo = sem_comentario();
+    let code = sem_comentario();
     assert!(
-        codigo.contains("crawrad_agent::slash_commands::use_reply")
-            && codigo.contains("self.selecionar_provedor_ia(cx, p);"),
+        code.contains("crawrad_agent::slash_commands::use_reply")
+            && code.contains("self.selecionar_provedor_ia(cx, p);"),
         "/use must resolve the agent and call switch_provider"
     );
     assert!(
-        !codigo.contains("match crawrad_agent::AcpConfig::execute_cli_query(\"claude\", query)")
-            && !codigo
+        !code.contains("match crawrad_agent::AcpConfig::execute_cli_query(\"claude\", query)")
+            && !code
                 .contains("match crawrad_agent::AcpConfig::execute_cli_query(\"agy\", query)"),
         "synchronous execution on UI thread for /claude and /gemini was eliminated"
     );
@@ -1178,18 +1178,18 @@ fn format_model_label_safe_with_multibyte_utf8() {
 /// The options dialog keeps a snapshot of ACP config and restores if canceled.
 #[test]
 fn canceling_options_restores_previous_configuration() {
-    let codigo = sem_comentario();
+    let code = sem_comentario();
     assert!(
-        codigo.contains("self.acp_antes = Some(self.acp_config.clone());"),
+        code.contains("self.acp_antes = Some(self.acp_config.clone());"),
         "open_options must save snapshot of acp_config in acp_antes"
     );
     assert!(
-        codigo.contains("if let Some(acp_antes) = self.acp_antes.take() {")
-            && codigo.contains("self.acp_config = acp_antes;"),
+        code.contains("if let Some(acp_antes) = self.acp_antes.take() {")
+            && code.contains("self.acp_config = acp_antes;"),
         "desfazer_options (Cancel) must restore self.acp_antes"
     );
     assert!(
-        codigo.contains("self.acp_antes = None;"),
+        code.contains("self.acp_antes = None;"),
         "salvar_options (OK) must discard the acp_antes snapshot"
     );
 }
@@ -1197,15 +1197,15 @@ fn canceling_options_restores_previous_configuration() {
 /// The three provider combos in Options (opt_ai_provider, opt_cu_ai_provider, opt_sr_ai_provider)
 /// use the centralized `selecionar_provedor_ia` method which synchronizes state and UI.
 #[test]
-fn selecionar_provedor_ia_unifica_os_tres_combos() {
-    let codigo = sem_comentario();
+fn selecting_the_ai_provider_unifies_the_three_combos() {
+    let code = sem_comentario();
     assert!(
-        codigo.contains("self.selecionar_provedor_ia(cx, p);"),
+        code.contains("self.selecionar_provedor_ia(cx, p);"),
         "provider combos must dispatch to selecionar_provedor_ia"
     );
     assert!(
-        !codigo.contains("if *p == \"Gemini (Antigravity)\" {")
-            && !codigo.contains("self.acp_config.endpoint = \"gemini --acp-server\".to_string();"),
+        !code.contains("if *p == \"Gemini (Antigravity)\" {")
+            && !code.contains("self.acp_config.endpoint = \"gemini --acp-server\".to_string();"),
         "hardcoded endpoints in opt_sr/opt_cu were eliminated in favor of switch_provider"
     );
 }
@@ -1256,41 +1256,41 @@ fn custom_endpoint_com_argumentos_executa_binario_e_flags_separados() {
 
 /// The btn_ai_browser item was removed from the DSL and shell because CrawRAD does not do direct web search.
 #[test]
-fn btn_ai_browser_removido_do_popup_de_contexto() {
-    let codigo = sem_comentario();
-    let paineis = include_str!("../../ide_app/panels.rs");
+fn btn_ai_browser_is_gone_from_the_context_popup() {
+    let code = sem_comentario();
+    let panels = include_str!("../../../ide_app/panels.rs");
     assert!(
-        !paineis.contains("btn_ai_browser"),
-        "btn_ai_browser must have been removed from context popup DSL in paineis.rs"
+        !panels.contains("btn_ai_browser"),
+        "btn_ai_browser must have been removed from context popup DSL in panels.rs"
     );
     assert!(
-        !codigo.contains("btn_ai_browser"),
+        !code.contains("btn_ai_browser"),
         "btn_ai_browser must have been removed from action handling in ide_app.rs"
     );
 }
 
 /// No item in the context popup (+) merely writes to the status bar without performing an action.
 #[test]
-fn nenhum_item_do_popup_de_contexto_so_escreve_na_barra_de_status() {
-    let codigo = sem_comentario();
+fn no_context_popup_item_merely_writes_to_the_status_bar() {
+    let code = sem_comentario();
     assert!(
-        !codigo.contains("self.status = Some(\"Attach Media:"),
+        !code.contains("self.status = Some(\"Attach Media:"),
         "btn_ai_media must not merely write to the status bar"
     );
     assert!(
-        !codigo.contains("self.status = Some(\"Mentions:"),
+        !code.contains("self.status = Some(\"Mentions:"),
         "btn_ai_mentions must not merely write to the status bar"
     );
     assert!(
-        !codigo.contains("self.status = Some(\"Browser:"),
+        !code.contains("self.status = Some(\"Browser:"),
         "btn_ai_browser must not exist"
     );
 }
 
 /// The memory dialog synchronizes text with the input and persists real edits.
 #[test]
-fn dialogo_de_memoria_sincroniza_com_input_e_persiste_edicao() {
-    let memory_dialog_rs = include_str!("../../ide_app/dialogs/memory.rs");
+fn the_memory_dialog_syncs_with_the_input_and_persists_the_edit() {
+    let memory_dialog_rs = include_str!("../../../ide_app/dialogs/memory.rs");
     assert!(
         memory_dialog_rs.contains("dlg.text_input(id!(mem_input))")
             && memory_dialog_rs.contains(".set_text(cx, &self.memoria_texto);"),
@@ -1309,17 +1309,17 @@ fn dialogo_de_memoria_sincroniza_com_input_e_persiste_edicao() {
 /// executar_ai_prompt extracts live project context and global memory via PromptAssembler.
 #[test]
 fn execute_ai_prompt_builds_live_project_context_and_memory() {
-    let codigo = sem_comentario();
+    let code = sem_comentario();
     assert!(
-        codigo.contains("crawrad_agent::PromptAssembler::assemble"),
+        code.contains("crawrad_agent::PromptAssembler::assemble"),
         "executar_ai_prompt must invoke PromptAssembler::assemble to enrich the prompt"
     );
     assert!(
-        codigo.contains("extrair_contexto_ativo_para_ia()"),
+        code.contains("extrair_contexto_ativo_para_ia()"),
         "executar_ai_prompt must extract live context from editor or designer"
     );
     assert!(
-        codigo.contains("extrair_selecao_do_editor()"),
+        code.contains("extrair_selecao_do_editor()"),
         "ide_app must have routine to extract active selection from CodeView"
     );
 }
@@ -1327,13 +1327,13 @@ fn execute_ai_prompt_builds_live_project_context_and_memory() {
 /// Gate of The MCP dialog does not paint fixed green and calls the executable probe.
 #[test]
 fn o_dialogo_mcp_chama_probe_e_nao_tem_verde_fixo() {
-    let codigo_mcp_dialog = include_str!("../../ide_app/dialogs/mcp.rs");
+    let mcp_dialog_code = include_str!("../../../ide_app/dialogs/mcp.rs");
     assert!(
-        codigo_mcp_dialog.contains("s.probe()"),
+        mcp_dialog_code.contains("s.probe()"),
         "MCP dialog must invoke s.probe() to check real server availability"
     );
     assert!(
-        !codigo_mcp_dialog.contains("\"🟢 "),
+        !mcp_dialog_code.contains("\"🟢 "),
         "MCP dialog cannot fix status 🟢 without probe check"
     );
 
@@ -1354,7 +1354,7 @@ fn o_dialogo_mcp_chama_probe_e_nao_tem_verde_fixo() {
 
 /// Gate of auth_token was removed from AcpConfig and serialization.
 #[test]
-fn auth_token_nao_existe_mais_no_tipo_nem_na_gravacao() {
+fn auth_token_no_longer_exists_in_the_type_or_on_disk() {
     let cfg = crawrad_agent::AcpConfig::default();
     let json = serde_json::to_string(&cfg).expect("AcpConfig serialization");
     assert!(
@@ -1367,10 +1367,10 @@ fn auth_token_nao_existe_mais_no_tipo_nem_na_gravacao() {
 /// shell's dispatch, which matches on the table's `id`.
 #[test]
 fn todo_slash_command_do_catalogo_tem_despacho() {
-    let codigo_casca = sem_comentario();
+    let shell_code = sem_comentario();
     for cmd in crawrad_agent::SlashCommand::ALL {
         assert!(
-            codigo_casca.contains(&format!("\"{}\"", cmd.id)),
+            shell_code.contains(&format!("\"{}\"", cmd.id)),
             "command `{}` present in the catalog must have handling/dispatch in the shell",
             cmd.trigger
         );
@@ -1401,19 +1401,19 @@ fn default_paths_point_to_crawrad_with_own_folder() {
 
 /// Gate of Editing global memory and saving writes and reopens with the edited text.
 #[test]
-fn memoria_global_salva_e_reabre_texto_editado() {
+fn global_memory_saves_and_reopens_the_edited_text() {
     let dir = std::env::temp_dir().join("crawrad_test_memoria_183");
     let _ = std::fs::create_dir_all(&dir);
-    let arquivo = dir.join("memory_editada.json");
+    let file = dir.join("memory_editada.json");
 
-    let texto_editado = "Specific test instructions edited by user in dialog";
-    let mem = crawrad_agent::AefosMemory::new(texto_editado);
-    mem.save_to_file(&arquivo).expect("save edited memory");
+    let edited_text = "Specific test instructions edited by user in dialog";
+    let mem = crawrad_agent::AefosMemory::new(edited_text);
+    mem.save_to_file(&file).expect("save edited memory");
 
-    let lida = crawrad_agent::AefosMemory::load_from_file(&arquivo).expect("load memory");
-    assert_eq!(lida.instructions, texto_editado);
+    let lida = crawrad_agent::AefosMemory::load_from_file(&file).expect("load memory");
+    assert_eq!(lida.instructions, edited_text);
 
-    let _ = std::fs::remove_file(&arquivo);
+    let _ = std::fs::remove_file(&file);
     let _ = std::fs::remove_dir(&dir);
 }
 
@@ -1448,14 +1448,14 @@ fn o_chat_tem_rolagem_automatica_e_respiro_no_final() {
 /// 3. The Explorer panel header (`explorer_header`) has explicit spacing between action buttons to avoid crowding.
 #[test]
 fn user_bubble_has_orange_background_aligned_right_with_spacing() {
-    let tema = super::tests::TEMA_COMPLETO;
+    let theme = super::tests::TEMA_COMPLETO;
     assert!(
-        tema.contains("pub CrawradCardUser = <CrawradCard>")
-            && tema.contains("color: (CRAWRAD_ACENTO)")
+        theme.contains("pub CrawradCardUser = <CrawradCard>")
+            && theme.contains("color: (CRAWRAD_ACENTO)")
             // 8 px corners and a 3 px tail at the bottom right (the owner's review, 06/10/2026)
-            && tema.contains("uniform border_radius: 8.0")
-            && tema.contains("r, r, 3.0, r)")
-            && tema.contains("margin: { left:"),
+            && theme.contains("uniform border_radius: 8.0")
+            && theme.contains("r, r, 3.0, r)")
+            && theme.contains("margin: { left:"),
         "CrawradCardUser must define left margin, CRAWRAD_ACENTO background, and border_radius for right-aligned look"
     );
     assert!(
@@ -1472,11 +1472,11 @@ fn user_bubble_has_orange_background_aligned_right_with_spacing() {
 
 /// User Bubble Auto-Size Gate: compact size for short sentences and maximum limit for long sentences.
 #[test]
-fn o_balao_do_usuario_faz_auto_size_com_limite_maximo_e_quebra() {
-    let largura_painel = 300.0;
+fn the_user_bubble_auto_sizes_with_a_max_width_and_wraps() {
+    let panel_width = 300.0;
     // Short text: small bubble, large left indent (e.g. ~155px with meta "19:19 ✓✓")
     let recuo_curto =
-        crawrad_agent::chat_layout::user_bubble_indent("Hi", "19:19 ✓✓", largura_painel);
+        crawrad_agent::chat_layout::user_bubble_indent("Hi", "19:19 ✓✓", panel_width);
     assert!(
         recuo_curto > 140.0,
         "short messages must have larger left indent to keep the bubble compact and against the right edge (indent: {recuo_curto})"
@@ -1484,7 +1484,7 @@ fn o_balao_do_usuario_faz_auto_size_com_limite_maximo_e_quebra() {
 
     // Medium text: proportional bubble
     let recuo_medio =
-        crawrad_agent::chat_layout::user_bubble_indent("Test build", "19:19 ✓✓", largura_painel);
+        crawrad_agent::chat_layout::user_bubble_indent("Test build", "19:19 ✓✓", panel_width);
     assert!(
         recuo_medio < recuo_curto
             && recuo_medio > crawrad_agent::chat_layout::USER_BUBBLE_MIN_INDENT,
@@ -1492,9 +1492,9 @@ fn o_balao_do_usuario_faz_auto_size_com_limite_maximo_e_quebra() {
     );
 
     // Long text: hits maximum width limit (minimum indent with line break)
-    let texto_longo = "This is a long prompt typed by the developer to request a complete refactoring of the visual component with multiple arguments.";
+    let long_text = "This is a long prompt typed by the developer to request a complete refactoring of the visual component with multiple arguments.";
     let recuo_longo =
-        crawrad_agent::chat_layout::user_bubble_indent(texto_longo, "19:19 ✓✓", largura_painel);
+        crawrad_agent::chat_layout::user_bubble_indent(long_text, "19:19 ✓✓", panel_width);
     assert_eq!(
         recuo_longo,
         crawrad_agent::chat_layout::USER_BUBBLE_MIN_INDENT,
@@ -1558,7 +1558,7 @@ fn auto_is_first_fixed_model_of_every_provider_and_config_default() {
 /// Gate of When model is "auto" (or empty), no --model argument is generated in the CLI.
 /// Mutation: removing the omission of --model for "auto" fails this test immediately.
 #[test]
-fn auto_omite_argumento_model_em_todos_os_clis() {
+fn auto_omits_the_model_argument_on_every_cli() {
     use crawrad_agent::{SessionSupport, build_cli_args_for_session};
 
     let clis = [
@@ -1743,7 +1743,7 @@ fn manual_model_management_adds_removes_and_preserves_auto() {
 
 /// Criterion 1: Three consecutive turns remain visible simultaneously in history.
 #[test]
-fn tres_turnos_seguidos_ficam_visiveis_no_historico() {
+fn three_turns_in_a_row_stay_visible_in_the_history() {
     use crawrad_agent::{ChatMessage, ChatSession};
 
     let mut session = ChatSession::new("test-history", "Multi-turn Real History");
@@ -1780,11 +1780,11 @@ fn tres_turnos_seguidos_ficam_visiveis_no_historico() {
     assert_eq!(session.messages[4].text, "And with references?");
 
     // Verifies that the shell supports rendering multiple simultaneous slots
-    let codigo = sem_comentario();
+    let code = sem_comentario();
     assert!(
-        codigo.contains("user_card_1")
-            && codigo.contains("reply_card_1")
-            && codigo.contains("user_card_2"),
+        code.contains("user_card_1")
+            && code.contains("reply_card_1")
+            && code.contains("user_card_2"),
         "the IDE shell must contain multiple message cards (user_card_1, reply_card_1, etc.) to display turns simultaneously"
     );
 }
@@ -1794,8 +1794,8 @@ fn tres_turnos_seguidos_ficam_visiveis_no_historico() {
 fn code_block_response_renders_formatted_code_with_copy() {
     use crawrad_agent::{ChatContentBlock, parse_chat_markdown};
 
-    let texto = "Here is the requested function:\n\n```rust\nfn calcular(x: i32) -> i32 {\n    x * 2\n}\n```\n\nReady for use!";
-    let blocos = parse_chat_markdown(texto);
+    let text = "Here is the requested function:\n\n```rust\nfn calcular(x: i32) -> i32 {\n    x * 2\n}\n```\n\nReady for use!";
+    let blocos = parse_chat_markdown(text);
 
     assert_eq!(blocos.len(), 3);
     match &blocos[0] {
@@ -1815,11 +1815,11 @@ fn code_block_response_renders_formatted_code_with_copy() {
     }
 
     // The shell must contain the code block widget with copy button
-    let codigo = sem_comentario();
+    let code = sem_comentario();
     assert!(
-        codigo.contains("CrawradAiCodeBlock")
-            && codigo.contains("btn_copy_code")
-            && codigo.contains("code_text"),
+        code.contains("CrawradAiCodeBlock")
+            && code.contains("btn_copy_code")
+            && code.contains("code_text"),
         "the DSL must have the CrawradAiCodeBlock component with btn_copy_code and mono text area"
     );
 }
@@ -1845,11 +1845,11 @@ fn chamada_de_ferramenta_aparece_como_card_e_atualiza_status() {
     assert_eq!(msg.tool_calls[1].status, ToolCallStatus::Success);
 
     // The shell must have the tool card widget
-    let codigo = sem_comentario();
+    let code = sem_comentario();
     assert!(
-        codigo.contains("CrawradAiToolCard")
-            && codigo.contains("tool_name")
-            && codigo.contains("tool_status"),
+        code.contains("CrawradAiToolCard")
+            && code.contains("tool_name")
+            && code.contains("tool_status"),
         "the DSL must contain the CrawradAiToolCard component to render tool call cards"
     );
 }
@@ -1857,56 +1857,56 @@ fn chamada_de_ferramenta_aparece_como_card_e_atualiza_status() {
 /// Criterion 5: Stop button cancels active turn, leaves busy state, and preserves message queue.
 #[test]
 fn stop_button_cancels_and_preserves_message_queue() {
-    let codigo = sem_comentario();
+    let code = sem_comentario();
 
     // Verifies that btn_prompt_stop exists on the toolbar
     assert!(
-        codigo.contains("btn_prompt_stop"),
+        code.contains("btn_prompt_stop"),
         "btn_prompt_stop button must be present on chat toolbar"
     );
 
     // Verifies parar_ia_prompt function in the shell
     assert!(
-        codigo.contains("fn parar_ia_prompt"),
+        code.contains("fn parar_ia_prompt"),
         "parar_ia_prompt routine must be implemented"
     );
 
     // Verifies that parar_ia_prompt resets ai_busy to false
     assert!(
-        codigo.contains("self.chat.busy = false;"),
+        code.contains("self.chat.busy = false;"),
         "parar_ia_prompt must set ai_busy = false when stopping"
     );
 
     // And does NOT empty ai_queue
-    let i = codigo
+    let i = code
         .find("fn parar_ia_prompt")
         .expect("fn parar_ia_prompt is missing");
-    let fim = codigo[i..]
+    let fim = code[i..]
         .find("fn ")
         .map(|f| i + f)
-        .unwrap_or(codigo.len());
-    let trecho_parar = &codigo[i..fim];
+        .unwrap_or(code.len());
+    let stop_snippet = &code[i..fim];
 
     assert!(
-        !trecho_parar.contains("ai_queue.clear()"),
+        !stop_snippet.contains("ai_queue.clear()"),
         "parar_ia_prompt MUST preserve the ai_queue message queue intact when canceling"
     );
 }
 
 /// Criterion 6: Message queue without fixed limit (supports multiple items).
 #[test]
-fn fila_de_mensagens_sem_limite_fixo() {
-    let codigo = sem_comentario();
+fn the_message_queue_has_no_fixed_limit() {
+    let code = sem_comentario();
 
     // Strict fixed limit check at 4 items cannot be present
     assert!(
-        !codigo.contains("ai_queue.len() >= 4"),
+        !code.contains("ai_queue.len() >= 4"),
         "the fixed and artificial limit of 4 items in the chat queue was removed"
     );
 
     // DSL must support multiple queue slots (q_item_0 through q_item_7)
     assert!(
-        codigo.contains("q_item_0") && codigo.contains("q_item_7"),
+        code.contains("q_item_0") && code.contains("q_item_7"),
         "the DSL must contain dynamic slots for the message queue"
     );
 }
@@ -1914,12 +1914,12 @@ fn fila_de_mensagens_sem_limite_fixo() {
 /// Criteria 7 and 8: No blocking calls (Command::output, Command::status, Command::wait)
 /// on the UI thread.
 #[test]
-fn nenhuma_chamada_de_processo_bloqueante_executada_direto_na_thread_de_ui() {
-    let codigo = sem_comentario();
+fn no_blocking_process_call_runs_straight_on_the_ui_thread() {
+    let code = sem_comentario();
 
     // Scans all occurrences of `Command::new` in the shell (ide_app and submodules)
     // and ensures there is no synchronous call outside thread::spawn
-    for linha in codigo.lines() {
+    for linha in code.lines() {
         let t = linha.trim();
         if t.starts_with("//") {
             continue;
@@ -1937,20 +1937,20 @@ fn nenhuma_chamada_de_processo_bloqueante_executada_direto_na_thread_de_ui() {
 
     // Options test button must run on background thread with channel
     assert!(
-        codigo.contains("options_test_rx"),
+        code.contains("options_test_rx"),
         "AI connection test in options must use asynchronous channel to avoid freezing UI"
     );
 
     // ACP probe dispatch must use asynchronous channel
     assert!(
-        codigo.contains("probe_rx"),
+        code.contains("probe_rx"),
         "ACP version probe must use asynchronous channel"
     );
 }
 
 /// Criterion 10: Dead agent mid-turn displays real error and leaves busy state.
 #[test]
-fn agente_morto_no_meio_do_turno_exibe_erro_real_e_sai_de_ocupado() {
+fn an_agent_killed_mid_turn_shows_the_real_error_and_leaves_busy() {
     use crawrad_agent::{ChatMessage, ChatSession, TurnOutcome};
 
     let mut session = ChatSession::new("test-crash", "Crash recovery test");
@@ -1977,9 +1977,9 @@ fn agente_morto_no_meio_do_turno_exibe_erro_real_e_sai_de_ocupado() {
     assert!(session.messages[0].text.contains("❌ Agent error"));
 
     // In the IDE shell, finalizar_ia_prompt turns off ai_busy even on error
-    let codigo = sem_comentario();
+    let code = sem_comentario();
     assert!(
-        codigo.contains("self.chat.busy = false;"),
+        code.contains("self.chat.busy = false;"),
         "when finishing the turn (even with error), the IDE must always set ai_busy = false"
     );
 }

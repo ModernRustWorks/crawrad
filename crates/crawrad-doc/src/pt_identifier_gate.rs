@@ -8,7 +8,11 @@ use std::path::Path;
 
 /// Maximum allowed Portuguese identifier definitions across the workspace.
 /// Must equal the exact actual count; if the count decreases, this ratchet constant must be lowered in the same PR.
-pub const MAX_PT_IDENTIFIERS: usize = 2_136;
+/// Tightened on 27/11/2026 from 2,136 to 2,061: the AI panel and terminal panel
+/// test modules arrived with 75 Portuguese definitions (31 test names and 44
+/// locals) and were written in English instead, so the ratchet falls by exactly
+/// that many.
+pub const MAX_PT_IDENTIFIERS: usize = 2_061;
 
 /// Maximum allowed Portuguese directory and file paths across `crates/` and `components/`.
 pub const MAX_PT_PATHS: usize = 10;

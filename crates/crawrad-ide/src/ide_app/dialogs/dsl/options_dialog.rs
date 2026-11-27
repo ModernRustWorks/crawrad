@@ -647,6 +647,11 @@ live_design! {
                                     <CrawradLabelMuted> { width: Fill, height: Fit, text: "Auto save editor files:" }
                                     opt_auto_save = <CrawradOptionDrop> { width: 240.0 } }
                                 <CrawradLabelMuted> { width: Fill, height: Fit, text: "Editor files only: the form saves with Save, because saving it regenerates the designer code." }
+                                <CrawradGroupBoxTitle> { text: "Recent projects" }
+                                <View> { width: Fill, height: Fit, flow: Down, spacing: (CRAWRAD_ESPACO_XS),
+                                    <CrawradLabelMuted> { width: Fill, height: Fit, text: "Projects kept in recent list:" }
+                                    opt_recent_limit = <CrawradOptionDrop> { width: 160.0 } }
+                                <CrawradLabelMuted> { width: Fill, height: Fit, text: "The list stops growing at this number; older projects are pruned automatically." }
                                 <CrawradGroupBoxTitle> { text: "Autorecover" }
                                 opt_recover = <CrawradOptionCheck> {}
                                 <View> { width: Fill, height: Fit, flow: Down, spacing: (CRAWRAD_ESPACO_XS),
