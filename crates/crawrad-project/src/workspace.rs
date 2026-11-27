@@ -1897,6 +1897,92 @@ pub fn refusal_occupied_folder(parent: &Path, name: &str) -> Option<Refusal> {
     })
 }
 
+// Where the New Project dialog should point when it opens.
+//
+// It must point somewhere a project can actually be written. The old default was
+// the process working directory, which is fine when the IDE was installed by an
+// ordinary installer and WRONG when it came from the Microsoft Store: there the
+// working directory IS `...\WindowsApps\<package>`, the package's own install
+// folder, which Windows keeps read-only with locked ACLs. The dialog opened
+// pointing at the one place a project can never live.
+//
+// The order is the useful one: beside the project last opened, since a person
+// keeps their projects together; then a `CrawRAD-Projects` folder under the home
+// folder; then the working directory, but only when it is not inside the install
+// folder. Every input is a parameter so the choice can be tested without touching
+// the real environment.
+#[note("workspace-default-project-parent")]
+pub fn default_project_parent(
+    recent: Option<&Path>,
+    home: Option<&Path>,
+    cwd: Option<&Path>,
+    app_dir: Option<&Path>,
+) -> Option<PathBuf> {
+    if let Some(r) = recent
+        && let Some(parent) = r.parent()
+        && parent.is_dir()
+        && !is_inside(parent, app_dir)
+    {
+        return Some(parent.to_path_buf());
+    }
+    if let Some(h) = home {
+        return Some(h.join("CrawRAD-Projects"));
+    }
+    if let Some(c) = cwd
+        && c.is_dir()
+        && !is_inside(c, app_dir)
+    {
+        return Some(c.to_path_buf());
+    }
+    None
+}
+
+// True when `path` is the install folder or sits under it.
+#[note("workspace-is-inside")]
+fn is_inside(path: &Path, outer: Option<&Path>) -> bool {
+    match outer {
+        Some(o) => path.starts_with(o),
+        None => false,
+    }
+}
+
+// Makes the folder a project is about to be written into, or says why it cannot.
+//
+// `Create` is a promise to create, so a folder that does not exist yet is created
+// here rather than answered with a file picker. The picker used to be the silent
+// fallback for a path that was not a directory, which is how editing the drive
+// letter of the default location — making the path point nowhere — turned the
+// Create button into a folder chooser, with nothing said about why.
+//
+// `app_dir` is CrawRAD's own install folder, when it is known: a path inside it
+// gets its own phrase, because no amount of retrying will make that folder
+// writable and the person deserves to be told that instead of an OS error code.
+#[note("workspace-make-project-parent")]
+pub fn make_project_parent(folder: &Path, app_dir: Option<&Path>) -> Result<(), Refusal> {
+    if folder.is_dir() {
+        return Ok(());
+    }
+    if folder.exists() {
+        return Err(Refusal::simple(format!(
+            "`{}` is a file, not a folder. Nothing was written.",
+            folder.display()
+        )));
+    }
+    if is_inside(folder, app_dir) {
+        return Err(Refusal::simple(format!(
+            "`{}` is inside CrawRAD's own installation folder, which Windows keeps              read-only — a project cannot be created there. Choose a folder under your              user folder instead. Nothing was written.",
+            folder.display()
+        )));
+    }
+    match std::fs::create_dir_all(folder) {
+        Ok(()) => Ok(()),
+        Err(e) => Err(Refusal::simple(format!(
+            "`{}` could not be created: {e}. Nothing was written.",
+            folder.display()
+        ))),
+    }
+}
+
 #[note("workspace-without-color")]
 pub fn without_color(raw: &str) -> String {
     let mut clean = String::with_capacity(raw.len());

@@ -1666,3 +1666,121 @@ fn shorten_middle_keeps_both_ends_within_max() {
         "C:/crawrad-wt"
     );
 }
+
+/// The New Project dialog must not open pointing at a folder nobody can write to.
+///
+/// Installed from the Microsoft Store, the process working directory IS the
+/// package's own `WindowsApps` folder, which Windows keeps read-only. The dialog
+/// used to take the working directory unconditionally, so it opened pointing at
+/// the one place a project can never live.
+#[test]
+fn the_default_location_is_never_inside_the_install_folder() {
+    let root = std::env::temp_dir().join(format!("crawrad-default-{}", std::process::id()));
+    let install = root.join("WindowsApps").join("GUARANA.CrawRAD_0.1.1.0");
+    let home = root.join("home");
+    std::fs::create_dir_all(&install).expect("install folder");
+    std::fs::create_dir_all(&home).expect("home folder");
+
+    // The working directory is inside the install folder: it is refused, and the
+    // home folder answers instead.
+    let chosen = default_project_parent(None, Some(&home), Some(&install), Some(&install))
+        .expect("a default is found");
+    assert_eq!(
+        chosen,
+        home.join("CrawRAD-Projects"),
+        "the default fell back to the install folder, which is read-only"
+    );
+
+    // With no home to fall back to, it answers nothing rather than a folder that
+    // cannot be written: an empty field is honest, a doomed path is not.
+    assert_eq!(
+        default_project_parent(None, None, Some(&install), Some(&install)),
+        None,
+        "with nowhere writable it still offered the install folder"
+    );
+
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+/// Beside the last project opened, because a person keeps their projects together.
+#[test]
+fn the_default_location_prefers_where_the_last_project_lives() {
+    let root = std::env::temp_dir().join(format!("crawrad-default-recent-{}", std::process::id()));
+    let projects = root.join("CrawRAD-Projects");
+    let last = projects.join("my_app");
+    let home = root.join("home");
+    std::fs::create_dir_all(&last).expect("recent project");
+    std::fs::create_dir_all(&home).expect("home folder");
+
+    assert_eq!(
+        default_project_parent(Some(&last), Some(&home), None, None),
+        Some(projects),
+        "the folder holding the last project is the one a person expects"
+    );
+
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+/// `Create` creates. A folder that does not exist yet is made, not answered with
+/// a file picker — the picker is what the folder button beside the field is for.
+#[test]
+fn create_makes_the_folder_instead_of_asking_where() {
+    let root = std::env::temp_dir().join(format!("crawrad-make-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    let target = root.join("CrawRAD-Projects");
+    assert!(!target.exists());
+
+    make_project_parent(&target, None).expect("a missing folder is created, not refused");
+    assert!(target.is_dir(), "Create did not create");
+
+    // Running again on the folder it just made is not an error.
+    make_project_parent(&target, None).expect("an existing folder is accepted");
+
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+/// A path inside the install folder gets its own phrase, because no amount of
+/// retrying will make that folder writable.
+#[test]
+fn a_path_inside_the_install_folder_is_refused_by_name() {
+    let root = std::env::temp_dir().join(format!("crawrad-refuse-{}", std::process::id()));
+    let install = root.join("WindowsApps").join("GUARANA.CrawRAD_0.1.1.0");
+    std::fs::create_dir_all(&install).expect("install folder");
+
+    let refusal = make_project_parent(&install.join("my_app"), Some(&install))
+        .expect_err("a project inside the install folder must be refused");
+    assert!(
+        refusal.phrase.contains("read-only"),
+        "the phrase does not say why it cannot be written: {}",
+        refusal.phrase
+    );
+    assert!(
+        refusal.phrase.contains("Nothing was written"),
+        "the phrase does not say the project was not half-created: {}",
+        refusal.phrase
+    );
+    assert!(
+        !install.join("my_app").exists(),
+        "it refused and created the folder anyway"
+    );
+
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+/// A file where a folder was asked for is refused, not silently replaced.
+#[test]
+fn a_file_in_the_folders_place_is_refused() {
+    let root = std::env::temp_dir().join(format!("crawrad-file-{}", std::process::id()));
+    std::fs::create_dir_all(&root).expect("test root");
+    let file_in_the_way = root.join("not_a_folder");
+    std::fs::write(&file_in_the_way, b"x").expect("the file");
+
+    let refusal = make_project_parent(&file_in_the_way, None).expect_err("a file is not a folder");
+    assert!(
+        refusal.phrase.contains("is a file"),
+        "the phrase does not name what is wrong: {}",
+        refusal.phrase
+    );
+
+    let _ = std::fs::remove_dir_all(&root);
+}
