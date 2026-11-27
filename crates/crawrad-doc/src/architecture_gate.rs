@@ -100,12 +100,12 @@ pub const ALLOWED_SHELL_ROOT_FILES: &[&str] = &["ide_app.rs", "main.rs"];
 /// condensed to what the code itself needs to say.
 /// Ratchet rule: This threshold can ONLY DECREASE as code is extracted into crates.
 /// The gate enforces equality: if lines decrease, the constant must be lowered in the same PR.
-/// Raised on 27/11/2026 from 32,794 to 33,029, measured on this tree: the MCP
+/// Raised on 27/11/2026 from 32,794 to 33,027, measured on this tree: the MCP
 /// now reports WHERE each thing is — the palette, the Inspector, the notes, the
 /// tests and the status bar each answer with the rectangle of the row they name —
 /// and the Form check moved from the title bar down to the tab strip. The ratchet
 /// normally only tightens; it rises because those answers are new surface.
-pub const MAX_SHELL_SOURCE_LINES: usize = 33_029;
+pub const MAX_SHELL_SOURCE_LINES: usize = 33_027;
 
 /// Maximum allowed lines for any individual `.rs` file in `crates/crawrad-ide/src/` (outside `test/`).
 ///

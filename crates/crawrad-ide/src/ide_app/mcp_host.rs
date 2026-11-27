@@ -172,9 +172,7 @@ impl McpServer {
         let read = match name {
             "editor.get_completion" => Some(app.completion_json(cx)),
             "editor.get_choices" => Some(app.nav.choices_json()),
-            "view.get_inspector" => Some(crawrad_actions::inspector_model::rows_json(
-                &app.linhas_do_inspector(),
-            )),
+            "view.get_inspector" => Some(app.inspector_json(cx)),
             "editor.get_rename" => Some(app.nav.rename.to_json()),
             "editor.get_references" => Some(app.nav.references.to_json()),
             "editor.get_hover" => Some(app.hover_json()),
