@@ -1906,18 +1906,28 @@ pub fn refusal_occupied_folder(parent: &Path, name: &str) -> Option<Refusal> {
 // folder, which Windows keeps read-only with locked ACLs. The dialog opened
 // pointing at the one place a project can never live.
 //
-// The order is the useful one: beside the project last opened, since a person
+// The order is the useful one: the folder chosen in Options first, since a person
+// who set it said where their projects go; then beside the project last opened, since a person
 // keeps their projects together; then a `CrawRAD-Projects` folder under the home
 // folder; then the working directory, but only when it is not inside the install
 // folder. Every input is a parameter so the choice can be tested without touching
 // the real environment.
 #[note("workspace-default-project-parent")]
 pub fn default_project_parent(
+    configured: Option<&Path>,
     recent: Option<&Path>,
     home: Option<&Path>,
     cwd: Option<&Path>,
     app_dir: Option<&Path>,
 ) -> Option<PathBuf> {
+    // What the person chose in Options wins: they said where their projects go,
+    // and nothing here knows better. It was being written and shown there, and
+    // never read by this dialog.
+    if let Some(c) = configured
+        && !is_inside(c, app_dir)
+    {
+        return Some(c.to_path_buf());
+    }
     if let Some(r) = recent
         && let Some(parent) = r.parent()
         && parent.is_dir()

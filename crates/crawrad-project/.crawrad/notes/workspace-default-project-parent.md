@@ -7,7 +7,7 @@ author:
 created: 
 title: "default_project_parent"
 tags: []
-signature: "pub fn default_project_parent (recent : Option < & Path >, home : Option < & Path >, cwd : Option < & Path >, app_dir : Option < & Path >) -> Option < PathBuf >"
+signature: "pub fn default_project_parent (configured : Option < & Path >, recent : Option < & Path >, home : Option < & Path >, cwd : Option < & Path >, app_dir : Option < & Path >) -> Option < PathBuf >"
 ---
 
 Where the New Project dialog points when it opens.
@@ -21,9 +21,12 @@ project can never live, and the person only found out after pressing Create.
 
 The order is the useful one:
 
-1. beside the project last opened, because a person keeps their projects together;
-2. a `CrawRAD-Projects` folder under the home folder;
-3. the working directory, but only when it is not inside the install folder.
+1. the folder chosen in Options (`default_projects_dir`), because a person who set
+   it already said where their projects go — it was being written and shown there,
+   and never read by this dialog;
+2. beside the project last opened, because a person keeps their projects together;
+3. a `CrawRAD-Projects` folder under the home folder;
+4. the working directory, but only when it is not inside the install folder.
 
 Every input is a parameter, so the choice is tested without touching the real
 environment — the caller reads the environment, this decides.
@@ -38,13 +41,13 @@ use crawrad_project::workspace::default_project_parent;
 let install = Path::new("C:/Program Files/WindowsApps/GUARANA.CrawRAD_0.1.1.0");
 let home = Path::new("C:/Users/someone");
 assert_eq!(
-    default_project_parent(None, Some(home), Some(install), Some(install)),
+    default_project_parent(None, None, Some(home), Some(install), Some(install)),
     Some(home.join("CrawRAD-Projects"))
 );
 
 // With nowhere writable it answers nothing, rather than a path that cannot work.
 assert_eq!(
-    default_project_parent(None, None, Some(install), Some(install)),
+    default_project_parent(None, None, None, Some(install), Some(install)),
     None
 );
 ```

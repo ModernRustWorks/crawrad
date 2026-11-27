@@ -79,7 +79,9 @@ impl IdeApp {
         // wrong for the Store one, where that directory IS the package's read-only
         // install folder. `default_project_parent` decides; this only reads the
         // environment for it.
+        let escolhida = crawrad_project::workspace::read_preferences().default_projects_dir;
         let pasta_padrao = crawrad_project::workspace::default_project_parent(
+            escolhida.as_deref(),
             self.welcome.first().map(PathBuf::as_path),
             std::env::var("USERPROFILE")
                 .or_else(|_| std::env::var("HOME"))

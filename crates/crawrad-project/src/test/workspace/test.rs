@@ -1683,7 +1683,7 @@ fn the_default_location_is_never_inside_the_install_folder() {
 
     // The working directory is inside the install folder: it is refused, and the
     // home folder answers instead.
-    let chosen = default_project_parent(None, Some(&home), Some(&install), Some(&install))
+    let chosen = default_project_parent(None, None, Some(&home), Some(&install), Some(&install))
         .expect("a default is found");
     assert_eq!(
         chosen,
@@ -1694,7 +1694,7 @@ fn the_default_location_is_never_inside_the_install_folder() {
     // With no home to fall back to, it answers nothing rather than a folder that
     // cannot be written: an empty field is honest, a doomed path is not.
     assert_eq!(
-        default_project_parent(None, None, Some(&install), Some(&install)),
+        default_project_parent(None, None, None, Some(&install), Some(&install)),
         None,
         "with nowhere writable it still offered the install folder"
     );
@@ -1713,7 +1713,7 @@ fn the_default_location_prefers_where_the_last_project_lives() {
     std::fs::create_dir_all(&home).expect("home folder");
 
     assert_eq!(
-        default_project_parent(Some(&last), Some(&home), None, None),
+        default_project_parent(None, Some(&last), Some(&home), None, None),
         Some(projects),
         "the folder holding the last project is the one a person expects"
     );
@@ -1780,6 +1780,40 @@ fn a_file_in_the_folders_place_is_refused() {
         refusal.phrase.contains("is a file"),
         "the phrase does not name what is wrong: {}",
         refusal.phrase
+    );
+
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+/// The folder chosen in Options wins over everything this function could infer.
+///
+/// `default_projects_dir` was already a preference, written and shown in Options —
+/// and the New Project dialog never read it. A person could set where their
+/// projects go and watch the dialog ignore it.
+#[test]
+fn the_folder_chosen_in_options_wins() {
+    let root = std::env::temp_dir().join(format!("crawrad-options-{}", std::process::id()));
+    let chosen_by_hand = root.join("Meus Projetos");
+    let last = root.join("CrawRAD-Projects").join("my_app");
+    let home = root.join("home");
+    std::fs::create_dir_all(&chosen_by_hand).expect("chosen folder");
+    std::fs::create_dir_all(&last).expect("recent project");
+    std::fs::create_dir_all(&home).expect("home folder");
+
+    assert_eq!(
+        default_project_parent(Some(&chosen_by_hand), Some(&last), Some(&home), None, None),
+        Some(chosen_by_hand.clone()),
+        "the dialog ignored the folder the person chose in Options"
+    );
+
+    // Even a chosen folder is refused when it points inside the install folder:
+    // the preference says where projects go, not that Windows will allow it.
+    let install = root.join("WindowsApps").join("GUARANA.CrawRAD_0.1.1.0");
+    std::fs::create_dir_all(&install).expect("install folder");
+    assert_eq!(
+        default_project_parent(Some(&install), None, Some(&home), None, Some(&install)),
+        Some(home.join("CrawRAD-Projects")),
+        "a chosen folder inside the install folder was offered anyway"
     );
 
     let _ = std::fs::remove_dir_all(&root);
