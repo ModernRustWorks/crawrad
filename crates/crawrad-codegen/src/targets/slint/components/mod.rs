@@ -1,5 +1,6 @@
 //! Slint component mapping and registry module.
 
+pub mod bit_btn;
 pub mod button;
 pub mod checkbox;
 pub mod codegen;
@@ -7,6 +8,7 @@ pub mod combobox;
 pub mod edit;
 pub mod group_box;
 pub mod label;
+pub mod link_label;
 pub mod list_box;
 pub mod memo;
 pub mod page_control;
@@ -14,6 +16,7 @@ pub mod panel;
 pub mod progress_bar;
 pub mod radio_button;
 pub mod radio_group;
+pub mod speed_button;
 pub mod spin_edit;
 pub mod toggle;
 pub mod track_bar;
@@ -42,6 +45,9 @@ static REGISTRY: &[&'static dyn SlintComponentCodegen] = &[
     &radio_group::RadioGroupCodegen,
     &page_control::PageControlCodegen,
     &page_control::TabSheetCodegen,
+    &speed_button::SpeedButtonCodegen,
+    &bit_btn::BitBtnCodegen,
+    &link_label::LinkLabelCodegen,
 ];
 
 pub fn for_class(class: &str) -> Option<&'static dyn SlintComponentCodegen> {

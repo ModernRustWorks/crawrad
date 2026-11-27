@@ -573,3 +573,89 @@ fn test_slint_generator_emits_page_control_and_tabs() {
             .contains("window.on_pgc_main_tab_changed")
     );
 }
+
+#[test]
+fn test_slint_generator_emits_button_variants_and_link_label() {
+    let mut doc = Document::new("FormButtons", "Form");
+    {
+        let form = doc.node_mut("FormButtons").unwrap();
+        form.set_rect(Rect::new(0.0, 0.0, 800.0, 600.0));
+        form.set_name("FormButtons");
+        form.set_text("Buttons Form");
+    }
+
+    let mut sbtn = Node::new("sbtn_play", "SpeedButton");
+    sbtn.set_name("sbtn_play");
+    sbtn.set_text("Play");
+    sbtn.set_rect(Rect::new(10.0, 10.0, 80.0, 32.0));
+    sbtn.events
+        .insert("on_click".to_string(), "sbtn_play_click".to_string());
+    let _ = doc.add_child("FormButtons", sbtn);
+
+    let mut bbtn = Node::new("bbtn_ok", "BitBtn");
+    bbtn.set_name("bbtn_ok");
+    bbtn.set_text("OK");
+    bbtn.set_rect(Rect::new(100.0, 10.0, 96.0, 32.0));
+    bbtn.events
+        .insert("on_click".to_string(), "bbtn_ok_click".to_string());
+    let _ = doc.add_child("FormButtons", bbtn);
+
+    let mut lnk = Node::new("lnk_docs", "LinkLabel");
+    lnk.set_name("lnk_docs");
+    lnk.set_text("Documentation");
+    lnk.set_rect(Rect::new(10.0, 60.0, 140.0, 24.0));
+    lnk.events
+        .insert("on_click".to_string(), "lnk_docs_click".to_string());
+    let _ = doc.add_child("FormButtons", lnk);
+
+    let generator = GeradorSlint;
+    let files = generator
+        .gerar(&doc, "my_app", &crawrad_registry::Registry::builtin())
+        .expect("must generate button variants successfully");
+
+    let slint_file = files
+        .iter()
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormButtons.slint")
+        .unwrap();
+
+    assert!(slint_file.conteudo.contains("sbtn_play := Button"));
+    assert!(slint_file.conteudo.contains("text: \"Play\";"));
+    assert!(
+        slint_file
+            .conteudo
+            .contains("callback sbtn_play_clicked();")
+    );
+    assert!(slint_file.conteudo.contains("bbtn_ok := Button"));
+    assert!(slint_file.conteudo.contains("text: \"OK\";"));
+    assert!(slint_file.conteudo.contains("callback bbtn_ok_clicked();"));
+    assert!(slint_file.conteudo.contains("lnk_docs := TouchArea"));
+    assert!(slint_file.conteudo.contains("text: \"Documentation\";"));
+    assert!(slint_file.conteudo.contains("color: #0066cc;"));
+    assert!(slint_file.conteudo.contains("callback lnk_docs_clicked();"));
+
+    let designer_file = files
+        .iter()
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormButtons.designer.rs")
+        .unwrap();
+    assert!(
+        designer_file
+            .conteudo
+            .contains("pub sbtn_play: SpeedButton,")
+    );
+    assert!(designer_file.conteudo.contains("pub bbtn_ok: BitBtn,"));
+    assert!(designer_file.conteudo.contains("pub lnk_docs: LinkLabel,"));
+    assert!(designer_file.conteudo.contains("pub struct SpeedButton"));
+    assert!(designer_file.conteudo.contains("pub struct BitBtn"));
+    assert!(designer_file.conteudo.contains("pub struct LinkLabel"));
+    assert!(
+        designer_file
+            .conteudo
+            .contains("window.on_sbtn_play_clicked")
+    );
+    assert!(designer_file.conteudo.contains("window.on_bbtn_ok_clicked"));
+    assert!(
+        designer_file
+            .conteudo
+            .contains("window.on_lnk_docs_clicked")
+    );
+}
