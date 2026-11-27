@@ -1,9 +1,7 @@
 //! Slint component implementation for `PageControl` and `TabSheet`.
 
-use super::codegen::SlintComponentCodegen;
-use super::util;
-use crate::identificador;
-use crate::targets::slint::layout;
+use super::{codegen::SlintComponentCodegen, util};
+use crate::{identificador, targets::slint::layout};
 use crawrad_ir::{Document, Node, Value};
 
 pub struct PageControlCodegen;
@@ -27,9 +25,12 @@ impl SlintComponentCodegen for PageControlCodegen {
 
     fn emit_actions(
         &self,
+        // target doc
         _doc: &Document,
         node: &Node,
+        // field name
         field: &str,
+        // emitted nodes
         _emitted: &[&Node],
     ) -> Result<String, crate::Erro> {
         emit_actions(node, field)
@@ -37,12 +38,17 @@ impl SlintComponentCodegen for PageControlCodegen {
 
     fn emit_slint(
         &self,
+        // target doc
         doc: &Document,
         reg: &crawrad_registry::Registry,
+        // target node
         node: &Node,
+        // coords
         x: f32,
         y: f32,
+        // dimensions
         w: f32,
+        // height
         h: f32,
     ) -> Result<String, crate::Erro> {
         emit_slint(doc, reg, node, x, y, w, h)
@@ -75,9 +81,12 @@ impl SlintComponentCodegen for TabSheetCodegen {
 
     fn emit_actions(
         &self,
+        // target doc
         _doc: &Document,
         _node: &Node,
+        // field name
         _field: &str,
+        // emitted nodes
         _emitted: &[&Node],
     ) -> Result<String, crate::Erro> {
         Ok(String::new())
@@ -85,6 +94,7 @@ impl SlintComponentCodegen for TabSheetCodegen {
 
     fn emit_slint(
         &self,
+        // target doc
         doc: &Document,
         reg: &crawrad_registry::Registry,
         node: &Node,
@@ -115,14 +125,7 @@ pub fn page_control_struct() -> String {
 
 pub fn tab_sheet_struct() -> String {
     let desc = crawrad_registry::components::tab_sheet();
-    let mut fields = util::common_control_fields();
-    fields.push(util::FIELD_TEXT.to_string());
-    fields.extend(util::catalogue_fields(
-        &desc,
-        &["visible", "enabled", "text"],
-    ));
-    let body = fields.join("\n");
-    format!("#[derive(Debug, Clone, Default)]\npub struct TabSheet {{\n{body}\n}}\n")
+    util::standard_text_control_struct("TabSheet", &desc)
 }
 
 pub fn emit_page_control_default(node: &Node) -> String {
@@ -149,16 +152,8 @@ pub fn emit_page_control_default(node: &Node) -> String {
 }
 
 pub fn emit_tab_sheet_default(node: &Node) -> String {
-    let mut inits = util::common_control_inits(node);
-    inits.push(util::init_text(node));
     let desc = crawrad_registry::components::tab_sheet();
-    inits.extend(util::catalogue_inits(
-        node,
-        &desc,
-        &["visible", "enabled", "text"],
-    ));
-    let body = inits.join(", ");
-    format!("TabSheet {{ {body} }}")
+    util::standard_text_control_default("TabSheet", node, &desc)
 }
 
 pub fn emit_actions(node: &Node, field: &str) -> Result<String, crate::Erro> {
@@ -180,22 +175,27 @@ pub fn emit_actions(node: &Node, field: &str) -> Result<String, crate::Erro> {
          \x20           }});\n\
          \x20       }}\n"
     ));
+    // return page control tab change actions
     Ok(code)
 }
 
 pub fn emit_slint(
+    // page control hierarchy document
     doc: &Document,
     reg: &crawrad_registry::Registry,
     node: &Node,
+    // page control layout bounds
     x: f32,
     y: f32,
     w: f32,
+    // component height
     h: f32,
 ) -> Result<String, crate::Erro> {
     let name = identificador(node.name())?;
     let pos = layout::position(x, y);
     let children = super::emit_children(doc, reg, node, "    ")?;
 
+    // PageControl tab container
     let mut out = String::new();
     out.push_str(&format!("        {name} := Rectangle {{\n"));
     out.push_str(&format!("            {pos}\n"));

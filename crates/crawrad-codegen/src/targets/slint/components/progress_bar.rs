@@ -1,9 +1,7 @@
 //! Slint component implementation for `ProgressBar`.
 
-use super::codegen::SlintComponentCodegen;
-use super::util;
-use crate::identificador;
-use crate::targets::slint::layout;
+use super::{codegen::SlintComponentCodegen, util};
+use crate::{identificador, targets::slint::layout};
 use crawrad_ir::{Document, Node, Value};
 
 pub struct ProgressBarCodegen;
@@ -27,9 +25,12 @@ impl SlintComponentCodegen for ProgressBarCodegen {
 
     fn emit_actions(
         &self,
+        // target doc
         _doc: &Document,
         _node: &Node,
+        // field name
         _field: &str,
+        // emitted nodes
         _emitted: &[&Node],
     ) -> Result<String, crate::Erro> {
         Ok(String::new())
@@ -37,12 +38,17 @@ impl SlintComponentCodegen for ProgressBarCodegen {
 
     fn emit_slint(
         &self,
+        // target doc
         _doc: &Document,
         _reg: &crawrad_registry::Registry,
+        // target node
         node: &Node,
+        // coords
         x: f32,
         y: f32,
+        // dimensions
         w: f32,
+        // height
         h: f32,
     ) -> Result<String, crate::Erro> {
         emit_slint(node, x, y, w, h)
@@ -98,6 +104,7 @@ pub fn emit_slint(node: &Node, x: f32, y: f32, w: f32, h: f32) -> Result<String,
 
     let pos = layout::position(x, y);
 
+    // ProgressBar gauge container
     let mut out = String::new();
     out.push_str(&format!("        {name} := Rectangle {{\n"));
     out.push_str(&format!("            {pos}\n"));

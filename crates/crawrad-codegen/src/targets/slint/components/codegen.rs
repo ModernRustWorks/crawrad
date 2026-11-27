@@ -25,36 +25,42 @@ pub trait SlintComponentCodegen: Send + Sync {
     }
 
     /// Emits UI state synchronization logic from `self.form` to Slint handles.
-    fn emit_sync(&self, doc: &Document, node: &Node, field: &str) -> String;
+    fn emit_sync(&self, _doc: &Document, _node: &Node, _field: &str) -> String {
+        String::new()
+    }
 
     /// Emits action and callback wiring logic for this component.
     fn emit_actions(
         &self,
         // Document containing nodes
-        doc: &Document,
+        _doc: &Document,
         // Node being wired
-        node: &Node,
+        _node: &Node,
         // Target struct field name
-        field: &str,
+        _field: &str,
         // All emitted nodes in form
-        emitted: &[&Node],
-    ) -> Result<String, Erro>;
+        _emitted: &[&Node],
+    ) -> Result<String, Erro> {
+        Ok(String::new())
+    }
 
     /// Emits the `.slint` markup element for this component.
     fn emit_slint(
         &self,
         // Source document
-        doc: &Document,
+        _doc: &Document,
         // Registry
-        reg: &crawrad_registry::Registry,
+        _reg: &crawrad_registry::Registry,
         // Target component node
-        node: &Node,
+        _node: &Node,
         // Control coordinates and dimensions
-        x: f32,
-        y: f32,
-        w: f32,
-        h: f32,
-    ) -> Result<String, Erro>;
+        _x: f32,
+        _y: f32,
+        _w: f32,
+        _h: f32,
+    ) -> Result<String, Erro> {
+        Ok(String::new())
+    }
 
     /// Declares any Slint callbacks exposed by this component on the root window.
     fn slint_callbacks(&self, _node: &Node) -> Vec<String> {

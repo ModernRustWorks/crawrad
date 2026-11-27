@@ -4,7 +4,7 @@ use super::codegen::SlintComponentCodegen;
 use super::util;
 use crate::identificador;
 use crate::targets::slint::layout;
-use crawrad_ir::{Document, Node};
+use crawrad_ir::Node;
 
 pub struct ImageCodegen;
 
@@ -14,67 +14,36 @@ impl SlintComponentCodegen for ImageCodegen {
     }
 
     fn struct_definition(&self) -> String {
-        struct_definition()
+        util::standard_control_struct("Image", &crawrad_registry::components::image())
     }
 
     fn emit_default(&self, node: &Node) -> String {
-        emit_default(node)
-    }
-
-    fn emit_sync(&self, _doc: &Document, _node: &Node, _field: &str) -> String {
-        String::new()
-    }
-
-    fn emit_actions(
-        &self,
-        _doc: &Document,
-        _node: &Node,
-        _field: &str,
-        _emitted: &[&Node],
-    ) -> Result<String, crate::Erro> {
-        Ok(String::new())
+        util::standard_control_default("Image", node, &crawrad_registry::components::image())
     }
 
     fn emit_slint(
         &self,
-        _doc: &Document,
+        _doc: &crawrad_ir::Document,
         _reg: &crawrad_registry::Registry,
+        // target node
         node: &Node,
+        // coords
         x: f32,
         y: f32,
+        // dimensions
         w: f32,
+        // height
         h: f32,
     ) -> Result<String, crate::Erro> {
-        emit_slint(node, x, y, w, h)
+        let name = identificador(node.name())?;
+        let pos = layout::position(x, y);
+        Ok(format!(
+            "        {name} := Image {{\n\
+             \x20           {pos}\n\
+             \x20           width: {w:.1}px;\n\
+             \x20           height: {h:.1}px;\n\
+             \x20           image-fit: contain;\n\
+             \x20       }}\n"
+        ))
     }
-}
-
-pub fn struct_definition() -> String {
-    let desc = crawrad_registry::components::image();
-    let mut fields = util::common_control_fields();
-    fields.extend(util::catalogue_fields(&desc, &["visible", "enabled"]));
-    let body = fields.join("\n");
-    format!("#[derive(Debug, Clone, Default)]\npub struct Image {{\n{body}\n}}\n")
-}
-
-pub fn emit_default(node: &Node) -> String {
-    let mut inits = util::common_control_inits(node);
-    let desc = crawrad_registry::components::image();
-    inits.extend(util::catalogue_inits(node, &desc, &["visible", "enabled"]));
-    let body = inits.join(", ");
-    format!("Image {{ {body} }}")
-}
-
-pub fn emit_slint(node: &Node, x: f32, y: f32, w: f32, h: f32) -> Result<String, crate::Erro> {
-    let name = identificador(node.name())?;
-    let pos = layout::position(x, y);
-
-    let mut out = String::new();
-    out.push_str(&format!("        {name} := Image {{\n"));
-    out.push_str(&format!("            {pos}\n"));
-    out.push_str(&format!("            width: {w:.1}px;\n"));
-    out.push_str(&format!("            height: {h:.1}px;\n"));
-    out.push_str("            image-fit: contain;\n");
-    out.push_str("        }\n");
-    Ok(out)
 }

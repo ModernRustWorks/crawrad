@@ -1,9 +1,7 @@
 //! Slint component implementation for `SpinEdit`.
 
-use super::codegen::SlintComponentCodegen;
-use super::util;
-use crate::identificador;
-use crate::targets::slint::layout;
+use super::{codegen::SlintComponentCodegen, util};
+use crate::{identificador, targets::slint::layout};
 use crawrad_ir::{Document, Node, Value};
 
 pub struct SpinEditCodegen;
@@ -27,9 +25,12 @@ impl SlintComponentCodegen for SpinEditCodegen {
 
     fn emit_actions(
         &self,
+        // target doc
         _doc: &Document,
         _node: &Node,
+        // field name
         _field: &str,
+        // emitted nodes
         _emitted: &[&Node],
     ) -> Result<String, crate::Erro> {
         Ok(String::new())
@@ -37,12 +38,17 @@ impl SlintComponentCodegen for SpinEditCodegen {
 
     fn emit_slint(
         &self,
+        // target doc
         _doc: &Document,
         _reg: &crawrad_registry::Registry,
+        // target node
         node: &Node,
+        // coords
         x: f32,
         y: f32,
+        // dimensions
         w: f32,
+        // height
         h: f32,
     ) -> Result<String, crate::Erro> {
         emit_slint(node, x, y, w, h)

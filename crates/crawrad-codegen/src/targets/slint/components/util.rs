@@ -150,6 +150,19 @@ pub fn catalogue_inits(node: &Node, desc: &ComponentDesc, by_hand: &[&str]) -> V
     inits
 }
 
+/// Helper that extracts caption layout properties.
+pub fn layout_props_caption(
+    node: &Node,
+    x: f32,
+    y: f32,
+) -> Result<(String, String, String), crate::Erro> {
+    let name = crate::identificador(node.name())?;
+    let caption = layout::text(node);
+    let caption_esc = escape_slint_string(&caption);
+    let pos = layout::position(x, y);
+    Ok((name, caption_esc, pos))
+}
+
 /// Helper that builds struct fields for standard text controls.
 pub fn struct_fields_with_text(desc: &ComponentDesc) -> String {
     let mut fields = common_control_fields();
@@ -164,4 +177,157 @@ pub fn struct_inits_with_text(node: &Node, desc: &ComponentDesc) -> String {
     inits.push(init_text(node));
     inits.extend(catalogue_inits(node, desc, &["visible", "enabled", "text"]));
     inits.join(", ")
+}
+
+/// Helper for standard text control struct definition.
+pub fn standard_text_control_struct(class_name: &str, desc: &ComponentDesc) -> String {
+    let body = struct_fields_with_text(desc);
+    format!("#[derive(Debug, Clone, Default)]\npub struct {class_name} {{\n{body}\n}}\n")
+}
+
+/// Helper for standard text control default initialization.
+pub fn standard_text_control_default(
+    class_name: &str,
+    node: &Node,
+    desc: &ComponentDesc,
+) -> String {
+    let body = struct_inits_with_text(node, desc);
+    format!("{class_name} {{ {body} }}")
+}
+
+/// Helper that emits window click handler wiring.
+pub fn emit_click_action(node: &Node, field: &str) -> Result<String, crate::Erro> {
+    let mut code = String::new();
+    if let Some(h) = layout::event_handler(node, "on_click") {
+        let h_name = crate::identificador(&h)?;
+        code.push_str(&format!(
+            "        {{\n\
+             \x20           let form = app.clone();\n\
+             \x20           window.on_{field}_clicked(move || {{\n\
+             \x20               if let Ok(mut f) = form.lock() {{\n\
+             \x20                   f.form.{h_name}();\n\
+             \x20               }}\n\
+             \x20           }});\n\
+             \x20       }}\n"
+        ));
+    }
+    Ok(code)
+}
+
+/// Helper that emits window click callback definition.
+pub fn click_callbacks(node: &Node) -> Vec<String> {
+    let name = crate::identificador(node.name()).unwrap_or_else(|_| node.name().to_string());
+    if layout::event_handler(node, "on_click").is_some() {
+        vec![format!("callback {name}_clicked();")]
+    } else {
+        Vec::new()
+    }
+}
+
+/// Helper that builds standard visual component structs with common fields.
+pub fn standard_control_struct(class_name: &str, desc: &ComponentDesc) -> String {
+    let mut fields = common_control_fields();
+    fields.extend(catalogue_fields(desc, &["visible", "enabled"]));
+    let body = fields.join("\n");
+    format!("#[derive(Debug, Clone, Default)]\npub struct {class_name} {{\n{body}\n}}\n")
+}
+
+/// Helper that builds standard visual component default inits with common fields.
+pub fn standard_control_default(class_name: &str, node: &Node, desc: &ComponentDesc) -> String {
+    let mut inits = common_control_inits(node);
+    inits.extend(catalogue_inits(node, desc, &["visible", "enabled"]));
+    let body = inits.join(", ");
+    format!("{class_name} {{ {body} }}")
+}
+
+/// Helper for list and item-index extraction.
+pub fn extract_items_and_selected(node: &Node) -> (String, String, Vec<String>) {
+    let items = match node.props.get("items") {
+        Some(v) => extract_string_items(v),
+        None => Vec::new(),
+    };
+    let items_quoted: Vec<String> = items.iter().map(|it| crate::literal(it)).collect();
+    let items_slice = items_quoted.join(", ");
+    let selected = match node.props.get("item_index") {
+        Some(Value::Int(i)) if *i >= 0 => format!("Some({i})"),
+        _ => "None".to_string(),
+    };
+    (items_slice, selected, items)
+}
+
+/// Helper for checked-control structs.
+pub fn checked_control_struct(class_name: &str, desc: &ComponentDesc) -> String {
+    let mut fields = common_control_fields();
+    fields.push(FIELD_CHECKED.to_string());
+    fields.push(FIELD_TEXT.to_string());
+    fields.extend(catalogue_fields(
+        desc,
+        &["visible", "enabled", "checked", "text"],
+    ));
+    let body = fields.join("\n");
+    format!("#[derive(Debug, Clone, Default)]\npub struct {class_name} {{\n{body}\n}}\n")
+}
+
+/// Helper for checked-control defaults.
+pub fn checked_control_default(class_name: &str, node: &Node, desc: &ComponentDesc) -> String {
+    let mut inits = common_control_inits(node);
+    inits.push(init_checked(node));
+    inits.push(init_text(node));
+    inits.extend(catalogue_inits(
+        node,
+        desc,
+        &["visible", "enabled", "checked", "text"],
+    ));
+    let body = inits.join(", ");
+    format!("{class_name} {{ {body} }}")
+}
+
+/// Helper for checked layout properties extraction.
+pub fn layout_props_checked(
+    node: &Node,
+    x: f32,
+    y: f32,
+) -> Result<(String, String, bool, bool, String), crate::Erro> {
+    let name = crate::identificador(node.name())?;
+    let caption = layout::text(node);
+    let caption_esc = escape_slint_string(&caption);
+    let checked = layout::is_checked(node);
+    let en = layout::is_enabled(node);
+    let pos = layout::position(x, y);
+    Ok((name, caption_esc, checked, en, pos))
+}
+
+/// Helper for standard rectangle container slint emission.
+pub fn emit_simple_rectangle(
+    node: &Node,
+    x: f32,
+    y: f32,
+    w: f32,
+    h: f32,
+    style: &str,
+) -> Result<String, crate::Erro> {
+    let name = crate::identificador(node.name())?;
+    let pos = layout::position(x, y);
+    Ok(format!(
+        "        {name} := Rectangle {{\n            {pos}\n            width: {w:.1}px;\n            height: {h:.1}px;\n{style}        }}\n"
+    ))
+}
+
+/// Helper for toggled/change event action emission.
+pub fn emit_toggle_action(
+    node: &Node,
+    field: &str,
+    cb_name: &str,
+    state_field: &str,
+) -> Result<String, crate::Erro> {
+    let mut calls = String::new();
+    for ev in ["on_click", "on_change"] {
+        if let Some(h) = layout::event_handler(node, ev) {
+            let h_name = crate::identificador(&h)?;
+            calls.push_str(&format!("                    f.form.{h_name}();\n"));
+        }
+    }
+    Ok(format!(
+        "        {{\n            let form = app.clone();\n            window.on_{field}_{cb_name}(move |val| {{\n                if let Ok(mut f) = form.lock() {{\n                    f.form.{field}.{state_field} = val;\n{calls}                }}\n            }});\n        }}\n"
+    ))
 }

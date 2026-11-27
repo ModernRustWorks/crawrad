@@ -1,9 +1,7 @@
 //! Slint component implementation for `ComboBox`.
 
-use super::codegen::SlintComponentCodegen;
-use super::util;
-use crate::identificador;
-use crate::targets::slint::layout;
+use super::{codegen::SlintComponentCodegen, util};
+use crate::{identificador, targets::slint::layout};
 use crawrad_ir::{Document, Node, Value};
 
 pub struct ComboBoxCodegen;
@@ -27,9 +25,12 @@ impl SlintComponentCodegen for ComboBoxCodegen {
 
     fn emit_actions(
         &self,
+        // target doc
         _doc: &Document,
         node: &Node,
+        // field name
         field: &str,
+        // emitted nodes
         _emitted: &[&Node],
     ) -> Result<String, crate::Erro> {
         emit_actions(node, field)
@@ -37,12 +38,17 @@ impl SlintComponentCodegen for ComboBoxCodegen {
 
     fn emit_slint(
         &self,
+        // target doc
         _doc: &Document,
         _reg: &crawrad_registry::Registry,
+        // target node
         node: &Node,
+        // coords
         x: f32,
         y: f32,
+        // dimensions
         w: f32,
+        // height
         h: f32,
     ) -> Result<String, crate::Erro> {
         emit_slint(node, x, y, w, h)
@@ -74,16 +80,7 @@ pub fn struct_definition() -> String {
 pub fn emit_default(node: &Node) -> String {
     let vis = layout::is_visible(node);
     let en = layout::is_enabled(node);
-    let items = match node.props.get("items") {
-        Some(v) => util::extract_string_items(v),
-        None => Vec::new(),
-    };
-    let items_quoted: Vec<String> = items.iter().map(|it| crate::literal(it)).collect();
-    let items_slice = items_quoted.join(", ");
-    let selected = match node.props.get("item_index") {
-        Some(Value::Int(i)) if *i >= 0 => format!("Some({i})"),
-        _ => "None".to_string(),
-    };
+    let (items_slice, selected, items) = util::extract_items_and_selected(node);
     let text = match node.props.get("text") {
         Some(Value::Str(s)) if !s.is_empty() => crate::literal(s),
         _ => match node.props.get("item_index") {
@@ -131,6 +128,7 @@ pub fn emit_actions(node: &Node, field: &str) -> Result<String, crate::Erro> {
          \x20           }});\n\
          \x20       }}\n"
     ));
+    // return combobox selection callback wiring
     Ok(code)
 }
 

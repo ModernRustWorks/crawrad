@@ -1,9 +1,7 @@
 //! Slint component implementation for `ListBox`.
 
-use super::codegen::SlintComponentCodegen;
-use super::util;
-use crate::identificador;
-use crate::targets::slint::layout;
+use super::{codegen::SlintComponentCodegen, util};
+use crate::{identificador, targets::slint::layout};
 use crawrad_ir::{Document, Node, Value};
 
 pub struct ListBoxCodegen;
@@ -27,9 +25,12 @@ impl SlintComponentCodegen for ListBoxCodegen {
 
     fn emit_actions(
         &self,
+        // target doc
         _doc: &Document,
         node: &Node,
+        // field name
         field: &str,
+        // emitted nodes
         _emitted: &[&Node],
     ) -> Result<String, crate::Erro> {
         emit_actions(node, field)
@@ -37,12 +38,17 @@ impl SlintComponentCodegen for ListBoxCodegen {
 
     fn emit_slint(
         &self,
+        // target doc
         _doc: &Document,
         _reg: &crawrad_registry::Registry,
+        // target node
         node: &Node,
+        // coords
         x: f32,
         y: f32,
+        // dimensions
         w: f32,
+        // height
         h: f32,
     ) -> Result<String, crate::Erro> {
         emit_slint(node, x, y, w, h)
@@ -74,16 +80,7 @@ pub fn struct_definition() -> String {
 pub fn emit_default(node: &Node) -> String {
     let vis = layout::is_visible(node);
     let en = layout::is_enabled(node);
-    let items = match node.props.get("items") {
-        Some(v) => util::extract_string_items(v),
-        None => Vec::new(),
-    };
-    let items_quoted: Vec<String> = items.iter().map(|it| crate::literal(it)).collect();
-    let items_slice = items_quoted.join(", ");
-    let selected = match node.props.get("item_index") {
-        Some(Value::Int(i)) if *i >= 0 => format!("Some({i})"),
-        _ => "None".to_string(),
-    };
+    let (items_slice, selected, _) = util::extract_items_and_selected(node);
     let mut inits = vec![
         format!("visible: {vis}"),
         format!("enabled: {en}"),
@@ -92,11 +89,8 @@ pub fn emit_default(node: &Node) -> String {
         format!("items: Strings::from_slice(&[{items_slice}])"),
     ];
     let desc = crawrad_registry::components::list_box();
-    inits.extend(util::catalogue_inits(
-        node,
-        &desc,
-        &["visible", "enabled", "items", "item_index"],
-    ));
+    let extra = util::catalogue_inits(node, &desc, &["visible", "enabled", "items", "item_index"]);
+    inits.extend(extra);
     let body = inits.join(", ");
     format!("ListBox {{ {body} }}")
 }
@@ -121,6 +115,7 @@ pub fn emit_actions(node: &Node, field: &str) -> Result<String, crate::Erro> {
          \x20           }});\n\
          \x20       }}\n"
     ));
+    // return listbox item changed callback wiring
     Ok(code)
 }
 

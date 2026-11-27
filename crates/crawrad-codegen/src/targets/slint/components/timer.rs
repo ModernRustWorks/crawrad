@@ -1,9 +1,7 @@
 //! Slint component implementation for `Timer`.
 
-use super::codegen::SlintComponentCodegen;
-use super::util;
-use crate::identificador;
-use crate::targets::slint::layout;
+use super::{codegen::SlintComponentCodegen, util};
+use crate::{identificador, targets::slint::layout};
 use crawrad_ir::{Document, Node, Value};
 
 pub struct TimerCodegen;
@@ -27,25 +25,15 @@ impl SlintComponentCodegen for TimerCodegen {
 
     fn emit_actions(
         &self,
+        // target doc
         _doc: &Document,
         node: &Node,
+        // field name
         field: &str,
+        // emitted nodes
         _emitted: &[&Node],
     ) -> Result<String, crate::Erro> {
         emit_actions(node, field)
-    }
-
-    fn emit_slint(
-        &self,
-        _doc: &Document,
-        _reg: &crawrad_registry::Registry,
-        _node: &Node,
-        _x: f32,
-        _y: f32,
-        _w: f32,
-        _h: f32,
-    ) -> Result<String, crate::Erro> {
-        Ok(String::new())
     }
 }
 

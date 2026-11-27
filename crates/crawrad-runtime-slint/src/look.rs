@@ -20,7 +20,7 @@ pub fn hex_to_slint_color(hex: &str) -> String {
             format!("#{clean}ff")
         }
         8 => {
-            // #AARRGGBB (Delphi/CrawRAD) -> #RRGGBBAA (Slint/CSS)
+            // #AARRGGBB (classic RAD/CrawRAD) -> #RRGGBBAA (Slint/CSS)
             let a = &clean[0..2];
             let r = &clean[2..4];
             let g = &clean[4..6];

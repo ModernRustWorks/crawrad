@@ -1,5 +1,13 @@
 //! Slint component mapping and registry module.
 
+pub mod prelude {
+    pub use super::codegen::SlintComponentCodegen;
+    pub use super::util;
+    pub use crate::identificador;
+    pub use crate::targets::slint::layout;
+    pub use crawrad_ir::{Document, Node, Value};
+}
+
 pub mod bevel;
 pub mod bit_btn;
 pub mod button;

@@ -1,9 +1,7 @@
 //! Slint component implementation for `Button`.
 
-use super::codegen::SlintComponentCodegen;
-use super::util;
-use crate::identificador;
-use crate::targets::slint::layout;
+use super::{codegen::SlintComponentCodegen, util};
+use crate::{identificador, targets::slint::layout};
 use crawrad_ir::{Document, Node};
 
 pub struct ButtonCodegen;
@@ -50,7 +48,9 @@ impl SlintComponentCodegen for ButtonCodegen {
         // Geometry
         x: f32,
         y: f32,
+        // dimensions
         w: f32,
+        // height
         h: f32,
     ) -> Result<String, crate::Erro> {
         emit_slint(node, x, y, w, h)
@@ -79,21 +79,7 @@ pub fn emit_default(node: &Node) -> String {
 }
 
 pub fn emit_actions(node: &Node, field: &str) -> Result<String, crate::Erro> {
-    let mut code = String::new();
-    if let Some(h) = layout::event_handler(node, "on_click") {
-        let h_name = identificador(&h)?;
-        code.push_str(&format!(
-            "        {{\n\
-             \x20           let form = app.clone();\n\
-             \x20           window.on_{field}_clicked(move || {{\n\
-             \x20               if let Ok(mut f) = form.lock() {{\n\
-             \x20                   f.form.{h_name}();\n\
-             \x20               }}\n\
-             \x20           }});\n\
-             \x20       }}\n"
-        ));
-    }
-    Ok(code)
+    util::emit_click_action(node, field)
 }
 
 pub fn emit_slint(node: &Node, x: f32, y: f32, w: f32, h: f32) -> Result<String, crate::Erro> {
