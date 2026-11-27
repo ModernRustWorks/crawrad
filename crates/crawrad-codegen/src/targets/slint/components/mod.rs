@@ -9,6 +9,7 @@ pub mod group_box;
 pub mod label;
 pub mod list_box;
 pub mod memo;
+pub mod page_control;
 pub mod panel;
 pub mod progress_bar;
 pub mod radio_button;
@@ -39,6 +40,8 @@ static REGISTRY: &[&'static dyn SlintComponentCodegen] = &[
     &group_box::GroupBoxCodegen,
     &radio_button::RadioButtonCodegen,
     &radio_group::RadioGroupCodegen,
+    &page_control::PageControlCodegen,
+    &page_control::TabSheetCodegen,
 ];
 
 pub fn for_class(class: &str) -> Option<&'static dyn SlintComponentCodegen> {

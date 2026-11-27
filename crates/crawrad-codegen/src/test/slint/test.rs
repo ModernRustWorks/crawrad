@@ -490,3 +490,86 @@ fn test_slint_generator_emits_containers_and_options() {
     assert!(designer_file.conteudo.contains("pub struct RadioGroup"));
     assert!(designer_file.conteudo.contains("window.on_rb_mode_clicked"));
 }
+
+#[test]
+fn test_slint_generator_emits_page_control_and_tabs() {
+    let mut doc = Document::new("FormTabs", "Form");
+    {
+        let form = doc.node_mut("FormTabs").unwrap();
+        form.set_rect(Rect::new(0.0, 0.0, 800.0, 600.0));
+        form.set_name("FormTabs");
+        form.set_text("Tabs Form");
+    }
+
+    let mut pgc = Node::new("pgc_main", "PageControl");
+    pgc.set_name("pgc_main");
+    pgc.set_rect(Rect::new(10.0, 10.0, 600.0, 400.0));
+    pgc.props
+        .insert("active_page".to_string(), crawrad_ir::Value::Int(0));
+    pgc.events
+        .insert("on_change".to_string(), "pgc_main_change".to_string());
+    let _ = doc.add_child("FormTabs", pgc);
+
+    let mut tab1 = Node::new("tab_general", "TabSheet");
+    tab1.set_name("tab_general");
+    tab1.set_text("General");
+    let _ = doc.add_child("pgc_main", tab1);
+
+    let mut btn_save = Node::new("btn_save", "Button");
+    btn_save.set_name("btn_save");
+    btn_save.set_text("Save Settings");
+    let _ = doc.add_child("tab_general", btn_save);
+
+    let mut tab2 = Node::new("tab_advanced", "TabSheet");
+    tab2.set_name("tab_advanced");
+    tab2.set_text("Advanced");
+    let _ = doc.add_child("pgc_main", tab2);
+
+    let generator = GeradorSlint;
+    let files = generator
+        .gerar(&doc, "my_app", &crawrad_registry::Registry::builtin())
+        .expect("must generate page control successfully");
+
+    let slint_file = files
+        .iter()
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormTabs.slint")
+        .unwrap();
+
+    assert!(slint_file.conteudo.contains("pgc_main := Rectangle"));
+    assert!(
+        slint_file
+            .conteudo
+            .contains("callback pgc_main_tab_changed(int);")
+    );
+    assert!(slint_file.conteudo.contains("tab_general := Rectangle"));
+    assert!(slint_file.conteudo.contains("btn_save := Button"));
+    assert!(slint_file.conteudo.contains("tab_advanced := Rectangle"));
+
+    let designer_file = files
+        .iter()
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormTabs.designer.rs")
+        .unwrap();
+    assert!(
+        designer_file
+            .conteudo
+            .contains("pub pgc_main: PageControl,")
+    );
+    assert!(
+        designer_file
+            .conteudo
+            .contains("pub tab_general: TabSheet,")
+    );
+    assert!(
+        designer_file
+            .conteudo
+            .contains("pub tab_advanced: TabSheet,")
+    );
+    assert!(designer_file.conteudo.contains("pub btn_save: Button,"));
+    assert!(designer_file.conteudo.contains("pub struct PageControl"));
+    assert!(designer_file.conteudo.contains("pub struct TabSheet"));
+    assert!(
+        designer_file
+            .conteudo
+            .contains("window.on_pgc_main_tab_changed")
+    );
+}
