@@ -21,12 +21,13 @@ silently.
 ```rust
 use crawrad_host::HostModel;
 use crawrad_doc::Doc;
+use crawrad_ir::Document;
 use std::path::PathBuf;
 
 let mut host = HostModel::new();
 let file = PathBuf::from("my_app/src/form_main.crawform");
-let first = host.open_form(Doc::default(), Some(file.clone()));
-let again = host.open_form(Doc::default(), Some(file));
+let first = host.open_form(Doc::new(Document::new("form_main", "Form")), Some(file.clone()));
+let again = host.open_form(Doc::new(Document::new("form_main", "Form")), Some(file));
 assert_eq!(first, again, "the same file must not open twice");
 assert_eq!(host.forms().len(), 1);
 ```

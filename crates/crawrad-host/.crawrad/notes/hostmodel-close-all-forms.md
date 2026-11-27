@@ -17,9 +17,10 @@ Empties the strip, as closing a project does.
 ```rust
 use crawrad_host::HostModel;
 use crawrad_doc::Doc;
+use crawrad_ir::Document;
 
 let mut host = HostModel::new();
-host.open_form(Doc::default(), None);
+host.open_form(Doc::new(Document::new("form_main", "Form")), None);
 host.close_all_forms();
 assert!(host.forms().is_empty());
 assert_eq!(host.front(), None);

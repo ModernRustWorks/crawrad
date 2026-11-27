@@ -20,9 +20,10 @@ strip that has since shrunk cannot leave the host pointing at a form that is gon
 ```rust
 use crawrad_host::HostModel;
 use crawrad_doc::Doc;
+use crawrad_ir::Document;
 
 let mut host = HostModel::new();
-host.open_form(Doc::default(), None);
+host.open_form(Doc::new(Document::new("form_main", "Form")), None);
 assert!(!host.bring_to_front(7), "there is no seventh tab");
 assert_eq!(host.front(), Some(0), "and the front did not move");
 ```

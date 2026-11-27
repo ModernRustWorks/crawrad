@@ -21,7 +21,8 @@ can sit side by side without either claiming to be the other.
 ```rust
 use crawrad_host::OpenForm;
 use crawrad_doc::Doc;
+use crawrad_ir::Document;
 
-let open = OpenForm { doc: Doc::default(), path: None };
+let open = OpenForm { doc: Doc::new(Document::new("form_main", "Form")), path: None };
 assert!(open.path.is_none(), "a form that was never saved has no file");
 ```
