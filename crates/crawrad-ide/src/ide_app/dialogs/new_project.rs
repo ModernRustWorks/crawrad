@@ -9,7 +9,7 @@ use crawrad_runtime_makepad::chips::CrawradChipsWidgetRefExt;
 use crawrad_runtime_makepad::drive;
 use crawrad_runtime_makepad::list::CrawradListBoxWidgetRefExt;
 use std::collections::HashSet;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 pub const NP_TITULO: &str = "New Project";
 pub const NP_ESCOLHER: &str = "Create Project";
@@ -55,6 +55,16 @@ fn np_id(name: String) -> [LiveId; 1] {
     [LiveId::from_str(&name)]
 }
 
+/// CrawRAD's own installation folder, when it can be known.
+///
+/// `None` is the honest answer when the executable's path cannot be read: an
+/// unknown install folder must not make every path look unwritable.
+fn install_folder() -> Option<PathBuf> {
+    std::env::current_exe()
+        .ok()
+        .and_then(|exe| exe.parent().map(Path::to_path_buf))
+}
+
 impl IdeApp {
     #[note("ide-app-dialogs-new-project-ideapp-open-new-project")]
     pub(in super::super) fn open_new_project(&mut self, cx: &mut Cx, add_to: Option<PathBuf>) {
@@ -64,7 +74,23 @@ impl IdeApp {
             return;
         }
 
-        let pasta_padrao = std::env::current_dir().ok();
+        // The dialog must open pointing somewhere a project can be written. Taking
+        // the working directory unconditionally was right for an installer build and
+        // wrong for the Store one, where that directory IS the package's read-only
+        // install folder. `default_project_parent` decides; this only reads the
+        // environment for it.
+        let escolhida = crawrad_project::workspace::read_preferences().default_projects_dir;
+        let pasta_padrao = crawrad_project::workspace::default_project_parent(
+            escolhida.as_deref(),
+            self.welcome.first().map(PathBuf::as_path),
+            std::env::var("USERPROFILE")
+                .or_else(|_| std::env::var("HOME"))
+                .ok()
+                .map(PathBuf::from)
+                .as_deref(),
+            std::env::current_dir().ok().as_deref(),
+            install_folder().as_deref(),
+        );
         let mut favs = HashSet::new();
         favs.insert(0); // GUI Application favorited
         favs.insert(5); // Multi-window Desktop
@@ -588,18 +614,22 @@ impl IdeApp {
             return;
         }
 
-        let pasta = match &dados.pasta {
-            Some(p) if p.is_dir() => p.clone(),
-            _ => {
-                let Some(p) = rfd::FileDialog::new()
-                    .set_title(format!("Choose folder for `{nome}`"))
-                    .pick_folder()
-                else {
-                    return;
-                };
-                p
-            }
+        // `Create` creates. A folder that does not exist yet is made here; it used
+        // to fall through to a file picker, so editing the drive letter of the
+        // default location turned Create into a folder chooser with nothing said
+        // about why. Choosing is what the folder button beside the field is for.
+        let Some(pasta) = dados.pasta.clone() else {
+            self.np_recusa = Some(crawrad_project::templates::NP_SEM_PASTA.into());
+            self.refresh(cx);
+            return;
         };
+        if let Err(refusal) =
+            crawrad_project::workspace::make_project_parent(&pasta, install_folder().as_deref())
+        {
+            self.np_recusa = Some(refusal.phrase);
+            self.refresh(cx);
+            return;
+        }
 
         crawrad_project::generator::set_active_target(dados.framework);
 
