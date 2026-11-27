@@ -10,6 +10,7 @@ pub mod data_binding;
 pub mod egui;
 pub mod makepad;
 pub mod shared;
+pub mod slint;
 pub mod speed_groups;
 pub mod splitters;
 pub mod tab_places;
