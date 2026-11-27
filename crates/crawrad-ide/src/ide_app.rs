@@ -768,6 +768,18 @@ pub struct IdeApp {
     /// Is the **MCP Servers** dialog on screen?
     #[rust]
     mcp_aberto: bool,
+    /// Is the **ACP Diagnostic** dialog on screen?
+    #[rust]
+    pub acp_diagnostic_open: bool,
+    /// The latest diagnostic report from ACP probing.
+    #[rust]
+    pub acp_diagnostic_report: Option<crawrad_agent::DiagnosticReport>,
+    /// Whether diagnostic checks are currently running in the background.
+    #[rust]
+    pub acp_diagnostic_running: bool,
+    /// Background receiver for diagnostic execution.
+    #[rust]
+    pub acp_diagnostic_rx: Option<std::sync::mpsc::Receiver<crawrad_agent::DiagnosticReport>>,
     /// ACP (Agent Client Protocol) configuration.
     #[rust(AcpConfig::load())]
     pub acp_config: AcpConfig,
@@ -1283,11 +1295,11 @@ mod testes_do_inspector;
 // And the AI panel mockup gate — the one that gave verdicts on the
 // user's form without ever measuring anything.
 #[cfg(test)]
-#[path = "test/ide_app/ai_panel.rs"]
+#[path = "test/ide_app/ai_panel/test.rs"]
 mod testes_do_painel_de_ia;
 
 #[cfg(test)]
-#[path = "test/ide_app/terminal_panel.rs"]
+#[path = "test/ide_app/terminal_panel/test.rs"]
 mod testes_do_terminal;
 
 #[cfg(test)]

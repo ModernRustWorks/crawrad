@@ -7,7 +7,7 @@ author:
 created: 
 title: "NumberChoice::ALL"
 tags: []
-signature: "pub const ALL : [Self ; 4] = [Self :: Limit , Self :: MergeSeconds , Self :: MaxFileKb , Self :: RecoverMinutes ,]"
+signature: "pub const ALL : [Self ; 5] = [Self :: Limit , Self :: MergeSeconds , Self :: MaxFileKb , Self :: RecoverMinutes , Self :: RecentProjects ,]"
 ---
 
 The four, in the order the pages show them.

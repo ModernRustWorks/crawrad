@@ -83,6 +83,7 @@ impl IdeApp {
         self.draw_memory(cx);
         self.draw_environment(cx);
         self.draw_mcp(cx);
+        self.draw_acp_diagnostic(cx);
         self.draw_note(cx);
         self.draw_goto(cx);
         self.draw_quick_open(cx);

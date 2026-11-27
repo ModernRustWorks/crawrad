@@ -836,6 +836,52 @@ fn recent_list_does_not_grow_forever() {
 }
 
 #[test]
+fn register_recent_respects_configured_limit() {
+    let mut list: Vec<PathBuf> = Vec::new();
+    let limit = 5;
+    for i in 0..8 {
+        list = register_recent_with_limit(&list, Path::new(&format!("/p/{i}")), limit);
+    }
+    assert_eq!(list.len(), 5, "must respect configured limit of 5, not 10");
+    assert_eq!(list[0], PathBuf::from("/p/7"), "last opened remains at top");
+    assert!(!list.contains(&PathBuf::from("/p/0")), "oldest is pruned");
+}
+
+#[test]
+fn shrinking_limit_shrinks_saved_list() {
+    // Start with 10 projects
+    let mut list: Vec<PathBuf> = Vec::new();
+    for i in 0..10 {
+        list = register_recent_with_limit(&list, Path::new(&format!("/p/{i}")), 10);
+    }
+    assert_eq!(list.len(), 10);
+
+    // Lower limit to 5: the next registration shrinks the list to 5 items,
+    // dropping projects beyond the fifth from the stored list.
+    let list = register_recent_with_limit(&list, Path::new("/p/new"), 5);
+    assert_eq!(list.len(), 5, "lowering limit must shrink list to 5");
+    assert_eq!(list[0], PathBuf::from("/p/new"));
+    assert_eq!(list[1], PathBuf::from("/p/9"));
+    assert_eq!(list[4], PathBuf::from("/p/6"));
+    assert!(!list.contains(&PathBuf::from("/p/5")));
+    assert!(!list.contains(&PathBuf::from("/p/0")));
+}
+
+#[test]
+fn raising_limit_does_not_invent_projects() {
+    let mut list: Vec<PathBuf> = Vec::new();
+    for i in 0..5 {
+        list = register_recent_with_limit(&list, Path::new(&format!("/p/{i}")), 5);
+    }
+    assert_eq!(list.len(), 5);
+
+    // Raising limit to 20 does not invent new projects
+    let list = register_recent_with_limit(&list, Path::new("/p/4"), 20);
+    assert_eq!(list.len(), 5, "raising limit does not invent projects");
+    assert_eq!(list[0], PathBuf::from("/p/4"));
+}
+
+#[test]
 fn vanished_folder_leaves_the_list() {
     // Deleted folder, unplugged thumb drive, moved project. Predicate enters
     // as parameter so test doesn't need to create and delete real folders.
@@ -1076,6 +1122,7 @@ fn open_preference_survives_text_round_trip() {
                     history_limit: if on { 20 } else { 10 },
                     history_merge_seconds: if on { 30 } else { 0 },
                     history_max_file_kb: if on { 10240 } else { 256 },
+                    recent_limit: if on { 15 } else { 5 },
                     save_before_build: on,
                     auto_save: AutoSave::ALL[usize::from(on)],
                     save_desktop: !on,
@@ -1124,6 +1171,45 @@ fn preference_history_range_checks() {
     assert_eq!(p_valid.history_limit, 50);
     assert_eq!(p_valid.history_merge_seconds, 60);
     assert_eq!(p_valid.history_max_file_kb, 10240);
+}
+
+#[test]
+fn preference_recent_limit_range_checks() {
+    // Normal value
+    assert_eq!(preferences_from_text("recent-limit=5\n").recent_limit, 5);
+    // Boundary low (1) and high (50)
+    assert_eq!(preferences_from_text("recent-limit=1\n").recent_limit, 1);
+    assert_eq!(preferences_from_text("recent-limit=50\n").recent_limit, 50);
+    // Missing (falls back to default 10)
+    assert_eq!(preferences_from_text("").recent_limit, 10);
+    // Zero (falls back to default 10)
+    assert_eq!(preferences_from_text("recent-limit=0\n").recent_limit, 10);
+    // Negative (falls back to default 10)
+    assert_eq!(preferences_from_text("recent-limit=-5\n").recent_limit, 10);
+    // Above ceiling (falls back to default 10)
+    assert_eq!(preferences_from_text("recent-limit=51\n").recent_limit, 10);
+    assert_eq!(
+        preferences_from_text("recent-limit=999999\n").recent_limit,
+        10
+    );
+    // Non-numeric
+    assert_eq!(
+        preferences_from_text("recent-limit=invalid\n").recent_limit,
+        10
+    );
+    // Alternate key alias
+    assert_eq!(
+        preferences_from_text("recent-projects-limit=15\n").recent_limit,
+        15
+    );
+    // Round-trip serialization
+    let p = Preferences {
+        recent_limit: 20,
+        ..Default::default()
+    };
+    let serialized = preferences_to_text(p);
+    assert!(serialized.contains("recent-limit=20"));
+    assert_eq!(preferences_from_text(&serialized).recent_limit, 20);
 }
 
 #[test]

@@ -331,6 +331,7 @@ pub CrawradMainUi = <Window> {
             memory_dialog = <CrawradMemoryDialog> {}
             environment_dialog = <CrawradEnvironmentDialog> {}
             mcp_dialog = <CrawradMcpDialog> {}
+            acp_diagnostic_dialog = <CrawradAcpDiagnosticDialog> {}
             note_dialog = <CrawradNoteDialog> {}
             goto_dialog = <CrawradGotoDialog> {}
             quick_open_dialog = <CrawradQuickOpenDialog> {}

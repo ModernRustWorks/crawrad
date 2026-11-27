@@ -80,6 +80,51 @@ live_design! {
                     }
                 }
             }
+            // Why: ACP Agent diagnostic dialog
+            pub CrawradAcpDiagnosticDialog = <CrawradDialogVeil> {
+                dlg = <CrawradDialog> {
+                    width: 720.0, height: Fit,
+                    <CrawradDialogTitleBar> {
+                        diag_title = <CrawradDialogTitle> { text: "ACP Agent Diagnostic" }
+                    }
+                    <CrawradDialogBody> {
+                        height: Fit,
+                        flow: Down,
+                        spacing: (CRAWRAD_ESPACO_M),
+                        diag_status = <CrawradLabelMuted> { width: Fill, height: Fit, text: "" }
+                        diag_checks_box = <CrawradGroupBoxFrame> {
+                            height: Fit,
+                            flow: Down,
+                            spacing: (CRAWRAD_ESPACO_S),
+                            diag_checks_title = <CrawradGroupBoxTitle> { text: "Diagnostic Checks" }
+                            diag_check_0 = <CrawradLabel> { width: Fill, height: Fit, text: "" }
+                            diag_check_1 = <CrawradLabel> { width: Fill, height: Fit, text: "" }
+                            diag_check_2 = <CrawradLabel> { width: Fill, height: Fit, text: "" }
+                            diag_check_3 = <CrawradLabel> { width: Fill, height: Fit, text: "" }
+                        }
+                        diag_info_box = <CrawradGroupBoxFrame> {
+                            height: Fit,
+                            flow: Down,
+                            spacing: (CRAWRAD_ESPACO_XS),
+                            diag_info_title = <CrawradGroupBoxTitle> { text: "Configuration & Environment" }
+                            diag_config_path = <CrawradLabelMuted> { width: Fill, height: Fit, text: "" }
+                            diag_detected_agents = <CrawradLabelMuted> { width: Fill, height: Fit, text: "" }
+                        }
+                    }
+                    <CrawradDialogFooter> {
+                        diag_act_0 = <CrawradDialogPrimaryButton> { width: Fit, height: (CRAWRAD_DIALOGO_BOTAO_A), padding: { left: 10.0, right: 10.0 }, visible: false, text: "" }
+                        diag_act_1 = <CrawradDialogButton> { width: Fit, height: (CRAWRAD_DIALOGO_BOTAO_A), padding: { left: 10.0, right: 10.0 }, visible: false, text: "" }
+                        diag_act_2 = <CrawradDialogButton> { width: Fit, height: (CRAWRAD_DIALOGO_BOTAO_A), padding: { left: 10.0, right: 10.0 }, visible: false, text: "" }
+                        diag_act_3 = <CrawradDialogButton> { width: Fit, height: (CRAWRAD_DIALOGO_BOTAO_A), padding: { left: 10.0, right: 10.0 }, visible: false, text: "" }
+                        diag_act_4 = <CrawradDialogButton> { width: Fit, height: (CRAWRAD_DIALOGO_BOTAO_A), padding: { left: 10.0, right: 10.0 }, visible: false, text: "" }
+                        diag_act_5 = <CrawradDialogButton> { width: Fit, height: (CRAWRAD_DIALOGO_BOTAO_A), padding: { left: 10.0, right: 10.0 }, visible: false, text: "" }
+                        diag_act_6 = <CrawradDialogButton> { width: Fit, height: (CRAWRAD_DIALOGO_BOTAO_A), padding: { left: 10.0, right: 10.0 }, visible: false, text: "" }
+                        diag_act_7 = <CrawradDialogButton> { width: Fit, height: (CRAWRAD_DIALOGO_BOTAO_A), padding: { left: 10.0, right: 10.0 }, visible: false, text: "" }
+                        <CrawradFiller> {}
+                        diag_close = <CrawradDialogButton> { width: Fit, height: (CRAWRAD_DIALOGO_BOTAO_A), padding: { left: 12.0, right: 12.0 }, text: "" }
+                    }
+                }
+            }
             pub CrawradNoteDialog = <CrawradDialogVeil> {
                 dlg = <CrawradDialog> {
                     width: (CRAWRAD_OPTIONS_DLG_L), height: Fit,
