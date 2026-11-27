@@ -1,8 +1,12 @@
 //! Slint component mapping and registry module.
 
 pub mod button;
+pub mod checkbox;
 pub mod codegen;
+pub mod edit;
 pub mod label;
+pub mod memo;
+pub mod toggle;
 pub mod util;
 
 pub use codegen::SlintComponentCodegen;
@@ -10,8 +14,14 @@ pub use codegen::SlintComponentCodegen;
 use crate::Erro;
 use crawrad_ir::{Document, Node};
 
-static REGISTRY: &[&'static dyn SlintComponentCodegen] =
-    &[&button::ButtonCodegen, &label::LabelCodegen];
+static REGISTRY: &[&'static dyn SlintComponentCodegen] = &[
+    &button::ButtonCodegen,
+    &label::LabelCodegen,
+    &edit::EditCodegen,
+    &memo::MemoCodegen,
+    &checkbox::CheckBoxCodegen,
+    &toggle::ToggleCodegen,
+];
 
 pub fn for_class(class: &str) -> Option<&'static dyn SlintComponentCodegen> {
     REGISTRY.iter().copied().find(|c| c.class_name() == class)
