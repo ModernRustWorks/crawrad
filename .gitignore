@@ -11,3 +11,32 @@ Thumbs.db
 # mdBook output is not versioned.
 docs/book/
 
+
+# ---------------------------------------------------------------------------
+# Working material that lives beside the source and NEVER ships with it.
+# None of it is part of the product. Listed here, and not left to memory,
+# because public history cannot be rewritten.
+# ---------------------------------------------------------------------------
+
+# Engineering record: decision records, specs, studies, issue drafts, outreach.
+engineering/
+
+# Knowledge base and working notes.
+.project/
+BACKLOG.md
+
+# Assistant and tooling configuration.
+.agents/
+.claude/
+.codex/
+GEMINI.md
+
+# The marketing site, built and deployed on its own.
+site/
+
+# Scratch projects used to exercise the IDE by hand. The published study
+# examples are in `examples/` — that folder IS versioned and ships.
+exemplos/
+
+# Snapshot the gate writes so the Linux container can measure the repository.
+.gate-tracked
