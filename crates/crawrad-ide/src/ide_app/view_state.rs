@@ -339,6 +339,12 @@ impl IdeApp {
                 if self.host.center() == Center::Welcome {
                     self.show_center(cx, Center::Design);
                 }
+                // The form that is now open, so reopening brings back THIS one and
+                // not whichever form the folder happens to list first.
+                let opened = caminho.to_path_buf();
+                crawrad_project::workspace::update_preferences(move |p| {
+                    p.last_form = Some(opened);
+                });
                 if let Some(raiz) = self.raiz_projeto() {
                     Self::remember_recent(&raiz);
                     let instance =
