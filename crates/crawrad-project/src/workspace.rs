@@ -1553,6 +1553,7 @@ impl ProjectType {
         match (self, target) {
             (Self::Gui, crawrad_codegen::AlvoGerador::Makepad) => Some("makepad-widgets@1.0"),
             (Self::Gui, crawrad_codegen::AlvoGerador::Egui) => Some("eframe@0.36"),
+            (Self::Gui, crawrad_codegen::AlvoGerador::Slint) => Some("slint@1.9"),
             (Self::Console | Self::Library, _) => None,
         }
     }

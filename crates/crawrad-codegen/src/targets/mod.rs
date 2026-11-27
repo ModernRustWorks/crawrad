@@ -24,10 +24,11 @@ pub enum AlvoGerador {
     #[default]
     Makepad,
     Egui,
+    Slint,
 }
 
 impl AlvoGerador {
-    pub const TODOS: &[Self] = &[Self::Makepad, Self::Egui];
+    pub const TODOS: &[Self] = &[Self::Makepad, Self::Egui, Self::Slint];
 
     pub fn rotulos() -> Vec<String> {
         Self::TODOS.iter().map(|a| a.rotulo().to_string()).collect()
@@ -41,6 +42,7 @@ impl AlvoGerador {
         match self {
             Self::Makepad => "Makepad (Nativo)",
             Self::Egui => "Egui / Eframe",
+            Self::Slint => "Slint",
         }
     }
 
@@ -48,6 +50,7 @@ impl AlvoGerador {
         match self {
             Self::Makepad => "makepad",
             Self::Egui => "egui",
+            Self::Slint => "slint",
         }
     }
 
@@ -71,6 +74,7 @@ impl AlvoGerador {
         match self {
             Self::Makepad => Box::new(makepad::GeradorMakepad),
             Self::Egui => Box::new(egui::GeradorRxp),
+            Self::Slint => Box::new(slint::GeradorSlint),
         }
     }
 }

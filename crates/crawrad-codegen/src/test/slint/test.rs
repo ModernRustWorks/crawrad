@@ -775,3 +775,35 @@ fn test_slint_generator_emits_timer_and_dialogs() {
     assert!(designer_file.conteudo.contains("pub struct MessageDialog"));
     assert!(designer_file.conteudo.contains("f.form.tmr_tick_timer();"));
 }
+
+#[test]
+fn test_slint_target_manifest_and_dependencies() {
+    use crate::AlvoGerador;
+    use crate::dependencies::{dependencias_do_projeto, gerar_cargo_toml};
+
+    // 1. Unified dependencies check: Slint gets slint and not makepad-widgets
+    let deps = dependencias_do_projeto(AlvoGerador::Slint, true, false);
+    assert!(
+        deps.iter().any(|d| d.nome() == "slint"),
+        "Slint project must have 'slint' dependency"
+    );
+    assert!(
+        !deps.iter().any(|d| d.nome() == "makepad-widgets"),
+        "Slint project must NOT have 'makepad-widgets' dependency"
+    );
+
+    // 2. Cargo.toml generation check: includes slint, excludes makepad-widgets and eframe
+    let toml = gerar_cargo_toml("slint_sample_app", AlvoGerador::Slint, true, false, &[]);
+    assert!(
+        toml.contains("slint = \"1.9\""),
+        "Generated Cargo.toml must contain slint = \"1.9\" dependency:\n{toml}"
+    );
+    assert!(
+        !toml.contains("makepad-widgets"),
+        "Generated Cargo.toml must NOT contain makepad-widgets:\n{toml}"
+    );
+    assert!(
+        !toml.contains("eframe"),
+        "Generated Cargo.toml must NOT contain eframe:\n{toml}"
+    );
+}
