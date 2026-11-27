@@ -111,16 +111,14 @@ pub const ALLOWED_SHELL_ROOT_FILES: &[&str] = &["ide_app.rs", "main.rs"];
 /// diagnostic dialog is a new 296-line module, and the three screens account for
 /// the remaining 90. The ratchet normally only tightens; it rises here because the
 /// shell genuinely gained a surface, not because something was moved into it.
-/// Raised on 27/11/2026 from 33,180 to 33,413 on the tree that carries both the
-/// three screens and the MCP's rectangles: this branch adds 233 lines over its own
-/// base, and 33,180 + 233 is exactly what counting this tree reports. Measured two
-/// ways rather than taken from either side of the merge, because neither side
-/// describes the tree that results from it.
-/// Raised on 27/11/2026 from 33,413 to 33,418, measured on this tree: five lines in
-/// the Explorer action, which now carries the warning that rides with a created form
-/// instead of claiming success over half a result. Generating the code with the form
-/// is decided in `crawrad-project`, where a new project already did it.
-pub const MAX_SHELL_SOURCE_LINES: usize = 33_418;
+/// Raised on 27/11/2026 from 33,418 to 33,424, measured on the tree this merge
+/// produces, not taken from either side of it: six lines across the startup path.
+/// `Preferences` gained `last_form` (field, default, read, write) so reopening
+/// brings back the form that WAS open instead of whichever form the folder listed
+/// first, and `abrir_formulario` records it beside the recent folder it already
+/// recorded. Counting this tree reports 33,424, and 33,418 + 6 is the same number.
+/// What to reopen is decided in `crawrad-project`.
+pub const MAX_SHELL_SOURCE_LINES: usize = 33_424;
 
 /// Maximum allowed lines for any individual `.rs` file in `crates/crawrad-ide/src/` (outside `test/`).
 ///
