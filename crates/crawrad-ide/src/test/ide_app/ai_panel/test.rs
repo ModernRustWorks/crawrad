@@ -1020,8 +1020,7 @@ fn the_use_command_switches_profile_without_blocking_ui() {
     );
     assert!(
         !code.contains("match crawrad_agent::AcpConfig::execute_cli_query(\"claude\", query)")
-            && !code
-                .contains("match crawrad_agent::AcpConfig::execute_cli_query(\"agy\", query)"),
+            && !code.contains("match crawrad_agent::AcpConfig::execute_cli_query(\"agy\", query)"),
         "synchronous execution on UI thread for /claude and /gemini was eliminated"
     );
 }
@@ -1475,8 +1474,7 @@ fn user_bubble_has_orange_background_aligned_right_with_spacing() {
 fn the_user_bubble_auto_sizes_with_a_max_width_and_wraps() {
     let panel_width = 300.0;
     // Short text: small bubble, large left indent (e.g. ~155px with meta "19:19 ✓✓")
-    let recuo_curto =
-        crawrad_agent::chat_layout::user_bubble_indent("Hi", "19:19 ✓✓", panel_width);
+    let recuo_curto = crawrad_agent::chat_layout::user_bubble_indent("Hi", "19:19 ✓✓", panel_width);
     assert!(
         recuo_curto > 140.0,
         "short messages must have larger left indent to keep the bubble compact and against the right edge (indent: {recuo_curto})"
@@ -1881,10 +1879,7 @@ fn stop_button_cancels_and_preserves_message_queue() {
     let i = code
         .find("fn parar_ia_prompt")
         .expect("fn parar_ia_prompt is missing");
-    let fim = code[i..]
-        .find("fn ")
-        .map(|f| i + f)
-        .unwrap_or(code.len());
+    let fim = code[i..].find("fn ").map(|f| i + f).unwrap_or(code.len());
     let stop_snippet = &code[i..fim];
 
     assert!(
