@@ -208,6 +208,18 @@ impl IdeApp {
         let mut explorer_rows: Option<Vec<explorer::Row>> = None;
         let mut package_rows: Option<Vec<packages::Row>> = None;
 
+        // A row's rectangle is only true for the frame it was measured in: a panel that was
+        // NOT drawn must not report where it used to be. Measured on the running IDE on
+        // 24/11/2026 with the palette hidden behind the Explorer — it kept answering the
+        // same 18 rectangles, and anyone clicking them would have hit the Explorer. Cleared
+        // here; each panel refills its own while drawing, and one that did not draw reports
+        // nothing, which is the truth.
+        self.toolbox_rects.clear();
+        self.inspector_rects.clear();
+        self.notes_rects.clear();
+        self.tests_rects.clear();
+        self.status_bar_rects.clear();
+
         let mut rail_rects: Vec<(Panel, Rect)> = Vec::new();
         let mut rects_dos_eventos: Option<Vec<(usize, Rect)>> = None;
         let visible_rail = rail::visible(!self.no_form_in_project());
@@ -237,6 +249,7 @@ impl IdeApp {
             } }
             if let Some(mut lista) = inspetor.borrow_mut_if_eq(&proximo) {
                 let eventos = rects_dos_eventos.get_or_insert_with(Vec::new);
+                let mut insp_rects = Vec::new();
                 // THE SPLITTER, on the list's own turtle (its area is mid-rebuild).
                 let (name_w, left) = self.name_splitter.layout(cx.turtle().rect().size.x);
                 splitter.as_crawrad_column_splitter().set_edge(name_w, left);
@@ -284,10 +297,12 @@ impl IdeApp {
                     {
                         cx.set_key_focus(item.text_input(slot_path(c.slot())).area());
                     }
+                    insp_rects.push((i, item.area().rect(cx)));
                     if matches!(linha, inspector::Row::Event(_)) {
                         eventos.push((i, item.area().rect(cx)));
                     }
                 }
+                self.inspector_rects = insp_rects;
                 continue;
             }
             if let Some(mut lista) = iml_grade.borrow_mut_if_eq(&proximo) {
@@ -525,7 +540,10 @@ impl IdeApp {
                 palette::Row::Section(_) => live_id!(Secao),
                 palette::Row::Item { blocked: Some(_), .. } => live_id!(ItemOff),
                 palette::Row::Item { .. } => live_id!(Item),
-            }, before { let strip = self.class_icon_texture(cx); } |item, i, linha| {
+            }, before {
+                let strip = self.class_icon_texture(cx);
+                let mut tb_rects = Vec::new();
+            } |item, i, linha| {
                 match linha {
                     palette::Row::Item { class, label, .. } => {
                         let kind = self.class_icon_strip.cells().kind_of(class);
@@ -534,6 +552,10 @@ impl IdeApp {
                     }
                     _ => item.set_text(cx, linha.text()),
                 }
+            } then {
+                tb_rects.push((i, item.area().rect(cx)));
+            } finally {
+                self.toolbox_rects = tb_rects;
             } }
             draw_rows! { cx, proximo, explorador, linhas, LiveId::from_str(linha.template()),
                 before { let linhas = explorer_rows.get_or_insert_with(|| self.linhas_do_explorer()); let mut exp_rects = Vec::new(); }
@@ -653,6 +675,20 @@ impl IdeApp {
         }
         if let Some(eventos) = rects_dos_eventos {
             self.rects_dos_eventos = eventos;
+        }
+        if self.painel_a_vista(&arranjo, Panel::Notes) {
+            self.notes_rects = self.notes_view().captured_rects();
+        }
+        if self.painel_a_vista(&arranjo, Panel::Tests) {
+            self.tests_rects = self.tests_view().captured_rects();
+        }
+        let lsp_r = self
+            .ui
+            .view(&[live_id!(bottom_status_bar), live_id!(cell_lsp)])
+            .area()
+            .rect(cx);
+        if lsp_r.size.x > 0.0 && lsp_r.size.y > 0.0 {
+            self.status_bar_rects.push(("lsp".to_string(), lsp_r));
         }
 
         // Automatically scrolls AI chat to the bottom when there are new messages or updates

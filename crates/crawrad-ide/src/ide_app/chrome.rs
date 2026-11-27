@@ -66,6 +66,7 @@ impl IdeApp {
         // The IDE's default on open is always to display the EXPLORER selected on the left
         self.show_panel(cx, Panel::Explorer);
         self.write_panel_chrome(cx);
+        self.paint_form_check(cx);
     }
 
     #[note("ide-app-chrome-ideapp-write-panel-chrome")]
@@ -675,10 +676,37 @@ impl IdeApp {
         self.toolbox_json(cx)
     }
 
+    pub(crate) fn measured_toolbox_rects(&self, cx: &Cx) -> Vec<(usize, [f64; 4])> {
+        // Prefer rects captured during the draw loop if available.
+        if !self.toolbox_rects.is_empty() {
+            return (self.toolbox_rects.iter())
+                .filter(|(_, r)| r.size.x > 0.0 && r.size.y > 0.0)
+                .map(|(i, r)| (*i, xywh(*r)))
+                .collect();
+        }
+        // Fallback for when reading occurs before a full draw frame has completed:
+        // inspect items already instantiated in the portal list.
+        let list = self
+            .painel(Panel::Components)
+            .portal_list(id!(toolbox_palette.toolbox_list));
+        let rows = self.linhas_da_paleta();
+        let mut rects = Vec::new();
+        for i in 0..rows.len() {
+            if let Some((_, item)) = list.get_item(i) {
+                let r = item.area().rect(cx);
+                if r.size.x > 0.0 && r.size.y > 0.0 {
+                    rects.push((i, xywh(r)));
+                }
+            }
+        }
+        rects
+    }
+
     #[note("ide-app-chrome-ideapp-toolbox-json")]
     pub(crate) fn toolbox_json(&self, cx: &Cx) -> serde_json::Value {
         if !self.no_form_in_project() {
-            return palette::to_json(&self.linhas_da_paleta(), &self.filtro);
+            let rects = self.measured_toolbox_rects(cx);
+            return palette::to_json_with_rects(&self.linhas_da_paleta(), &self.filtro, &rects);
         }
         let empty = self.painel(Panel::Components).view(id!(no_form));
         let text = |name: &[LiveId]| empty.label(name).text();
@@ -691,5 +719,33 @@ impl IdeApp {
                 "button": { "text": btn.text(), "rect": xywh(btn.area().rect(cx)) }
             }
         })
+    }
+
+    pub(crate) fn measured_inspector_rects(&self, cx: &Cx) -> Vec<(usize, [f64; 4])> {
+        if !self.inspector_rects.is_empty() {
+            return (self.inspector_rects.iter())
+                .filter(|(_, r)| r.size.x > 0.0 && r.size.y > 0.0)
+                .map(|(i, r)| (*i, xywh(*r)))
+                .collect();
+        }
+        let list = self
+            .painel(Panel::Inspector)
+            .portal_list(id!(inspector_panel.inspector_list));
+        let rows = self.linhas_do_inspector();
+        let mut rects = Vec::new();
+        for i in 0..rows.len() {
+            if let Some((_, item)) = list.get_item(i) {
+                let r = item.area().rect(cx);
+                if r.size.x > 0.0 && r.size.y > 0.0 {
+                    rects.push((i, xywh(r)));
+                }
+            }
+        }
+        rects
+    }
+
+    pub(crate) fn inspector_json(&self, cx: &Cx) -> serde_json::Value {
+        let rects = self.measured_inspector_rects(cx);
+        crawrad_actions::inspector_model::rows_json_with_rects(&self.linhas_do_inspector(), &rects)
     }
 }

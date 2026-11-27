@@ -867,6 +867,7 @@ fn rows_json_reports_what_the_panel_shows() {
         .iter()
         .position(|row| row["key"] == "font")
         .expect("a Font row");
+    assert_eq!(shown[font]["rect"], serde_json::Value::Null);
     assert_eq!(shown[font]["depth"], 0);
     assert_eq!(shown[font]["template"], "RowFoldOpen");
     // The shut row says the font, never the name of its type.
@@ -882,6 +883,14 @@ fn rows_json_reports_what_the_panel_shows() {
         serde_json::json!({ "slot": "Value", "kind": "check", "on": false })
     );
     assert!(shown.iter().any(|row| row["category"].is_string()));
+
+    // Measured on-screen geometry is attached when provided.
+    use crate::inspector_model::rows_json_with_rects;
+    let with_rect = rows_json_with_rects(&list, &[(font, [10.0, 20.0, 100.0, 24.0])]);
+    assert_eq!(
+        with_rect["rows"][font]["rect"],
+        serde_json::json!([10.0, 20.0, 100.0, 24.0])
+    );
 
     let empty = rows_json(&rows(&r, None, &[], "", Tab::Properties, &none, &none));
     assert!(empty["rows"][0]["notice"].is_string());

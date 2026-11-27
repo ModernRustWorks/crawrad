@@ -303,6 +303,28 @@ pub fn button_labels(
     (model, effort)
 }
 
+/// Dispatches a chat config MCP tool call, extracting copied text if applicable.
+pub fn dispatch_config_call(
+    name: &str,
+    args: &Value,
+    live: &mut crate::acp_live::LiveAgent,
+    config: &mut crate::acp::AcpConfig,
+    chat: (&[crate::ChatMessage], &str),
+) -> crawrad_mcp::protocol::ToolCallResult {
+    let done = mcp_call(name, args, live, config, chat);
+    if let Ok(ref v) = done
+        && let Some(text) = v.get("copied").and_then(Value::as_str)
+    {
+        crawrad_os::clipboard::write_text(text);
+    }
+    match done {
+        Ok(found) => {
+            crawrad_mcp::protocol::ToolCallResult::success_json(found, "Chat config options.")
+        }
+        Err(err) => crawrad_mcp::protocol::ToolCallResult::error_text("config_error", err),
+    }
+}
+
 #[cfg(test)]
 #[path = "test/chat_config/test.rs"]
 mod tests;

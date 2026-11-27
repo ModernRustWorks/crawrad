@@ -440,6 +440,8 @@ live_design! {
             flow: Right, align: { y: 0.5 },
             padding: { top: 2.0, bottom: 2.0 },
             spacing: -1.0,
+            // Why: owner's decision 24/11/2026 — empty left part of the bottom strip of the CENTRE dock
+            form_check_badge = <CrawradFormCheckBadge> {}
             center_tabs_spacer = <CrawradFiller> {}
             editor_breadcrumbs_bar = <View> {
                 visible: false,

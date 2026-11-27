@@ -95,7 +95,6 @@ pub CrawradMainUi = <Window> {
                         }
                     }
 
-                    form_check_chip = <FormCheckChip> {}
                     btn_min = <CrawradMinButton> {}
                     btn_max = <CrawradMaxButton> {}
                     btn_restore = <CrawradRestoreButton> {}
@@ -111,86 +110,86 @@ pub CrawradMainUi = <Window> {
                     padding: { top: 0.0, bottom: 0.0, left: 0.0, right: (CRAWRAD_CARD_GAP) },
 
                     activity_rail = <CrawradCardRail> {
-                        width: (CRAWRAD_RAIL_LARGURA), height: Fill,
-                        flow: Down,
+                            width: (CRAWRAD_RAIL_LARGURA), height: Fill,
+                            flow: Down,
 
-                        rail_list = <PortalList> {
+                            rail_list = <PortalList> {
+                                width: Fill, height: Fill,
+                                // The rail scrollbar has zero width: the rail has
+                                // fixed destinations and does not scroll.
+                                scroll_bar: <CrawradScrollBar> { bar_size: 0.0 }
+
+                                // The TEMPLATE of a destination: see `rail.rs`.
+                                Destino = <CrawradRailButton> { text: "" }
+                            }
+
+                            rail_settings = <CrawradRailButtonMuted> {
+                                margin: { left: 6.0, right: 6.0, top: 4.0, bottom: 6.0 },
+                                text: ""
+                            }
+                        }
+
+                        // The options bar and left panel are joined
+                        // without an internal divider (modern-editor style, ADR 0014 / Amendment 10).
+                        sep_rail = <View> {
+                            width: 0.0, height: 0.0,
+                            visible: false
+                        }
+
+                        dock = <CrawradDock> {
                             width: Fill, height: Fill,
-                            // The rail scrollbar has zero width: the rail has
-                            // fixed destinations and does not scroll.
-                            scroll_bar: <CrawradScrollBar> { bar_size: 0.0 }
 
-                            // The TEMPLATE of a destination: see `rail.rs`.
-                            Destino = <CrawradRailButton> { text: "" }
-                        }
+                            // ------------------------------------------ the templates
 
-                        rail_settings = <CrawradRailButtonMuted> {
-                            margin: { left: 6.0, right: 6.0, top: 4.0, bottom: 6.0 },
-                            text: ""
+                            PanelComponents = <CrawradPanelComponents> {}
+                            PanelInspector = <CrawradPanelInspector> {}
+                            // The EXPLORER: who owns each file (ADR 0016).
+                            // Line count comes from the generator plan (ADR 0027).
+                            PanelExplorer = <CrawradPanelExplorer> {}
+                            // The PACKAGE MANAGER: crates.io store (ADR 0014, Amendment 8).
+                            PanelPackages = <CrawradPanelPackages> {}
+                            // RUN AND DEBUG: the controls docked on
+                            // top, the sections below — `crawrad_host::debug_panel`.
+                            PanelDebug = <CrawradPanelDebug> {}
+                            // FIND ALL REFERENCES: `crawrad_host::references`.
+                            PanelReferences = <CrawradPanelReferences> {}
+                            PanelProblems = <CrawradPanelProblems> {}
+                            // EXTENSION VIEWS: `crawrad_extension_host::views`.
+                            PanelExtensions = <CrawradPanelExtensions> {}
+                            PanelNotes = <CrawradPanelNotes> {}
+                            PanelTests = <CrawradPanelLeft> {
+                                tests_view = <TestsPanelView> {}
+                            }
+                            PanelTestoutput = <CrawradPanel> {
+                                output_view = <TestOutputView> {}
+                            }
+                            PanelFormcheck = <CrawradPanel> {
+                                check_view = <FormCheckView> {}
+                            }
+                            PanelDesign = <CrawradPanelDesign> {}
+                            PanelChat = <CrawradPanelChat> {}
+                            PanelTerminal = <CrawradPanelTerminal> {}
+                            root = Splitter {
+                                axis: Horizontal,
+                                align: FromA((CRAWRAD_DOCA_LARGURA)),
+                                a: dock_left,
+                                b: dock_rest
+                            }
+                            dock_rest = Splitter {
+                                axis: Horizontal,
+                                align: FromB((CRAWRAD_CHAT_LARGURA)),
+                                a: dock_center,
+                                b: dock_right
+                            }
+                            dock_left = Tabs { tabs: [tab_components], selected: 0, closable: true }
+                            dock_center = Tabs { tabs: [tab_design], selected: 0, closable: true }
+                            dock_right = Tabs { tabs: [tab_chat], selected: 0, closable: true }
+                            tab_components = Tab { name: "", template: PermanentTab, kind: PanelComponents }
+                            tab_design = Tab { name: "", template: PermanentTab, kind: PanelDesign }
+                            tab_chat = Tab { name: "", template: PermanentTab, kind: PanelChat }
+                            tab_terminal = Tab { name: "", template: PermanentTab, kind: PanelTerminal }
                         }
                     }
-
-                    // The options bar and left panel are joined
-                    // without an internal divider (modern-editor style, ADR 0014 / Amendment 10).
-                    sep_rail = <View> {
-                        width: 0.0, height: 0.0,
-                        visible: false
-                    }
-
-                    dock = <CrawradDock> {
-                        width: Fill, height: Fill,
-
-                        // ------------------------------------------ the templates
-
-                        PanelComponents = <CrawradPanelComponents> {}
-                        PanelInspector = <CrawradPanelInspector> {}
-                        // The EXPLORER: who owns each file (ADR 0016).
-                        // Line count comes from the generator plan (ADR 0027).
-                        PanelExplorer = <CrawradPanelExplorer> {}
-                        // The PACKAGE MANAGER: crates.io store (ADR 0014, Amendment 8).
-                        PanelPackages = <CrawradPanelPackages> {}
-                        // RUN AND DEBUG: the controls docked on
-                        // top, the sections below — `crawrad_host::debug_panel`.
-                        PanelDebug = <CrawradPanelDebug> {}
-                        // FIND ALL REFERENCES: `crawrad_host::references`.
-                        PanelReferences = <CrawradPanelReferences> {}
-                        PanelProblems = <CrawradPanelProblems> {}
-                        // EXTENSION VIEWS: `crawrad_extension_host::views`.
-                        PanelExtensions = <CrawradPanelExtensions> {}
-                        PanelNotes = <CrawradPanelNotes> {}
-                        PanelTests = <CrawradPanelLeft> {
-                            tests_view = <TestsPanelView> {}
-                        }
-                        PanelTestoutput = <CrawradPanel> {
-                            output_view = <TestOutputView> {}
-                        }
-                        PanelFormcheck = <CrawradPanel> {
-                            check_view = <FormCheckView> {}
-                        }
-                        PanelDesign = <CrawradPanelDesign> {}
-                        PanelChat = <CrawradPanelChat> {}
-                        PanelTerminal = <CrawradPanelTerminal> {}
-                        root = Splitter {
-                            axis: Horizontal,
-                            align: FromA((CRAWRAD_DOCA_LARGURA)),
-                            a: dock_left,
-                            b: dock_rest
-                        }
-                        dock_rest = Splitter {
-                            axis: Horizontal,
-                            align: FromB((CRAWRAD_CHAT_LARGURA)),
-                            a: dock_center,
-                            b: dock_right
-                        }
-                        dock_left = Tabs { tabs: [tab_components], selected: 0, closable: true }
-                        dock_center = Tabs { tabs: [tab_design], selected: 0, closable: true }
-                        dock_right = Tabs { tabs: [tab_chat], selected: 0, closable: true }
-                        tab_components = Tab { name: "", template: PermanentTab, kind: PanelComponents }
-                        tab_design = Tab { name: "", template: PermanentTab, kind: PanelDesign }
-                        tab_chat = Tab { name: "", template: PermanentTab, kind: PanelChat }
-                        tab_terminal = Tab { name: "", template: PermanentTab, kind: PanelTerminal }
-                    }
-                }
 
                 // --- 3. BOTTOM STATUS BAR ---
                 bottom_status_bar = <CrawradStatusBar> {
