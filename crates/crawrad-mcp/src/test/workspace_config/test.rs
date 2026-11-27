@@ -41,6 +41,13 @@ fn test_sync_workspace_mcp_config_creates_valid_mcp_json() {
 /// answered yes and the physical path went into `.mcp.json`; the agent's CLI, a
 /// separate process, then got `fork/exec ... Access is denied` and started with no
 /// MCP server at all. What the owner saw, three sessions in a row.
+///
+/// The real path is spelled with backslashes, which separate nothing on Unix - the
+/// whole string would be ONE component there and the test would fail for that
+/// reason and not for a defect. `WindowsApps` is the Store's own invention, so the
+/// Windows spelling proves itself on Windows; the rule underneath is checked
+/// everywhere, below.
+#[cfg(windows)]
 #[test]
 fn a_path_inside_the_store_package_is_never_offered() {
     let store = std::path::Path::new(
@@ -49,6 +56,29 @@ fn a_path_inside_the_store_package_is_never_offered() {
     assert!(
         super::super::workspace_config::is_inside_package(store),
         "the Store's own install path was not recognised, so it would be written again"
+    );
+}
+
+/// The rule itself, in a spelling every platform parses: a component named
+/// `WindowsApps`, whatever its case, means the path belongs to the package.
+///
+/// Without this, nothing on Linux or macOS guards the rule at all, and a change
+/// that broke it would only be caught by whoever happened to run the suite on
+/// Windows.
+#[test]
+fn the_rule_holds_on_every_platform_in_a_portable_spelling() {
+    use std::path::Path;
+    let f = super::super::workspace_config::is_inside_package;
+
+    assert!(f(Path::new("/var/lib/WindowsApps/crawrad-mcp-bridge")));
+    assert!(
+        f(Path::new("/var/lib/windowsapps/crawrad-mcp-bridge")),
+        "case must not matter"
+    );
+    assert!(!f(Path::new("/usr/local/bin/crawrad-mcp-bridge")));
+    assert!(
+        !f(Path::new("/home/someone/MyWindowsApps/crawrad-mcp-bridge")),
+        "a folder that merely CONTAINS the name is not the package folder"
     );
 }
 

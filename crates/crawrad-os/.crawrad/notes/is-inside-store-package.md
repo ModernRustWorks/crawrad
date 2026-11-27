@@ -23,13 +23,16 @@ instead of being stated twice and drifting apart.
 
 # Examples
 
+The folder is recognised by a path COMPONENT named `WindowsApps`, whatever its
+case, so the check reads the same on every platform - which is how this example
+runs on Linux and macOS too, where a backslash separates nothing and the real
+Windows spelling would be a single component.
+
 ```rust
 use crawrad_os::is_inside_store_package;
 use std::path::Path;
 
-let store = Path::new(r"C:\Program Files\WindowsApps\GUARANA.CrawRAD_0.1.1.0_x64__2nygkg5m59wk2\crawrad-ide.exe");
-assert!(is_inside_store_package(store));
-
-let plain = Path::new(r"C:\Users\someone\CrawRAD\crawrad-ide.exe");
-assert!(!is_inside_store_package(plain));
+assert!(is_inside_store_package(Path::new("/var/lib/WindowsApps/crawrad-ide")));
+assert!(is_inside_store_package(Path::new("/var/lib/windowsapps/crawrad-ide")));
+assert!(!is_inside_store_package(Path::new("/usr/local/bin/crawrad-ide")));
 ```

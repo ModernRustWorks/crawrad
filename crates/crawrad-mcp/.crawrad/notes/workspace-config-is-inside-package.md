@@ -24,13 +24,16 @@ execution alias is what makes it resolve.
 
 # Examples
 
+The folder is recognised by a path COMPONENT named `WindowsApps`, so the check
+reads the same on every platform - which is how this example runs on Linux and
+macOS too, where a backslash separates nothing and the real Windows spelling
+would be a single component.
+
 ```rust
 use crawrad_mcp::workspace_config::is_inside_package;
 use std::path::Path;
 
-let store = Path::new(r"C:\Program Files\WindowsApps\GUARANA.CrawRAD_0.1.1.0_x64__2nygkg5m59wk2\crawrad-mcp-bridge.exe");
-assert!(is_inside_package(store), "a Store install must be recognised");
-
-let plain = Path::new(r"C:\Users\someone\CrawRAD\crawrad-mcp-bridge.exe");
-assert!(!is_inside_package(plain), "an ordinary install keeps its real path");
+assert!(is_inside_package(Path::new("/var/lib/WindowsApps/crawrad-mcp-bridge")));
+assert!(is_inside_package(Path::new("/var/lib/windowsapps/crawrad-mcp-bridge")));
+assert!(!is_inside_package(Path::new("/usr/local/bin/crawrad-mcp-bridge")));
 ```
