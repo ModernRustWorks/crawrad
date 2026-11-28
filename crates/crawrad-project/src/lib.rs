@@ -3,6 +3,7 @@
 pub mod active_project;
 pub mod app_run;
 pub mod build_busy;
+pub mod build_dialog;
 pub mod build_fields;
 pub mod build_progress;
 pub mod build_report;

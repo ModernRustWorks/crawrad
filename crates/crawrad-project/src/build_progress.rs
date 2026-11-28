@@ -295,6 +295,10 @@ impl BuildProgress {
         self.current.as_deref()
     }
 
+    pub fn current_action(&self) -> Option<&str> {
+        self.current_action.as_deref()
+    }
+
     #[note("build-progress-buildprogress-done")]
     pub fn done(&self) -> usize {
         self.done
