@@ -8,6 +8,7 @@ pub mod prelude {
     pub use crawrad_ir::{Document, Node, Value};
 }
 
+pub mod action_list;
 pub mod badge;
 pub mod bevel;
 pub mod bit_btn;
@@ -15,6 +16,7 @@ pub mod breadcrumb;
 pub mod button;
 pub mod card;
 pub mod category_panel;
+pub mod check_list_box;
 pub mod checkbox;
 pub mod chips;
 pub mod codegen;
@@ -23,11 +25,14 @@ pub mod combobox;
 pub mod date_time_picker;
 pub mod drawer;
 pub mod edit;
+pub mod grid;
 pub mod group_box;
 pub mod image;
+pub mod image_list;
 pub mod label;
 pub mod link_label;
 pub mod list_box;
+pub mod list_view;
 pub mod main_menu;
 pub mod mask_edit;
 pub mod memo;
@@ -54,6 +59,7 @@ pub mod timer;
 pub mod toggle;
 pub mod tool_bar;
 pub mod track_bar;
+pub mod tree_view;
 pub mod util;
 
 pub use codegen::SlintComponentCodegen;
@@ -110,6 +116,14 @@ static REGISTRY: &[&'static dyn SlintComponentCodegen] = &[
     &date_time_picker::DateTimePickerCodegen,
     &mask_edit::MaskEditCodegen,
     &multi_select::MultiSelectCodegen,
+    &action_list::ActionListCodegen,
+    &action_list::ActionCodegen,
+    &image_list::ImageListCodegen,
+    &check_list_box::CheckListBoxCodegen,
+    &list_view::ListViewCodegen,
+    &list_view::ListColumnCodegen,
+    &tree_view::TreeViewCodegen,
+    &grid::GridCodegen,
 ];
 
 pub fn for_class(class: &str) -> Option<&'static dyn SlintComponentCodegen> {

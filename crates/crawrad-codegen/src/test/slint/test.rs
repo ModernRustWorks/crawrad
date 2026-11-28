@@ -2068,3 +2068,445 @@ fn test_slint_slice4_components() {
         "MultiSelect on_change action invocation missing"
     );
 }
+
+#[test]
+fn test_slint_slice5_components() {
+    let mut doc = Document::new("FormDataBound", "Form");
+    if let Some(form) = doc.node_mut("FormDataBound") {
+        form.set_rect(Rect::new(0.0, 0.0, 800.0, 600.0));
+        form.set_name("FormDataBound");
+        form.set_text("Data Bound Form");
+    }
+
+    // 1. ActionList & Action
+    let mut acl = Node::new("acl_main", "ActionList");
+    acl.set_name("acl_main");
+    acl.props.insert(
+        "images".to_string(),
+        crawrad_ir::Value::Ref("iml_icons".to_string()),
+    );
+    let _ = doc.add_child("FormDataBound", acl);
+
+    let mut act = Node::new("act_open", "Action");
+    act.set_name("act_open");
+    act.props.insert(
+        "text".to_string(),
+        crawrad_ir::Value::Str("Open".to_string()),
+    );
+    act.props.insert(
+        "category".to_string(),
+        crawrad_ir::Value::Str("File".to_string()),
+    );
+    let _ = doc.add_child("acl_main", act);
+
+    // 2. ImageList
+    let mut iml = Node::new("iml_icons", "ImageList");
+    iml.set_name("iml_icons");
+    iml.props
+        .insert("image_width".to_string(), crawrad_ir::Value::Int(24));
+    iml.props
+        .insert("image_height".to_string(), crawrad_ir::Value::Int(24));
+    let mut icon_map = std::collections::BTreeMap::new();
+    icon_map.insert(
+        "name".to_string(),
+        crawrad_ir::Value::Str("save".to_string()),
+    );
+    icon_map.insert(
+        "symbol".to_string(),
+        crawrad_ir::Value::Str("floppy".to_string()),
+    );
+    iml.props.insert(
+        "images_data".to_string(),
+        crawrad_ir::Value::List(vec![crawrad_ir::Value::Map(icon_map)]),
+    );
+    let _ = doc.add_child("FormDataBound", iml);
+
+    // 3. CheckListBox
+    let mut clb = Node::new("clb_tasks", "CheckListBox");
+    clb.set_name("clb_tasks");
+    clb.set_rect(Rect::new(10.0, 10.0, 150.0, 120.0));
+    clb.props.insert(
+        "items".to_string(),
+        crawrad_ir::Value::List(vec![
+            crawrad_ir::Value::Str("Setup".to_string()),
+            crawrad_ir::Value::Str("Build".to_string()),
+            crawrad_ir::Value::Str("Deploy".to_string()),
+        ]),
+    );
+    clb.props.insert(
+        "checked_items".to_string(),
+        crawrad_ir::Value::List(vec![
+            crawrad_ir::Value::Str("Setup".to_string()),
+            crawrad_ir::Value::Str("Build".to_string()),
+        ]),
+    );
+    clb.events
+        .insert("on_change".to_string(), "clb_task_change".to_string());
+    let _ = doc.add_child("FormDataBound", clb);
+
+    // 4. ListView with ListColumn
+    let mut lvw = Node::new("lvw_files", "ListView");
+    lvw.set_name("lvw_files");
+    lvw.set_rect(Rect::new(170.0, 10.0, 220.0, 150.0));
+    lvw.props.insert(
+        "items".to_string(),
+        crawrad_ir::Value::List(vec![crawrad_ir::Value::Map(
+            std::collections::BTreeMap::from([
+                (
+                    "text".to_string(),
+                    crawrad_ir::Value::Str("main.rs".to_string()),
+                ),
+                (
+                    "children".to_string(),
+                    crawrad_ir::Value::List(vec![crawrad_ir::Value::Map(
+                        std::collections::BTreeMap::from([(
+                            "text".to_string(),
+                            crawrad_ir::Value::Str("4 KB".to_string()),
+                        )]),
+                    )]),
+                ),
+            ]),
+        )]),
+    );
+    lvw.events
+        .insert("on_change".to_string(), "lvw_change".to_string());
+    lvw.events
+        .insert("on_click".to_string(), "lvw_click".to_string());
+    lvw.events
+        .insert("on_dbl_click".to_string(), "lvw_dbl_click".to_string());
+    let _ = doc.add_child("FormDataBound", lvw);
+
+    let mut col1 = Node::new("col_name", "ListColumn");
+    col1.set_name("col_name");
+    col1.props.insert(
+        "text".to_string(),
+        crawrad_ir::Value::Str("Name".to_string()),
+    );
+    col1.props
+        .insert("width".to_string(), crawrad_ir::Value::Int(120));
+    let _ = doc.add_child("lvw_files", col1);
+
+    let mut col2 = Node::new("col_size", "ListColumn");
+    col2.set_name("col_size");
+    col2.props.insert(
+        "text".to_string(),
+        crawrad_ir::Value::Str("Size".to_string()),
+    );
+    col2.props
+        .insert("width".to_string(), crawrad_ir::Value::Int(80));
+    let _ = doc.add_child("lvw_files", col2);
+
+    // 5. TreeView
+    let mut trv = Node::new("trv_tree", "TreeView");
+    trv.set_name("trv_tree");
+    trv.set_rect(Rect::new(400.0, 10.0, 160.0, 140.0));
+    trv.props.insert(
+        "items".to_string(),
+        crawrad_ir::Value::List(vec![crawrad_ir::Value::Map(
+            std::collections::BTreeMap::from([
+                (
+                    "text".to_string(),
+                    crawrad_ir::Value::Str("Root".to_string()),
+                ),
+                (
+                    "children".to_string(),
+                    crawrad_ir::Value::List(vec![crawrad_ir::Value::Map(
+                        std::collections::BTreeMap::from([(
+                            "text".to_string(),
+                            crawrad_ir::Value::Str("Child".to_string()),
+                        )]),
+                    )]),
+                ),
+            ]),
+        )]),
+    );
+    trv.events
+        .insert("on_change".to_string(), "trv_change".to_string());
+    trv.events
+        .insert("on_click".to_string(), "trv_click".to_string());
+    let _ = doc.add_child("FormDataBound", trv);
+
+    // 6. Grid
+    let mut grd = Node::new("grd_data", "Grid");
+    grd.set_name("grd_data");
+    grd.set_rect(Rect::new(10.0, 180.0, 320.0, 110.0));
+    grd.props
+        .insert("col_count".to_string(), crawrad_ir::Value::Int(4));
+    grd.props
+        .insert("row_count".to_string(), crawrad_ir::Value::Int(4));
+    grd.props
+        .insert("default_col_width".to_string(), crawrad_ir::Value::Int(80));
+    grd.props
+        .insert("default_row_height".to_string(), crawrad_ir::Value::Int(26));
+    grd.events
+        .insert("on_click".to_string(), "grd_click".to_string());
+    let _ = doc.add_child("FormDataBound", grd);
+
+    let generator = GeradorSlint;
+    let files = generator
+        .gerar(&doc, "my_app", &crawrad_registry::Registry::builtin())
+        .expect("must generate Slice 5 components successfully");
+
+    let slint_file = files
+        .iter()
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormDataBound.slint")
+        .unwrap();
+    let sc = &slint_file.conteudo;
+
+    // CheckListBox assertions
+    assert!(
+        sc.contains("clb_tasks := Rectangle"),
+        "CheckListBox element missing"
+    );
+    assert!(sc.contains("width: 150.0px;"), "CheckListBox width missing");
+    assert!(
+        sc.contains("height: 120.0px;"),
+        "CheckListBox height missing"
+    );
+    assert!(
+        sc.contains("clb_tasks_chk_0 := CheckBox"),
+        "CheckListBox checkbox element missing"
+    );
+    assert!(
+        sc.contains("checked: true;"),
+        "CheckListBox checkbox checked status missing"
+    );
+    assert!(
+        sc.contains("text: \"Setup\";"),
+        "CheckListBox item text missing"
+    );
+    assert!(
+        sc.contains("toggled => { root.clb_tasks_toggled(0, self.checked); }"),
+        "CheckListBox toggled wiring missing"
+    );
+    assert!(
+        sc.contains("callback clb_tasks_toggled(int, bool);"),
+        "CheckListBox callback declaration missing"
+    );
+
+    // ListView assertions
+    assert!(
+        sc.contains("lvw_files := Rectangle"),
+        "ListView element missing"
+    );
+    assert!(sc.contains("width: 220.0px;"), "ListView width missing");
+    assert!(sc.contains("height: 150.0px;"), "ListView height missing");
+    assert!(
+        sc.contains("lvw_files_header := Rectangle"),
+        "ListView header missing"
+    );
+    assert!(
+        sc.contains("text: \"Name\";"),
+        "ListView column header Name missing"
+    );
+    assert!(
+        sc.contains("text: \"Size\";"),
+        "ListView column header Size missing"
+    );
+    assert!(
+        sc.contains("width: 120px;"),
+        "ListView column width 120 missing"
+    );
+    assert!(
+        sc.contains("width: 80px;"),
+        "ListView column width 80 missing"
+    );
+    assert!(
+        sc.contains("text: \"main.rs\";"),
+        "ListView item text main.rs missing"
+    );
+    assert!(
+        sc.contains("text: \"4 KB\";"),
+        "ListView sub-item text 4 KB missing"
+    );
+    assert!(
+        sc.contains("clicked => { root.lvw_files_selected(0); }"),
+        "ListView clicked selection missing"
+    );
+    assert!(
+        sc.contains("double-clicked => { root.lvw_files_double_clicked(0); }"),
+        "ListView double-clicked missing"
+    );
+    assert!(
+        sc.contains("callback lvw_files_selected(int);"),
+        "ListView selected callback declaration missing"
+    );
+    assert!(
+        sc.contains("callback lvw_files_double_clicked(int);"),
+        "ListView double_clicked callback declaration missing"
+    );
+
+    // TreeView assertions
+    assert!(
+        sc.contains("trv_tree := Rectangle"),
+        "TreeView element missing"
+    );
+    assert!(sc.contains("width: 160.0px;"), "TreeView width missing");
+    assert!(sc.contains("height: 140.0px;"), "TreeView height missing");
+    assert!(
+        sc.contains("trv_tree_node_0 := Rectangle"),
+        "TreeView node row missing"
+    );
+    assert!(sc.contains("text: \"Root\";"), "TreeView Root text missing");
+    assert!(
+        sc.contains("clicked => { root.trv_tree_node_clicked(0); }"),
+        "TreeView clicked wiring missing"
+    );
+    assert!(
+        sc.contains("callback trv_tree_node_clicked(int);"),
+        "TreeView callback declaration missing"
+    );
+
+    // Grid assertions
+    assert!(sc.contains("grd_data := Rectangle"), "Grid element missing");
+    assert!(sc.contains("width: 320.0px;"), "Grid width missing");
+    assert!(sc.contains("height: 110.0px;"), "Grid height missing");
+    assert!(
+        sc.contains("grd_data_row_0 := Rectangle"),
+        "Grid row missing"
+    );
+    assert!(sc.contains("height: 26px;"), "Grid row height missing");
+    assert!(
+        sc.contains("grd_data_cell_0_0 := Rectangle"),
+        "Grid cell missing"
+    );
+    assert!(sc.contains("width: 80px;"), "Grid cell width missing");
+    assert!(
+        sc.contains("clicked => { root.grd_data_cell_selected(0, 0); }"),
+        "Grid cell selected wiring missing"
+    );
+    assert!(
+        sc.contains("callback grd_data_cell_selected(int, int);"),
+        "Grid callback declaration missing"
+    );
+
+    // Designer file assertions
+    let designer_file = files
+        .iter()
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormDataBound.designer.rs")
+        .unwrap();
+    let dc = &designer_file.conteudo;
+
+    assert!(
+        dc.contains("pub acl_main: ActionList,"),
+        "ActionList field missing in designer struct"
+    );
+    assert!(
+        dc.contains("pub struct ActionList"),
+        "ActionList struct definition missing"
+    );
+    assert!(
+        dc.contains("pub act_open: Action,"),
+        "Action field missing in designer struct"
+    );
+    assert!(
+        dc.contains("pub struct Action"),
+        "Action struct definition missing"
+    );
+    assert!(
+        dc.contains("pub iml_icons: ImageList,"),
+        "ImageList field missing in designer struct"
+    );
+    assert!(
+        dc.contains("pub struct ImageList"),
+        "ImageList struct definition missing"
+    );
+    assert!(
+        dc.contains("pub struct ImageItem"),
+        "ImageItem struct definition missing"
+    );
+    assert!(
+        dc.contains("pub clb_tasks: CheckListBox,"),
+        "CheckListBox field missing in designer struct"
+    );
+    assert!(
+        dc.contains("pub struct CheckListBox"),
+        "CheckListBox struct definition missing"
+    );
+    assert!(
+        dc.contains("pub lvw_files: ListView,"),
+        "ListView field missing in designer struct"
+    );
+    assert!(
+        dc.contains("pub struct ListView"),
+        "ListView struct definition missing"
+    );
+    assert!(
+        dc.contains("pub struct ListViewItem"),
+        "ListViewItem struct definition missing"
+    );
+    assert!(
+        dc.contains("pub col_name: ListColumn,"),
+        "ListColumn field missing in designer struct"
+    );
+    assert!(
+        dc.contains("pub struct ListColumn"),
+        "ListColumn struct definition missing"
+    );
+    assert!(
+        dc.contains("pub trv_tree: TreeView,"),
+        "TreeView field missing in designer struct"
+    );
+    assert!(
+        dc.contains("pub struct TreeView"),
+        "TreeView struct definition missing"
+    );
+    assert!(
+        dc.contains("pub grd_data: Grid,"),
+        "Grid field missing in designer struct"
+    );
+    assert!(
+        dc.contains("pub struct Grid"),
+        "Grid struct definition missing"
+    );
+
+    // Action wirings in designer
+    assert!(
+        dc.contains("window.on_clb_tasks_toggled"),
+        "CheckListBox on_toggled wiring missing"
+    );
+    assert!(
+        dc.contains("f.form.clb_task_change();"),
+        "CheckListBox on_change action invocation missing"
+    );
+    assert!(
+        dc.contains("window.on_lvw_files_selected"),
+        "ListView on_selected wiring missing"
+    );
+    assert!(
+        dc.contains("f.form.lvw_change();"),
+        "ListView on_change action invocation missing"
+    );
+    assert!(
+        dc.contains("f.form.lvw_click();"),
+        "ListView on_click action invocation missing"
+    );
+    assert!(
+        dc.contains("window.on_lvw_files_double_clicked"),
+        "ListView on_double_clicked wiring missing"
+    );
+    assert!(
+        dc.contains("f.form.lvw_dbl_click();"),
+        "ListView on_dbl_click action invocation missing"
+    );
+    assert!(
+        dc.contains("window.on_trv_tree_node_clicked"),
+        "TreeView on_node_clicked wiring missing"
+    );
+    assert!(
+        dc.contains("f.form.trv_change();"),
+        "TreeView on_change action invocation missing"
+    );
+    assert!(
+        dc.contains("f.form.trv_click();"),
+        "TreeView on_click action invocation missing"
+    );
+    assert!(
+        dc.contains("window.on_grd_data_cell_selected"),
+        "Grid on_cell_selected wiring missing"
+    );
+    assert!(
+        dc.contains("f.form.grd_click();"),
+        "Grid on_click action invocation missing"
+    );
+}
