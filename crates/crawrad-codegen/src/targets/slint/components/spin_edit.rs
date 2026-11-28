@@ -53,6 +53,10 @@ impl SlintComponentCodegen for SpinEditCodegen {
     ) -> Result<String, crate::Erro> {
         emit_slint(node, x, y, w, h)
     }
+
+    fn std_widgets(&self) -> &'static [&'static str] {
+        &["SpinBox"]
+    }
 }
 
 pub fn struct_definition() -> String {

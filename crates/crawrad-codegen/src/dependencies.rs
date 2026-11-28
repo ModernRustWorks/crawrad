@@ -166,7 +166,7 @@ pub fn dependencias_do_projeto(
         AlvoGerador::Slint => {
             if com_formulario {
                 // Main toolkit
-                deps.push(Dependencia::registro("slint", "1.9"));
+                deps.push(Dependencia::registro("slint", "=1.9.2"));
                 deps.push(Dependencia::caminho(
                     "crawrad-runtime",
                     caminho_local_crate("crawrad-runtime"),

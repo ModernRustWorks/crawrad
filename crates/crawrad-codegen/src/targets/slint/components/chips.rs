@@ -108,7 +108,7 @@ impl SlintComponentCodegen for ChipsCodegen {
         &self,
         // chips doc
         _doc: &Document,
-        _reg: &crawrad_registry::Registry,
+        reg: &crawrad_registry::Registry,
         node: &Node,
         // chips bounds
         x: f32,
@@ -120,7 +120,14 @@ impl SlintComponentCodegen for ChipsCodegen {
         let name = identificador(node.name())?;
         let vis = layout::is_visible(node);
         let en = layout::is_enabled(node);
-        let (_, _, raw_items) = util::extract_items_and_selected(node);
+        let (_, _, mut raw_items) = util::extract_items_and_selected(node);
+        if raw_items.is_empty()
+            && let Some(p) = reg
+                .get("Chips")
+                .and_then(|desc| desc.props.iter().find(|p| p.key == "items"))
+        {
+            raw_items = util::extract_string_items(&p.default);
+        }
         let item_idx = match node.props.get("item_index") {
             Some(Value::Int(i)) => *i,
             _ => -1,
@@ -138,7 +145,6 @@ impl SlintComponentCodegen for ChipsCodegen {
         out.push_str("            spacing: 6px;\n");
         out.push_str("            alignment: start;\n");
         out.push_str(&format!("            visible: {vis};\n"));
-        out.push_str(&format!("            enabled: {en};\n"));
         out.push_str(&format!(
             "            for item[index] in [{items_lit}]: Rectangle {{\n"
         ));
@@ -172,6 +178,7 @@ impl SlintComponentCodegen for ChipsCodegen {
         }
         out.push_str("                }\n");
         out.push_str("                TouchArea {\n");
+        out.push_str(&format!("                    enabled: {en};\n"));
         out.push_str(&format!(
             "                    clicked => {{ root.{name}_selected(index); }}\n"
         ));

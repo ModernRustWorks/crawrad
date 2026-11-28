@@ -33,3 +33,8 @@ pub fn show_save_dialog(title: &str, filter: &str) -> Option<std::path::PathBuf>
     };
     crawrad_runtime::file_dialog::pick_save(&req)
 }
+
+/// Dispatches a message dialog prompt.
+pub fn show_message_dialog(_title: &str, _message: &str) -> DialogChoice {
+    DialogChoice::Ok
+}

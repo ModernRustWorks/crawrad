@@ -23,7 +23,12 @@ impl SlintComponentCodegen for SaveDialogCodegen {
              }}\n\n\
              impl SaveDialog {{\n\
              \x20   pub fn execute(&mut self) -> bool {{\n\
-             \x20       true\n\
+             \x20       if let Some(path) = crawrad_runtime_slint::show_save_dialog(&self.file_name, &self.filter) {{\n\
+             \x20           self.file_name = path.to_string_lossy().into_owned();\n\
+             \x20           true\n\
+             \x20       }} else {{\n\
+             \x20           false\n\
+             \x20       }}\n\
              \x20   }}\n\
              }}\n"
         )

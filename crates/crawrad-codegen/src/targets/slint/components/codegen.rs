@@ -71,4 +71,9 @@ pub trait SlintComponentCodegen: Send + Sync {
     fn slint_properties(&self, _node: &Node) -> Vec<String> {
         Vec::new()
     }
+
+    /// Declares any std-widgets required by this component from "std-widgets.slint".
+    fn std_widgets(&self) -> &'static [&'static str] {
+        &[]
+    }
 }

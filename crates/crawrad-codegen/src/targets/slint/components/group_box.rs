@@ -53,6 +53,10 @@ impl SlintComponentCodegen for GroupBoxCodegen {
     ) -> Result<String, crate::Erro> {
         emit_slint(doc, reg, node, x, y, w, h)
     }
+
+    fn std_widgets(&self) -> &'static [&'static str] {
+        &["GroupBox"]
+    }
 }
 
 pub fn struct_definition() -> String {

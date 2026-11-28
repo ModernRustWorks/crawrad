@@ -58,6 +58,10 @@ impl SlintComponentCodegen for MemoCodegen {
         let name = identificador(node.name()).unwrap_or_else(|_| node.name().to_string());
         vec![format!("callback {name}_edited(string);")]
     }
+
+    fn std_widgets(&self) -> &'static [&'static str] {
+        &["TextEdit"]
+    }
 }
 
 pub fn struct_definition() -> String {

@@ -83,7 +83,7 @@ impl SlintComponentCodegen for BreadcrumbCodegen {
         &self,
         // breadcrumb doc
         _doc: &Document,
-        _reg: &crawrad_registry::Registry,
+        reg: &crawrad_registry::Registry,
         node: &Node,
         // breadcrumb bounds
         x: f32,
@@ -95,7 +95,14 @@ impl SlintComponentCodegen for BreadcrumbCodegen {
         let name = identificador(node.name())?;
         let vis = layout::is_visible(node);
         let en = layout::is_enabled(node);
-        let (_, _, raw_items) = util::extract_items_and_selected(node);
+        let (_, _, mut raw_items) = util::extract_items_and_selected(node);
+        if raw_items.is_empty()
+            && let Some(p) = reg
+                .get("Breadcrumb")
+                .and_then(|desc| desc.props.iter().find(|p| p.key == "items"))
+        {
+            raw_items = util::extract_string_items(&p.default);
+        }
         let sep = match node.props.get("separator") {
             Some(Value::Str(s)) => s.as_str(),
             _ => "›",
@@ -125,7 +132,6 @@ impl SlintComponentCodegen for BreadcrumbCodegen {
         out.push_str("            spacing: 4px;\n");
         out.push_str("            alignment: start;\n");
         out.push_str(&format!("            visible: {vis};\n"));
-        out.push_str(&format!("            enabled: {en};\n"));
         out.push_str(&format!(
             "            for item[index] in [{items_lit}]: HorizontalLayout {{\n"
         ));
@@ -139,6 +145,9 @@ impl SlintComponentCodegen for BreadcrumbCodegen {
         out.push_str("                    font-size: 12px;\n");
         out.push_str("                    vertical-alignment: center;\n");
         out.push_str("                    TouchArea {\n");
+        if !en {
+            out.push_str("                        enabled: false;\n");
+        }
         out.push_str(&format!(
             "                        clicked => {{ root.{name}_clicked(index); }}\n"
         ));

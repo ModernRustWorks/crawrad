@@ -81,17 +81,11 @@ impl Gerador for SlintGenerator {
             })
             .collect();
 
-        // Build the quadruple output files required for Slint forms.
+        // Build the output files required for Slint forms.
+        // Single source of truth: markup is compiled via inlined `slint::slint! { ... }` in designer.rs.
         let main_file = Arquivo {
             caminho: PathBuf::from("src/main.rs"),
             conteudo: main_app::main_rs(&form_name, &form_type),
-            dono: Dono::Gerador,
-            adicoes: Vec::new(),
-        };
-
-        let slint_markup_file = Arquivo {
-            caminho: PathBuf::from(format!("src/{form_name}.slint")),
-            conteudo: form::form_slint(doc, reg, root, &form_type, &emitted)?,
             dono: Dono::Gerador,
             adicoes: Vec::new(),
         };
@@ -114,11 +108,6 @@ impl Gerador for SlintGenerator {
             base_ref.map(|b| (b, doc)),
         )?;
 
-        Ok(vec![
-            main_file,
-            slint_markup_file,
-            designer_rs_file,
-            user_stubs_file,
-        ])
+        Ok(vec![main_file, designer_rs_file, user_stubs_file])
     }
 }

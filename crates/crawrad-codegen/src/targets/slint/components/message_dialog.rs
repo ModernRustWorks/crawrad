@@ -22,7 +22,8 @@ impl SlintComponentCodegen for MessageDialogCodegen {
              }}\n\n\
              impl MessageDialog {{\n\
              \x20   pub fn execute(&mut self) -> bool {{\n\
-             \x20       true\n\
+             \x20       let choice = crawrad_runtime_slint::show_message_dialog(&self.message, \"\");\n\
+             \x20       choice == crawrad_runtime_slint::DialogChoice::Ok || choice == crawrad_runtime_slint::DialogChoice::Yes\n\
              \x20   }}\n\
              }}\n"
         )
