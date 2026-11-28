@@ -191,6 +191,81 @@ impl Row {
     }
 }
 
+/// The File menu's submenu of recently opened projects.
+///
+/// A classic RAD IDE puts the recent projects behind one row of File rather than
+/// spilling them into the menu itself, and that is what this is.
+#[note("menu-recent")]
+pub const RECENT: &str = "Recent";
+
+/// What the submenu says when the list is empty.
+#[note("menu-recent-none")]
+pub const RECENT_NONE: &str = "no recent projects yet";
+
+/// The row in File that opens the Recent submenu.
+///
+/// It runs nothing itself — a row with no action and a submenu name is how the
+/// chrome knows to open one.
+#[note("menu-recent-header-row")]
+pub fn recent_header_row() -> Row {
+    Row {
+        submenu: Some(Cow::Borrowed(RECENT)),
+        ..Row::custom(RECENT, None)
+    }
+}
+
+/// Puts the Recent row where it belongs in an already-built File menu.
+///
+/// Not at the end: the File group is one block in catalogue order, so pushing it
+/// would park `Recent` after `Close`, below everything. It goes beside the two
+/// rows it belongs with — after `Open Project...`, before `Remove from Recent` —
+/// so the three rows about the project list read as one thought.
+///
+/// A menu missing both of those (a trimmed catalogue, a future rename) gets the
+/// row at the end rather than no row at all: out of place beats absent.
+#[note("menu-insert-recent-header")]
+pub fn insert_recent_header(rows: &mut Vec<Row>) {
+    let at = rows
+        .iter()
+        .position(|r| r.action.as_deref() == Some("project.forget_recent"))
+        .or_else(|| {
+            rows.iter()
+                .position(|r| r.action.as_deref() == Some("project.open_folder"))
+                .map(|i| i + 1)
+        })
+        .unwrap_or(rows.len());
+    rows.insert(at, recent_header_row());
+}
+
+/// The rows inside the Recent submenu, newest first.
+///
+/// Each one runs `project.open_folder` with its own folder as the `path`
+/// argument, which is the same command the Welcome page's rows run and the same
+/// one `Open Project...` runs without an argument. The IDE passes the labels it
+/// already built for the Welcome page, so the menu and that page cannot drift
+/// apart into two different names for one project.
+///
+/// An empty list draws one disabled notice instead of nothing: a submenu that
+/// opens onto blankness reads as a bug.
+#[note("menu-recent-rows")]
+pub fn recent_rows(items: &[(String, std::path::PathBuf)]) -> Vec<Row> {
+    if items.is_empty() {
+        return vec![Row {
+            enabled: false,
+            tone: Tone::Notice,
+            ..Row::custom(RECENT_NONE, None)
+        }];
+    }
+    items
+        .iter()
+        .map(|(label, folder)| Row {
+            action: Some(Cow::Borrowed("project.open_folder")),
+            args: Args::text("path", folder.display().to_string()),
+            ..Row::custom(label.clone(), None)
+        })
+        .collect()
+}
+
 #[note("menu-rows-with-scheme")]
 pub fn rows_with_scheme(menu: Menu, ctx: &Context, scheme: crate::KeymapScheme) -> Vec<Row> {
     rows_with_scheme_and_contributions(menu, ctx, scheme, None, &[])

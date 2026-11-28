@@ -132,7 +132,20 @@ pub const ALLOWED_SHELL_ROOT_FILES: &[&str] = &["ide_app.rs", "main.rs"];
 /// `strip_target` there, proved by four mutations. The shell hands over the loose
 /// files it owns and draws the answer; it no longer subtracts an offset of its
 /// own, which is the kind of arithmetic that drifts from what it describes.
-pub const MAX_SHELL_SOURCE_LINES: usize = 33_524;
+///
+/// 27/11/2026, +8: `File > Recent`, the submenu of recent projects. The shell
+/// gained TEN lines and no logic - two hooks: it asks `menu::insert_recent_header`
+/// where the row goes when it builds the File menu, and returns
+/// `menu::recent_rows` when that submenu opens. Everything the feature KNOWS
+/// lives elsewhere: the submenu's name, label, empty-state row and position are
+/// pure functions in `crawrad-actions::menu`, and reading the list belongs to
+/// `crawrad_project::workspace::recent_menu_items`, beside the `welcome_rows` it
+/// is built from - so the menu and the Welcome page cannot drift into two names
+/// for one project. A first draft had the reader and a five-line comment in the
+/// shell, which cost 25; moving the reader to its data and the comment to its
+/// note brought it to 8. Re-measured after the strip of tabs merged: this tree
+/// reports 33,532, and 33,524 + 8 is the same number.
+pub const MAX_SHELL_SOURCE_LINES: usize = 33_532;
 
 /// Maximum allowed lines for any individual `.rs` file in `crates/crawrad-ide/src/` (outside `test/`).
 ///
