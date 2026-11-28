@@ -110,7 +110,14 @@ pub fn get_selection(doc: Option<&crawrad_doc::Doc>) -> Answer {
 #[note("designer-tool-get-component-properties")]
 pub fn get_component_properties(doc: Option<&crawrad_doc::Doc>, args: &Value) -> Answer {
     let Some(id) = crate::cargo_tool::nonempty(args, "id") else {
-        return error("invalid-params", "Missing 'id' parameter");
+        // NAMING THE ID, not just demanding one: `designer.add_component`
+        // answers "Added Grid component 'grid1'", so the caller has the value
+        // and only has to guess the field it goes in. Saying `name` is wrong
+        // and not saying what is right costs a round trip every time.
+        return error(
+            "invalid-params",
+            "Missing 'id' parameter: the component's id, as `designer.add_component`              reported it (for example `grid1`) or as `designer.list_components` lists it",
+        );
     };
     let Some(doc) = doc else {
         return no_form();

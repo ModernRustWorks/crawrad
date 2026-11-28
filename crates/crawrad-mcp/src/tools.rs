@@ -137,7 +137,7 @@ pub fn build_tools_list_with_registry(
                 },
                 "framework": {
                     "type": "string",
-                    "description": "UI framework for GUI projects: 'makepad' (default) or 'egui'"
+                    "description": "UI framework for GUI projects: 'makepad' (default), 'egui' or 'slint'. The name is matched against the framework catalogue, case-insensitively, and an unknown one is refused with the valid names listed"
                 }
             },
             "required": ["name", "folder"]
