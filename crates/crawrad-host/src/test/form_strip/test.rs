@@ -206,3 +206,100 @@ fn recording_against_an_empty_strip_changes_nothing() {
     assert_eq!(host.saved_revision(), 0);
     assert!(host.forms().is_empty(), "a form was invented to hold it");
 }
+
+#[test]
+fn the_strip_lists_the_forms_before_the_loose_files() {
+    let mut host = HostModel::new();
+    host.open_form(a_form("form_main"), Some(PathBuf::from("/p/form_main.rs")));
+    host.open_form(
+        a_form("form_other"),
+        Some(PathBuf::from("/p/form_other.rs")),
+    );
+
+    let rows = host.strip(&[("main.rs".to_string(), false), ("lib.rs".to_string(), true)]);
+
+    assert_eq!(rows.len(), 4);
+    assert!(rows[0].is_form && rows[1].is_form, "the forms come first");
+    assert!(!rows[2].is_form && !rows[3].is_form, "the files come after");
+    assert!(rows[0].label.ends_with("form_main"));
+    assert_eq!(rows[2].label, "main.rs");
+    assert!(
+        rows[3].dirty,
+        "a loose file's unsaved mark is carried through"
+    );
+}
+
+#[test]
+fn a_form_with_unsaved_work_marks_its_own_tab_only() {
+    let mut host = HostModel::new();
+    host.open_form(a_form("form_main"), None);
+    host.open_form(a_form("form_other"), None);
+    host.set_saved_revision(host.doc().unwrap().revision());
+
+    // Only the form in front is edited, by a real transaction: the revision moves
+    // PAST the saved one, which is the state a person creates by typing.
+    host.doc_mut()
+        .unwrap()
+        .apply_one(
+            "move it",
+            crawrad_doc::Command::SetRect {
+                node: "form_other".into(),
+                rect: crawrad_ir::Rect::new(8.0, 8.0, 96.0, 32.0),
+            },
+        )
+        .unwrap();
+
+    let rows = host.strip(&[]);
+    assert!(rows[1].dirty, "the edited form shows unsaved work");
+    assert!(
+        !rows[0].dirty,
+        "the other form was never touched; its tab must not claim it was"
+    );
+}
+
+#[test]
+fn a_click_past_the_forms_is_the_file_counted_from_zero() {
+    let mut host = HostModel::new();
+    host.open_form(a_form("form_main"), None);
+    host.open_form(a_form("form_other"), None);
+
+    assert_eq!(host.strip_target(0), StripClick::Form(0));
+    assert_eq!(host.strip_target(1), StripClick::Form(1));
+    // The shell's own tab list starts at zero again, past the forms.
+    assert_eq!(host.strip_target(2), StripClick::File(0));
+    assert_eq!(host.strip_target(3), StripClick::File(1));
+}
+
+#[test]
+fn with_the_editor_up_the_lit_row_is_the_files_not_the_forms() {
+    let mut host = HostModel::new();
+    host.open_form(a_form("form_main"), None);
+    host.open_form(a_form("form_other"), None);
+
+    host.set_center(ViewCenter::Design);
+    assert_eq!(
+        host.strip_front(Some(0)),
+        Some(1),
+        "the form in front is lit"
+    );
+
+    host.set_center(ViewCenter::Code);
+    assert_eq!(
+        host.strip_front(Some(0)),
+        Some(2),
+        "the editor is up, so the lit row is the file's, past both forms"
+    );
+}
+
+#[test]
+fn a_form_without_a_path_is_named_after_its_document() {
+    let mut host = HostModel::new();
+    host.open_form(a_form("form_unsaved"), None);
+
+    let rows = host.strip(&[]);
+    assert!(
+        rows[0].label.ends_with("form_unsaved"),
+        "a form never saved still reads as itself, not as an empty tab: {}",
+        rows[0].label
+    );
+}
