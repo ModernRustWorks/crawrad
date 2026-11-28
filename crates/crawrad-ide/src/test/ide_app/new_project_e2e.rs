@@ -308,3 +308,51 @@ fn test_e2e_mcp_project_lifecycle() {
 
     let _ = std::fs::remove_dir_all(&temp_root);
 }
+
+/// The line under the Location field says the folder is protected, FIRST.
+///
+/// Found by mutation on 28/11/2026: this decision lived inside the draw, so
+/// deleting the folder warning from it left the whole suite green. It is a
+/// function now, and this is the test that holds it.
+#[test]
+fn the_location_line_says_a_protected_folder_before_it_promises_anything() {
+    use crate::ide_app::dialogs::new_project::location_phrase;
+    let folder = Path::new("C:/WindowsApps/CrawRAD");
+    let protected = "`C:/WindowsApps/CrawRAD` is inside CrawRAD's own installation folder";
+
+    // The warning wins over the promise.
+    let said = location_phrase(None, None, Some(protected), Some(folder), "my_app");
+    assert_eq!(said, protected);
+    assert!(
+        !said.contains("Will create"),
+        "it promised a project it cannot create: {said}"
+    );
+
+    // Without it, the promise names the folder.
+    let said = location_phrase(None, None, None, Some(folder), "my_app");
+    assert!(
+        said.starts_with("Will create project `my_app` inside"),
+        "{said}"
+    );
+
+    // No folder yet: say so instead of promising.
+    let said = location_phrase(None, None, None, None, "my_app");
+    assert!(said.contains("Select destination folder"), "{said}");
+
+    // A bad NAME outranks the folder, and the last refusal outranks the folder
+    // too -- it is the newer answer.
+    assert_eq!(
+        location_phrase(
+            Some("bad name"),
+            Some("older"),
+            Some(protected),
+            Some(folder),
+            "x"
+        ),
+        "bad name"
+    );
+    assert_eq!(
+        location_phrase(None, Some("older"), Some(protected), Some(folder), "x"),
+        "older"
+    );
+}

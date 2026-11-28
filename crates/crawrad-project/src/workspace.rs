@@ -2018,26 +2018,94 @@ fn is_inside(path: &Path, outer: Option<&Path>) -> bool {
 // writable and the person deserves to be told that instead of an OS error code.
 #[note("workspace-make-project-parent")]
 pub fn make_project_parent(folder: &Path, app_dir: Option<&Path>) -> Result<(), Refusal> {
+    // ONE SENTENCE, ONE SOURCE. The dialog warns while the person types by
+    // calling `refusal_unwritable_folder`; `Create` must not then refuse in
+    // different words, or say nothing where the warning said something.
+    if let Some(refusal) = refusal_unwritable_folder(folder, app_dir) {
+        return Err(refusal);
+    }
     if folder.is_dir() {
         return Ok(());
-    }
-    if folder.exists() {
-        return Err(Refusal::simple(format!(
-            "`{}` is a file, not a folder. Nothing was written.",
-            folder.display()
-        )));
-    }
-    if is_inside(folder, app_dir) {
-        return Err(Refusal::simple(format!(
-            "`{}` is inside CrawRAD's own installation folder, which Windows keeps              read-only — a project cannot be created there. Choose a folder under your              user folder instead. Nothing was written.",
-            folder.display()
-        )));
     }
     match std::fs::create_dir_all(folder) {
         Ok(()) => Ok(()),
         Err(e) => Err(Refusal::simple(format!(
             "`{}` could not be created: {e}. Nothing was written.",
             folder.display()
+        ))),
+    }
+}
+
+/// A counter, because the probe's name must be unique within one process too.
+static PROBE: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+
+#[note("workspace-refusal-unwritable-folder")]
+pub fn refusal_unwritable_folder(folder: &Path, app_dir: Option<&Path>) -> Option<Refusal> {
+    if folder.as_os_str().is_empty() {
+        return None;
+    }
+    if folder.is_file() {
+        return Some(Refusal::simple(format!(
+            "`{}` is a file, not a folder. Nothing was written.",
+            folder.display()
+        )));
+    }
+    if is_inside(folder, app_dir) {
+        return Some(Refusal::simple(format!(
+            concat!(
+                "`{}` is inside CrawRAD's own installation folder, which Windows ",
+                "keeps read-only — a project cannot be created there. Choose a ",
+                "folder under your user folder instead. Nothing was written."
+            ),
+            folder.display()
+        )));
+    }
+    if !folder.is_dir() {
+        // It does not exist yet, and `Create` creates. The nearest parent that
+        // DOES exist is what decides, because that is where the first `mkdir`
+        // lands — answering `Ok` here and failing inside the worker thread is
+        // how a protected path used to turn into a cargo error nobody asked for.
+        // The first ancestor that EXISTS, not the first that is a directory: a
+        // path like `...\notes.txt\my_app` has a writable grandparent, so
+        // looking for a directory skipped straight past the file and answered
+        // `Ok` to a path no `mkdir` can ever reach.
+        return match folder.ancestors().skip(1).find(|a| a.exists()) {
+            Some(existing) if existing.is_dir() => probe(existing, folder),
+            Some(file) => Some(Refusal::simple(format!(
+                "`{}` is a file, not a folder. Nothing was written.",
+                file.display()
+            ))),
+            None => Some(Refusal::simple(format!(
+                "`{}` is not on a drive this computer has. Nothing was written.",
+                folder.display()
+            ))),
+        };
+    }
+    probe(folder, folder)
+}
+
+/// Asks the folder itself, by writing one directory and removing it.
+///
+/// `folder.is_dir()` answers that it EXISTS, never that it accepts a write, and
+/// on Windows the permission bits in the metadata do not answer it either — the
+/// ACL does. So the only honest answer is to try, in a name nobody else uses,
+/// and clean up. `at` is where the write is attempted; `about` is the path the
+/// person typed, which is the one the sentence must name.
+fn probe(at: &Path, about: &Path) -> Option<Refusal> {
+    let n = PROBE.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+    let probe = at.join(format!(".crawrad-write-probe-{}-{n}", std::process::id()));
+    match std::fs::create_dir(&probe) {
+        Ok(()) => {
+            let _ = std::fs::remove_dir(&probe);
+            None
+        }
+        Err(e) => Some(Refusal::simple(format!(
+            concat!(
+                "`{}` cannot be written to: {e}. Choose a folder under your ",
+                "user folder instead. Nothing was written."
+            ),
+            about.display(),
+            e = e
         ))),
     }
 }

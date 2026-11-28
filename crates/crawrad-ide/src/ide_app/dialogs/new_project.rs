@@ -32,6 +32,12 @@ pub struct NovoProjetoDados {
     pub fonte_templates: usize, // 0: Built-in Templates, 1: Custom Templates
     /// Add Project: the workspace the new project joins; `None` = New Project.
     pub add_to: Option<PathBuf>,
+    /// Why `pasta` cannot take a project, asked when `pasta` last changed.
+    ///
+    /// It lives here and not in `np_recusa` because that one is cleared by the
+    /// next keystroke in the name field, and a letter of the name does not make
+    /// a protected folder writable.
+    pub folder_refusal: Option<String>,
 }
 
 pub use crawrad_project::project_template::TEMPLATES;
@@ -53,6 +59,51 @@ const NP_CATEGORIES: [&str; 9] = [
 #[note("ide-app-dialogs-new-project-np-id")]
 fn np_id(name: String) -> [LiveId; 1] {
     [LiveId::from_str(&name)]
+}
+
+/// The one line under the Location field: a refusal, or what will happen.
+///
+/// A decision, not drawing, so it is a function and has its own test. It used to
+/// be a `match` inside the draw, which is why the folder warning could be
+/// dropped from it with the whole suite still green (found by mutation on
+/// 28/11/2026).
+///
+/// Order matters: a bad NAME outranks everything, then the last refusal an
+/// action produced, then a folder that cannot take a project -- that one before
+/// the cheerful promise, so the label never promises what `Create` will refuse.
+pub(crate) fn location_phrase(
+    name_refusal: Option<&str>,
+    last_refusal: Option<&str>,
+    folder_refusal: Option<&str>,
+    folder: Option<&Path>,
+    shown_name: &str,
+) -> String {
+    if let Some(bad_name) = name_refusal {
+        return bad_name.to_string();
+    }
+    if let Some(last) = last_refusal {
+        return last.to_string();
+    }
+    if let Some(unwritable) = folder_refusal {
+        return unwritable.to_string();
+    }
+    match folder {
+        Some(p) => format!(
+            "Will create project `{shown_name}` inside `{}`",
+            p.display()
+        ),
+        None => format!("Will create project `{shown_name}` (Select destination folder)"),
+    }
+}
+
+/// Why this folder cannot take a project, as one sentence, or `None`.
+///
+/// Asked only where the folder CHANGES -- the field's `changed`, the picker --
+/// never in the draw: the answer costs one directory created and removed.
+fn folder_refusal(folder: Option<&Path>) -> Option<String> {
+    let folder = folder?;
+    crawrad_project::workspace::refusal_unwritable_folder(folder, install_folder().as_deref())
+        .map(|r| r.phrase)
 }
 
 /// CrawRAD's own installation folder, when it can be known.
@@ -110,6 +161,7 @@ impl IdeApp {
             opt_tracing: false,
             fonte_templates: 0,
             add_to,
+            folder_refusal: None,
         });
         self.np_recusa = None;
         self.refresh(cx);
@@ -429,24 +481,13 @@ impl IdeApp {
 
         // Validation and refusal
         let recusa = crawrad_project::workspace::refusal_typed_name(&nome_exibicao);
-        let frase = match (&recusa, self.np_recusa.as_deref()) {
-            (None, Some(anterior)) => anterior.to_string(),
-            (Some(f), _) => f.clone(),
-            (None, None) => {
-                if let Some(p) = &dados.pasta {
-                    format!(
-                        "Will create project `{}` inside `{}`",
-                        nome_exibicao,
-                        p.display()
-                    )
-                } else {
-                    format!(
-                        "Will create project `{}` (Select destination folder)",
-                        nome_exibicao
-                    )
-                }
-            }
-        };
+        let frase = location_phrase(
+            recusa.as_deref(),
+            self.np_recusa.as_deref(),
+            dados.folder_refusal.as_deref(),
+            dados.pasta.as_deref(),
+            &nome_exibicao,
+        );
         dlg.label(id!(np_recusa)).set_text(cx, &frase);
         Self::habilitar(cx, &dlg.widget(id!(np_escolher)), recusa.is_none());
     }
@@ -548,6 +589,13 @@ impl IdeApp {
             } else {
                 Some(PathBuf::from(t.trim()))
             };
+            // SAY IT WHILE IT IS BEING TYPED. Editing the path to a protected
+            // place used to be answered on `Create` and not before, so the label
+            // promised "Will create project `x` inside `C:\Windows\System32`"
+            // right up to the moment it could not. Asked here and not in the
+            // draw, because `changed` fires once per edit and the answer costs
+            // one directory created and removed.
+            dados.folder_refusal = folder_refusal(path.as_deref());
             dados.pasta = path;
             mudou = true;
         }
@@ -558,6 +606,7 @@ impl IdeApp {
                 .set_title("Select Project Location")
                 .pick_folder()
         {
+            dados.folder_refusal = folder_refusal(Some(pasta.as_path()));
             dados.pasta = Some(pasta);
             mudou = true;
         }
