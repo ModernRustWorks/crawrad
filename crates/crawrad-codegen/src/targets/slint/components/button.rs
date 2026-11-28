@@ -64,6 +64,10 @@ impl SlintComponentCodegen for ButtonCodegen {
             Vec::new()
         }
     }
+
+    fn std_widgets(&self) -> &'static [&'static str] {
+        &["Button"]
+    }
 }
 
 pub fn struct_definition() -> String {

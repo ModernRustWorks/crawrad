@@ -109,7 +109,7 @@ impl SlintComponentCodegen for CardCodegen {
         // card id
         let name = identificador(node.name())?;
         let vis = layout::is_visible(node);
-        let en = layout::is_enabled(node);
+        let _en = layout::is_enabled(node);
         // card title text
         let caption = layout::text(node);
         let caption_esc = util::escape_slint_string(&caption);
@@ -135,7 +135,6 @@ impl SlintComponentCodegen for CardCodegen {
         out.push_str("            border-color: #3e3e56;\n");
         out.push_str("            clip: true;\n");
         out.push_str(&format!("            visible: {vis};\n"));
-        out.push_str(&format!("            enabled: {en};\n"));
         if show_header {
             out.push_str("            Rectangle {\n");
             out.push_str("                x: 0px;\n");
@@ -143,7 +142,7 @@ impl SlintComponentCodegen for CardCodegen {
             out.push_str("                width: parent.width;\n");
             out.push_str(&format!("                height: {header_h:.1}px;\n"));
             out.push_str("                background: #2d2d42;\n");
-            out.push_str("                border-bottom-width: 1px;\n");
+            out.push_str("                border-width: 1px;\n");
             out.push_str("                border-color: #3e3e56;\n");
             out.push_str("                Text {\n");
             out.push_str("                    x: 10px;\n");

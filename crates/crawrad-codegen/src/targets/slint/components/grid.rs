@@ -165,7 +165,6 @@ impl SlintComponentCodegen for GridCodegen {
 
         let mut out = util::emit_container_header(node, x, y, w, h, 4.0, true)?;
         out.push_str("            VerticalLayout {\n");
-        out.push_str("            VerticalLayout {\n");
 
         for r in 0..row_count.min(8) {
             let bg = if r == 0 { "#f0f0f0" } else { "#ffffff" };

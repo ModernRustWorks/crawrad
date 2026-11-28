@@ -62,6 +62,10 @@ impl SlintComponentCodegen for EditCodegen {
         }
         cbs
     }
+
+    fn std_widgets(&self) -> &'static [&'static str] {
+        &["LineEdit"]
+    }
 }
 
 pub fn struct_definition() -> String {

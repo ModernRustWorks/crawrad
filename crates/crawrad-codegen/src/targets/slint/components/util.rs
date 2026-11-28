@@ -15,7 +15,18 @@ pub const FIELD_LINES: &str = "    pub lines: Strings,";
 
 /// Escapes a string for inclusion in `.slint` markup.
 pub fn escape_slint_string(s: &str) -> String {
-    s.replace('\\', "\\\\").replace('"', "\\\"")
+    let mut out = String::with_capacity(s.len());
+    for c in s.chars() {
+        match c {
+            '\\' => out.push_str("\\\\"),
+            '"' => out.push_str("\\\""),
+            '\n' => out.push_str("\\n"),
+            '\r' => out.push_str("\\u{0d}"),
+            '\t' => out.push_str("\\u{09}"),
+            other => out.push(other),
+        }
+    }
+    out
 }
 
 /// Extracts string items from a property value supporting both string lists and item maps.

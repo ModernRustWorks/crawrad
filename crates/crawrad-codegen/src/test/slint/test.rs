@@ -1542,8 +1542,8 @@ fn test_slint_slice3_components() {
         "ToolBar background missing"
     );
     assert!(
-        sc.contains("border-bottom-width: 1px;"),
-        "ToolBar border-bottom-width missing"
+        sc.contains("border-width: 1px;"),
+        "ToolBar border-width missing"
     );
     assert!(
         sc.contains("border-color: #1e1e24;"),
@@ -2575,4 +2575,129 @@ fn test_slint_border_radius_property() {
         sc.contains("border-radius: 4px;"),
         "Default node without slint.border-radius must fallback to border-radius: 4px;"
     );
+}
+
+use crate::targets::slint::CLASSES;
+use slint_interpreter::Compiler;
+use std::future::Future;
+use std::path::PathBuf;
+use std::pin::pin;
+use std::sync::Arc;
+use std::task::{Context, Poll, Wake, Waker};
+
+struct NoopWake;
+
+impl Wake for NoopWake {
+    fn wake(self: Arc<Self>) {}
+}
+
+fn block_on<F: Future>(future: F) -> F::Output {
+    let waker = Waker::from(Arc::new(NoopWake));
+    let mut cx = Context::from_waker(&waker);
+    let mut future = pin!(future);
+    loop {
+        if let Poll::Ready(value) = future.as_mut().poll(&mut cx) {
+            return value;
+        }
+    }
+}
+
+fn diagnostics(source: &str) -> Vec<String> {
+    let compiler = Compiler::default();
+    let result =
+        block_on(compiler.build_from_source(source.to_string(), PathBuf::from("form.slint")));
+    result.diagnostics().map(|d| format!("{d}")).collect()
+}
+
+fn valid_form_doc() -> Document {
+    let mut doc = Document::new("Form1", "Form");
+    let form = doc.node_mut("Form1").unwrap();
+    form.set_rect(Rect::new(0.0, 0.0, 800.0, 600.0));
+    form.set_name("Form1");
+    form.set_text("Form");
+    doc
+}
+
+fn add_valid_node(doc: &mut Document, class: &str, index: usize) {
+    let id = format!("c{index}");
+    let mut node = Node::new(&id, class);
+    node.set_name(&id);
+    let reg = crawrad_registry::Registry::builtin();
+    if let Some(desc) = reg.get(class)
+        && desc.props.iter().any(|p| p.key == "text")
+    {
+        node.set_text(class);
+    }
+    node.set_rect(Rect::new(10.0, 10.0 + 30.0 * index as f32, 120.0, 24.0));
+    let _ = doc.add_child("Form1", node);
+}
+
+fn valid_markup(doc: &Document) -> String {
+    let reg = crawrad_registry::Registry::builtin();
+    let files: Vec<crate::Arquivo> = GeradorSlint.gerar(doc, "app", &reg).expect("generate");
+    let slint = files
+        .iter()
+        .find(|f| f.caminho.extension().is_some_and(|e| e == "slint"))
+        .expect("a .slint file");
+    slint.conteudo.clone()
+}
+
+#[test]
+fn every_class_generates_markup_the_slint_compiler_accepts() {
+    let mut failures = Vec::new();
+    for (i, class) in CLASSES.iter().enumerate() {
+        let mut doc = valid_form_doc();
+        add_valid_node(&mut doc, class, i);
+        let source = valid_markup(&doc);
+        let diags = diagnostics(&source);
+        if !diags.is_empty() {
+            failures.push(format!(
+                "== {class} ==\n{}\n-- markup --\n{source}",
+                diags.join("\n")
+            ));
+        }
+    }
+    assert!(failures.is_empty(), "{}", failures.join("\n\n"));
+}
+
+#[test]
+fn a_form_carrying_every_class_compiles_together() {
+    let mut doc = valid_form_doc();
+    for (i, class) in CLASSES.iter().enumerate() {
+        add_valid_node(&mut doc, class, i);
+    }
+    let source = valid_markup(&doc);
+    let diags = diagnostics(&source);
+    assert!(
+        diags.is_empty(),
+        "{}\n-- markup --\n{source}",
+        diags.join("\n")
+    );
+}
+
+#[test]
+fn special_characters_in_captions_compile_cleanly() {
+    for (name, caption) in [
+        ("newline", "Line1\nLine2"),
+        ("tab", "Col1\tCol2"),
+        ("cr", "Carriage\rReturn"),
+        ("crlf", "Windows\r\nNewline"),
+        ("brace", "Contains {brace}"),
+        ("quote", "Contains \"quoted\" text"),
+        ("backslash", "Contains \\ backslash"),
+    ] {
+        let mut doc = valid_form_doc();
+        let mut btn = Node::new(name, "Button");
+        btn.set_name(name);
+        btn.set_text(caption);
+        btn.set_rect(Rect::new(10.0, 10.0, 120.0, 24.0));
+        let _ = doc.add_child("Form1", btn);
+        let source = valid_markup(&doc);
+        let diags = diagnostics(&source);
+        assert!(
+            diags.is_empty(),
+            "Failed for {name}: {}\n-- markup --\n{source}",
+            diags.join("\n")
+        );
+    }
 }

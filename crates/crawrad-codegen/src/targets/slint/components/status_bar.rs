@@ -74,7 +74,7 @@ impl SlintComponentCodegen for StatusBarCodegen {
         // status_bar id
         let name = identificador(node.name())?;
         let vis = layout::is_visible(node);
-        let en = layout::is_enabled(node);
+        let _en = layout::is_enabled(node);
         let txt = match node.props.get("simple_text") {
             Some(Value::Str(s)) => s.as_str(),
             _ => "",
@@ -84,7 +84,6 @@ impl SlintComponentCodegen for StatusBarCodegen {
         let mut out = util::emit_rectangle_header(node, x, y, w, h)?;
         out.push_str("            background: #252526;\n");
         out.push_str(&format!("            visible: {vis};\n"));
-        out.push_str(&format!("            enabled: {en};\n"));
         out.push_str("            Text {\n");
         out.push_str("                x: 4px;\n");
         out.push_str(&format!("                text: \"{txt_esc}\";\n"));

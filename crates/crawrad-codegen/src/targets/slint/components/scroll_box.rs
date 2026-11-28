@@ -90,7 +90,7 @@ impl SlintComponentCodegen for ScrollBoxCodegen {
     ) -> Result<String, crate::Erro> {
         // scroll_box id
         let vis = layout::is_visible(node);
-        let en = layout::is_enabled(node);
+        let _en = layout::is_enabled(node);
         let bw = match node.props.get("border_width") {
             Some(Value::Int(i)) => (*i).max(0),
             _ => 1,
@@ -104,7 +104,6 @@ impl SlintComponentCodegen for ScrollBoxCodegen {
         out.push_str("            border-color: #45475a;\n");
         out.push_str("            clip: true;\n");
         out.push_str(&format!("            visible: {vis};\n"));
-        out.push_str(&format!("            enabled: {en};\n"));
         if !children.is_empty() {
             out.push_str(&children);
         }

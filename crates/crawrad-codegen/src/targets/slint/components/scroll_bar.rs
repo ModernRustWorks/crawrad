@@ -164,4 +164,8 @@ impl SlintComponentCodegen for ScrollBarCodegen {
         let name = identificador(node.name()).unwrap_or_else(|_| node.name().to_string());
         vec![format!("callback {name}_changed(float);")]
     }
+
+    fn std_widgets(&self) -> &'static [&'static str] {
+        &["Slider"]
+    }
 }

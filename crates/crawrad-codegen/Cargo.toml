@@ -50,3 +50,7 @@ egui = "0.36.1"
 # Fake components prove a fake generator.
 crawrad-package.workspace = true
 serde_json.workspace = true
+# Compiles the generated `.slint` markup and reports the compiler's diagnostics.
+# `default-features = false`: the test needs the compiler, not a renderer or a
+# windowing backend.
+slint-interpreter = { version = "=1.9.2", default-features = false, features = ["compat-1-2"] }
