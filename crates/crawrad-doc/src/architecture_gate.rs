@@ -145,7 +145,13 @@ pub const ALLOWED_SHELL_ROOT_FILES: &[&str] = &["ide_app.rs", "main.rs"];
 /// shell, which cost 25; moving the reader to its data and the comment to its
 /// note brought it to 8. Re-measured after the strip of tabs merged: this tree
 /// reports 33,532, and 33,524 + 8 is the same number.
-pub const MAX_SHELL_SOURCE_LINES: usize = 33_532;
+/// Raised to 33_536 on 28/11/2026 by FOUR lines, and they are not shell code: they
+/// are the `#[cfg(test)] #[path = ...] mod` declaration that attaches the app-icon
+/// tests to this crate. The tests themselves live under `test/`, which this count
+/// excludes; a test in the shell crate cannot be reached without those four lines.
+/// Measured both ways: 33_532 + 4 = 33_536, and `main.rs` went from 76 to 80 lines
+/// while no other non-test file in the crate changed.
+pub const MAX_SHELL_SOURCE_LINES: usize = 33_536;
 
 /// Maximum allowed lines for any individual `.rs` file in `crates/crawrad-ide/src/` (outside `test/`).
 ///
