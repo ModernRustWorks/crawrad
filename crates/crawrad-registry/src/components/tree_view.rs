@@ -16,6 +16,7 @@ pub fn tree_view() -> ComponentDesc {
             // are `comctl32` vocabulary and mean nothing in
             // egui. A file containing them remains valid — the namespace exists
             // for this, and the `.crawform` preserves them.
+            Props::slint_border_radius(4),
         ],
         events: [
             Events::CHANGE,

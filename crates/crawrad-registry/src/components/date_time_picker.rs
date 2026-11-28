@@ -16,6 +16,7 @@ pub fn date_time_picker() -> ComponentDesc {
             Props::date_time_value("2000-01-01"),
             Props::min_date(""),
             Props::max_date(""),
+            Props::slint_border_radius(4),
         ],
         events: [
             Events::CHANGE,

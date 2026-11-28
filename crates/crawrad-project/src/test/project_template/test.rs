@@ -119,7 +119,13 @@ fn template_floor_follows_what_the_template_writes() {
         ..Default::default()
     };
     assert_eq!(template_floor("console_app", &egui_options), (1, 85));
-    assert_eq!(template_floor("wasm_app", &egui_options), (1, 88));
+    // THIS ASSERTION USED TO READ `(1, 88)`, which is MAKEPAD's floor, because
+    // `wasm_app` hardcoded `AlvoGerador::Makepad` and threw away the framework the
+    // person chose. The test froze the defect instead of catching it: choosing
+    // egui + WASM produced a Makepad project, and the floor agreed with the
+    // project nobody asked for. egui needs 1.95 for a graphical project, which is
+    // the same number `gui_app` asserts two lines down.
+    assert_eq!(template_floor("wasm_app", &egui_options), (1, 95));
     assert_eq!(template_floor("gui_app", &egui_options), (1, 95));
     assert_eq!(
         template_floor("gui_app", &ProjectTemplateOptions::default()),
@@ -211,5 +217,119 @@ fn desktop_templates_born_with_icon_build_script_and_resource() {
     assert!(!non_desktop.join("build.rs").exists());
     assert!(!non_desktop.join("app.rc").exists());
 
+    let _ = std::fs::remove_dir_all(&base);
+}
+
+/// THE DIALOG MUST NOT OFFER WHAT IT WILL NOT HONOUR.
+///
+/// Before this, `wasm_app`, `mobile_app` and `multiwindow_app` hardcoded Makepad
+/// and ignored `options.framework`, so **egui + WASM produced a Makepad project**
+/// and nothing said so. Handing somebody another framework's project is worse
+/// than refusing: they find out when the code does not look like what they asked
+/// for.
+#[test]
+fn a_framework_that_cannot_reach_the_platform_is_refused_by_name() {
+    use crawrad_codegen::AlvoGerador;
+
+    let egui = ProjectTemplateOptions {
+        framework: AlvoGerador::Egui,
+        ..Default::default()
+    };
+    let refusal = refuse_a_platform_the_framework_cannot_reach("mobile_app", &egui)
+        .expect_err("egui's card does not claim phones, so this cannot be built");
+    assert!(
+        refusal.contains("egui") || refusal.contains("Egui"),
+        "the refusal must name the framework, not just say no: {refusal}"
+    );
+    assert!(
+        refusal.contains("phones"),
+        "and name the platform it cannot reach: {refusal}"
+    );
+}
+
+#[test]
+fn a_framework_that_does_reach_the_platform_is_let_through() {
+    use crawrad_codegen::AlvoGerador;
+
+    let egui = ProjectTemplateOptions {
+        framework: AlvoGerador::Egui,
+        ..Default::default()
+    };
+    // egui's card DOES claim the browser, so WASM is not refused.
+    assert!(refuse_a_platform_the_framework_cannot_reach("wasm_app", &egui).is_ok());
+    // And a template with no platform of its own never asks the question.
+    assert!(refuse_a_platform_the_framework_cannot_reach("console_app", &egui).is_ok());
+    let makepad = ProjectTemplateOptions::default();
+    assert!(refuse_a_platform_the_framework_cannot_reach("mobile_app", &makepad).is_ok());
+}
+
+/// The refusal reads the CARD, not a list of names written in the refusal itself.
+///
+/// That is what makes a framework added later covered without touching this: the
+/// card says what it can reach, and the decision follows the card.
+#[test]
+fn the_refusal_follows_the_card_and_not_a_hardcoded_name() {
+    use crawrad_codegen::AlvoGerador;
+
+    for alvo in [AlvoGerador::Makepad, AlvoGerador::Egui] {
+        let card = crate::frameworks::of(alvo);
+        let options = ProjectTemplateOptions {
+            framework: alvo,
+            ..Default::default()
+        };
+        assert_eq!(
+            refuse_a_platform_the_framework_cannot_reach("wasm_app", &options).is_ok(),
+            card.web,
+            "{}: the browser answer must be the card's `web`",
+            card.name
+        );
+        assert_eq!(
+            refuse_a_platform_the_framework_cannot_reach("mobile_app", &options).is_ok(),
+            card.mobile,
+            "{}: the phone answer must be the card's `mobile`",
+            card.name
+        );
+    }
+}
+
+/// THE STARTER FORM MUST BE THE CHOSEN FRAMEWORK'S, not Makepad's by default.
+///
+/// Found by mutation on 28/11/2026: putting `AlvoGerador::Makepad` back into
+/// `write_starter_form`'s call left the whole suite green, so a `wasm_app`
+/// created with egui could be born with a Makepad form and nothing would notice.
+/// The generated code is what the person opens first, so this is the most
+/// visible place the wrong framework could hide.
+#[test]
+fn a_wasm_project_is_born_with_the_chosen_frameworks_form() {
+    use crawrad_codegen::AlvoGerador;
+
+    let base = std::env::temp_dir().join(format!("crawrad-wasm-framework-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&base);
+    let member = create_or_add(None, &base, "wapp", "wasm_app", false, AlvoGerador::Egui)
+        .expect("egui reaches the browser, so this template must be produced");
+
+    let generated = member
+        .join("src")
+        .join(format!("form_main{}", crawrad_codegen::SUFIXO_GERADO));
+    let code = std::fs::read_to_string(&generated).unwrap_or_else(|e| {
+        panic!(
+            "the generated form must be readable at {}: {e}",
+            generated.display()
+        )
+    });
+
+    // Makepad's generated form is built around its `live_design!` macro, which
+    // egui's has no equivalent of — so the macro's presence is the framework's
+    // own fingerprint in the file the person opens first.
+    assert!(
+        !code.contains("live_design!"),
+        "the form was generated for Makepad although egui was chosen:
+{}",
+        &code[..code.len().min(400)]
+    );
+    assert!(
+        code.contains("egui") || code.contains("eframe"),
+        "the form names neither egui nor eframe, so it was not generated for egui"
+    );
     let _ = std::fs::remove_dir_all(&base);
 }

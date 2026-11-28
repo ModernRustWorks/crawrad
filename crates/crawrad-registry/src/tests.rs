@@ -808,3 +808,80 @@ fn a_grid_accepts_grid_columns() {
     assert!(col.prop("alignment").is_some());
     assert!(col.prop("visible").is_some());
 }
+
+/// THE OBJECT INSPECTOR MUST LIST DIFFERENT PROPERTIES PER FRAMEWORK.
+///
+/// The filtering already worked — the Inspector calls
+/// `props_for(generator::target_key())` — but there was almost nothing to filter:
+/// exactly ONE per-target property existed in the whole registry
+/// (`makepad.look`). So the mechanism was real and the shelf was empty.
+///
+/// `slint.border-radius` is the first of Slint's own: a first-class property of
+/// Slint's `Rectangle`, which Makepad and egui express differently or not at all.
+#[test]
+fn slints_own_rounding_is_offered_to_slint_and_withheld_from_the_others() {
+    let r = crate::Registry::builtin();
+    let carry_it = [
+        "CheckListBox",
+        "Chips",
+        "ColorBox",
+        "DateTimePicker",
+        "Grid",
+        "ListView",
+        "MultiSelect",
+        "Pagination",
+        "ProgressBar",
+        "RadioButton",
+        "TreeView",
+    ];
+    for class in carry_it {
+        let d = r
+            .get(class)
+            .unwrap_or_else(|| panic!("{class} must be in the catalogue"));
+        let keys_for = |alvo: &str| -> Vec<&str> { d.props_for(alvo).map(|p| p.key).collect() };
+        assert!(
+            keys_for("slint").contains(&"slint.border-radius"),
+            "{class}: the Inspector must offer it when Slint is generating"
+        );
+        for other in ["makepad", "egui"] {
+            assert!(
+                !keys_for(other).contains(&"slint.border-radius"),
+                "{class}: {other} does not honour it, so offering it would be a lie"
+            );
+        }
+        // AND THE LISTS MUST ACTUALLY DIFFER. Asserting one key in and one key out
+        // would still pass if `props_for` returned everything for every target.
+        assert_ne!(
+            keys_for("slint").len(),
+            keys_for("makepad").len(),
+            "{class}: the two targets' property lists came out the same length"
+        );
+    }
+}
+
+/// Registering a property must not change what the IDE already produces.
+///
+/// Its default is the number the Slint target emits for that component today, so
+/// a form that nobody touched generates byte for byte what it generated before.
+#[test]
+fn the_rounding_defaults_to_what_slint_already_emits() {
+    let r = crate::Registry::builtin();
+    for (class, expected) in [
+        ("Chips", 12i64),
+        ("ProgressBar", 3),
+        ("RadioButton", 8),
+        ("TreeView", 4),
+    ] {
+        let d = r.get(class).expect("in the catalogue");
+        let p = d
+            .props
+            .iter()
+            .find(|p| p.key == "slint.border-radius")
+            .unwrap_or_else(|| panic!("{class} carries no slint.border-radius"));
+        assert_eq!(
+            p.default,
+            crawrad_ir::Value::Int(expected),
+            "{class}: the default must be what the generator hardcodes today"
+        );
+    }
+}
