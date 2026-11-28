@@ -122,19 +122,44 @@ pub const ALLOWED_SHELL_ROOT_FILES: &[&str] = &["ide_app.rs", "main.rs"];
 /// `rev_salva` and `form_anterior`, which only `clippy` noticed. Counting this
 /// tree reports 33,480, and 33,454 + 26 is the same number. What a strip of
 /// forms IS lives in `crawrad-host`; the shell holds the wiring.
-/// Raised to 33_581 on 28/11/2026 by 49 lines in `dialogs/new_project.rs`, and
-/// they are not shell code either: they are the one line under the Location
-/// field becoming a FUNCTION (`location_phrase`) plus the field that remembers
-/// why the chosen folder cannot take a project. The decision used to live inside
-/// the draw, which is exactly why deleting the folder warning from it left the
-/// whole suite green -- found by mutation. The writability check itself is in
-/// `crawrad-project`, which this count does not reach, and the new tests are
-/// under `test/`, which it excludes.
+/// The 44 lines are the drawing and the click, and only that. WHAT THE STRIP IS
+/// went to `crawrad-host` instead - the order, the boundary between the two kinds,
+/// which row is lit, and each tab's unsaved mark are `strip`, `strip_front` and
+/// `strip_target` there, proved by four mutations. The shell hands over the loose
+/// files it owns and draws the answer; it no longer subtracts an offset of its
+/// own, which is the kind of arithmetic that drifts from what it describes.
 ///
-/// Measured: 33_532 + 49 = 33_581, and `git diff --stat` on the crate reports
-/// 67 insertions against 18 deletions in that one non-test file, with nothing
-/// else outside `test/` changed.
-pub const MAX_SHELL_SOURCE_LINES: usize = 33_581;
+/// 27/11/2026, +8: `File > Recent`, the submenu of recent projects. The shell
+/// gained TEN lines and no logic - two hooks: it asks `menu::insert_recent_header`
+/// where the row goes when it builds the File menu, and returns
+/// `menu::recent_rows` when that submenu opens. Everything the feature KNOWS
+/// lives elsewhere: the submenu's name, label, empty-state row and position are
+/// pure functions in `crawrad-actions::menu`, and reading the list belongs to
+/// `crawrad_project::workspace::recent_menu_items`, beside the `welcome_rows` it
+/// is built from - so the menu and the Welcome page cannot drift into two names
+/// for one project. A first draft had the reader and a five-line comment in the
+/// shell, which cost 25; moving the reader to its data and the comment to its
+/// note brought it to 8. Re-measured after the strip of tabs merged: this tree
+/// reports 33,532, and 33,524 + 8 is the same number.
+/// Raised to 33_536 on 28/11/2026 by FOUR lines, and they are not shell code: they
+/// are the `#[cfg(test)] #[path = ...] mod` declaration that attaches the app-icon
+/// tests to this crate. The tests themselves live under `test/`, which this count
+/// excludes; a test in the shell crate cannot be reached without those four lines.
+/// Measured both ways: 33_532 + 4 = 33_536, and `main.rs` went from 76 to 80 lines
+/// while no other non-test file in the crate changed.
+/// Raised to 33_585 on 28/11/2026 by 49 more lines in `dialogs/new_project.rs`,
+/// and they are not shell code either: they are the one line under the Location
+/// field becoming a FUNCTION (`location_phrase`), plus the field that remembers
+/// why the chosen folder cannot take a project. That decision used to live inside
+/// the draw, which is exactly why deleting the folder warning from it left the
+/// whole suite green -- found by mutation, not by reading. The writability check
+/// itself is in `crawrad-project`, which this count does not reach, and the new
+/// tests are under `test/`, which it excludes.
+/// Measured on the tree this merge produces, not taken from either side of it:
+/// 33_536 + 49 = 33_585, and `git diff --stat` on the crate reports 67 insertions
+/// against 18 deletions in that one non-test file, with nothing else outside
+/// `test/` changed.
+pub const MAX_SHELL_SOURCE_LINES: usize = 33_585;
 
 /// Maximum allowed lines for any individual `.rs` file in `crates/crawrad-ide/src/` (outside `test/`).
 ///

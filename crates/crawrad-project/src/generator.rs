@@ -100,6 +100,7 @@ static ACTIVE_TARGET: AtomicU8 = AtomicU8::new(0);
 pub fn active_target() -> crawrad_codegen::AlvoGerador {
     match ACTIVE_TARGET.load(Ordering::Relaxed) {
         1 => crawrad_codegen::AlvoGerador::Egui,
+        2 => crawrad_codegen::AlvoGerador::Slint,
         _ => crawrad_codegen::AlvoGerador::Makepad,
     }
 }
@@ -114,29 +115,53 @@ pub fn set_active_target(target: crawrad_codegen::AlvoGerador) {
     let value = match target {
         crawrad_codegen::AlvoGerador::Makepad => 0,
         crawrad_codegen::AlvoGerador::Egui => 1,
+        crawrad_codegen::AlvoGerador::Slint => 2,
     };
     ACTIVE_TARGET.store(value, Ordering::Relaxed);
 }
 
 #[note("generator-target-of-manifest")]
 pub fn target_of_manifest(manifest: &str) -> Option<crawrad_codegen::AlvoGerador> {
-    use crawrad_codegen::AlvoGerador::{Egui, Makepad};
+    use crawrad_codegen::AlvoGerador;
     let named = |krate: &str| {
         manifest.lines().any(|line| {
             let name = line.trim_start().split(['=', '.', ' ']).next();
             name.map(|n| n.trim_matches('"')) == Some(krate)
         })
     };
-    let one = |egui: bool, makepad: bool| match (egui, makepad) {
-        (true, false) => Some(Egui),
-        (false, true) => Some(Makepad),
-        _ => None,
+    // ONE TARGET OR NONE, over however many targets exist. This read two
+    // booleans until 28/11/2026, so a Slint project answered `None`, the active
+    // target stayed at its default of Makepad, and the Object Inspector listed
+    // MAKEPAD properties for a project the person had created as Slint - the
+    // dialog honoured the choice and reopening the project lost it.
+    let only = |hits: &[(bool, AlvoGerador)]| -> Option<AlvoGerador> {
+        let mut found = None;
+        for &(hit, alvo) in hits {
+            if hit {
+                // Two at once is not an answer, which is what the old pair said
+                // too: the Makepad example app carries `eframe` as well.
+                if found.is_some() {
+                    return None;
+                }
+                found = Some(alvo);
+            }
+        }
+        found
     };
-    one(
-        named("crawrad-runtime-egui"),
-        named("crawrad-runtime-makepad"),
-    )
-    .or_else(|| one(named("eframe") || named("egui"), named("makepad-widgets")))
+    // Our own runtime crate names the target with no room for doubt, so it is
+    // asked first; the toolkit crate is the fallback for a hand-written project.
+    only(&[
+        (named("crawrad-runtime-egui"), AlvoGerador::Egui),
+        (named("crawrad-runtime-makepad"), AlvoGerador::Makepad),
+        (named("crawrad-runtime-slint"), AlvoGerador::Slint),
+    ])
+    .or_else(|| {
+        only(&[
+            (named("eframe") || named("egui"), AlvoGerador::Egui),
+            (named("makepad-widgets"), AlvoGerador::Makepad),
+            (named("slint"), AlvoGerador::Slint),
+        ])
+    })
 }
 
 #[note("generator-project-target")]
