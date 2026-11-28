@@ -163,6 +163,20 @@ pub fn dependencias_do_projeto(
                 ));
             }
         }
+        AlvoGerador::Slint => {
+            if com_formulario {
+                // Main toolkit
+                deps.push(Dependencia::registro("slint", "1.9"));
+                deps.push(Dependencia::caminho(
+                    "crawrad-runtime",
+                    caminho_local_crate("crawrad-runtime"),
+                ));
+                deps.push(Dependencia::caminho(
+                    "crawrad-runtime-slint",
+                    caminho_local_crate("crawrad-runtime-slint"),
+                ));
+            }
+        }
     }
 
     // Forms with data binding require the `crawrad-binding` core
@@ -183,6 +197,7 @@ pub fn minimum_rustc(target: AlvoGerador, with_form: bool) -> (u32, u32) {
         (_, false) => (1, 85),
         (AlvoGerador::Makepad, true) => (1, 88),
         (AlvoGerador::Egui, true) => (1, 95),
+        (AlvoGerador::Slint, true) => (1, 88),
     }
 }
 

@@ -527,6 +527,7 @@ dependencies = [
  "crawrad-runtime",
  "crawrad-runtime-egui",
  "crawrad-runtime-makepad",
+ "crawrad-runtime-slint",
  "egui",
  "serde_json",
  "thiserror 2.0.20",
@@ -894,6 +895,17 @@ dependencies = [
  "crawrad-actions",
  "crawrad-designer",
  "crawrad-doc",
+ "crawrad-ir",
+ "crawrad-note",
+ "crawrad-registry",
+ "crawrad-runtime",
+]
+
+[[package]]
+name = "crawrad-runtime-slint"
+version = "0.1.0"
+dependencies = [
+ "crawrad-component",
  "crawrad-ir",
  "crawrad-note",
  "crawrad-registry",

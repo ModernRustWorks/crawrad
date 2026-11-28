@@ -43,6 +43,7 @@ crawrad-runtime-egui.workspace = true
 # `shared_geometry.rs` via `include!` in the path. The guard needs both
 # sides, which is why it is the only one bringing it in.
 crawrad-runtime-makepad.workspace = true
+crawrad-runtime-slint.workspace = true
 egui = "0.36.1"
 # The `Connection` gate reads the REAL `crawrad.toml` — the same file that
 # would go to crates.io — instead of an `ExternalComponent` written in the test.

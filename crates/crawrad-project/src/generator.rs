@@ -100,6 +100,7 @@ static ACTIVE_TARGET: AtomicU8 = AtomicU8::new(0);
 pub fn active_target() -> crawrad_codegen::AlvoGerador {
     match ACTIVE_TARGET.load(Ordering::Relaxed) {
         1 => crawrad_codegen::AlvoGerador::Egui,
+        2 => crawrad_codegen::AlvoGerador::Slint,
         _ => crawrad_codegen::AlvoGerador::Makepad,
     }
 }
@@ -114,6 +115,7 @@ pub fn set_active_target(target: crawrad_codegen::AlvoGerador) {
     let value = match target {
         crawrad_codegen::AlvoGerador::Makepad => 0,
         crawrad_codegen::AlvoGerador::Egui => 1,
+        crawrad_codegen::AlvoGerador::Slint => 2,
     };
     ACTIVE_TARGET.store(value, Ordering::Relaxed);
 }
