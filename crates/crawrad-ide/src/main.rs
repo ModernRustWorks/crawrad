@@ -46,6 +46,10 @@ pub mod ide_app;
 #[path = "test/crash_hook/test.rs"]
 mod crash_hook_test;
 
+#[cfg(test)]
+#[path = "test/app_icon/test.rs"]
+mod app_icon_test;
+
 fn main() {
     // A packaged build (tools/bundle) reads its fonts from `resources/` beside the exe.
     if option_env!("MAKEPAD_PACKAGE_DIR").is_some()
