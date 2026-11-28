@@ -16,7 +16,7 @@ impl IdeApp {
             || self
                 .host
                 .doc()
-                .is_some_and(|d| d.revision() != self.rev_salva)
+                .is_some_and(|d| d.revision() != self.host.saved_revision())
     }
 
     #[note("ide-app-dialogs-exit-ideapp-draw-quit")]

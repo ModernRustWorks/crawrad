@@ -143,6 +143,16 @@ impl ViewCenter {
 pub struct OpenForm {
     pub doc: Doc,
     pub path: Option<PathBuf>,
+    /// The revision at which THIS form was last saved, which decides its own
+    /// `saved` / `modified` badge.
+    ///
+    /// The shell held one of these beside its one document. With a tab each, two
+    /// forms have independent saved states, and a single field would have told
+    /// the person their saved form was modified the moment the other one changed.
+    pub saved_revision: u64,
+    /// The previous form rectangle, for the anchors and alignment pass - also per
+    /// form, since each is resized on its own.
+    pub previous_rect: Option<crawrad_ir::Rect>,
 }
 
 #[note("hostmodel")]
@@ -192,7 +202,12 @@ impl HostModel {
     #[note("hostmodel-with-doc")]
     pub fn with_doc(doc: Doc) -> Self {
         Self {
-            forms: vec![OpenForm { doc, path: None }],
+            forms: vec![OpenForm {
+                doc,
+                path: None,
+                saved_revision: 0,
+                previous_rect: None,
+            }],
             front: Some(0),
             ..Self::default()
         }
@@ -220,7 +235,12 @@ impl HostModel {
             (Some(d), Some(i)) => self.forms[i].doc = d,
             // Nothing in front yet, so this opens the first tab.
             (Some(d), None) => {
-                self.forms.push(OpenForm { doc: d, path: None });
+                self.forms.push(OpenForm {
+                    doc: d,
+                    path: None,
+                    saved_revision: 0,
+                    previous_rect: None,
+                });
                 self.front = Some(self.forms.len() - 1);
             }
             // `None` closes the tab in front and leaves the others alone. It used
@@ -274,7 +294,12 @@ impl HostModel {
             self.front = Some(i);
             return i;
         }
-        self.forms.push(OpenForm { doc, path });
+        self.forms.push(OpenForm {
+            doc,
+            path,
+            saved_revision: 0,
+            previous_rect: None,
+        });
         let i = self.forms.len() - 1;
         self.front = Some(i);
         i
@@ -305,6 +330,38 @@ impl HostModel {
             other => other,
         };
         true
+    }
+
+    #[note("hostmodel-saved-revision")]
+    pub fn saved_revision(&self) -> u64 {
+        self.front
+            .and_then(|i| self.forms.get(i))
+            .map_or(0, |f| f.saved_revision)
+    }
+
+    #[note("hostmodel-set-saved-revision")]
+    pub fn set_saved_revision(&mut self, revision: u64) {
+        if let Some(i) = self.front
+            && let Some(f) = self.forms.get_mut(i)
+        {
+            f.saved_revision = revision;
+        }
+    }
+
+    #[note("hostmodel-previous-rect")]
+    pub fn previous_rect(&self) -> Option<crawrad_ir::Rect> {
+        self.front
+            .and_then(|i| self.forms.get(i))
+            .and_then(|f| f.previous_rect)
+    }
+
+    #[note("hostmodel-set-previous-rect")]
+    pub fn set_previous_rect(&mut self, rect: Option<crawrad_ir::Rect>) {
+        if let Some(i) = self.front
+            && let Some(f) = self.forms.get_mut(i)
+        {
+            f.previous_rect = rect;
+        }
     }
 
     #[note("hostmodel-close-all-forms")]

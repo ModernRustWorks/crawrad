@@ -150,11 +150,12 @@ impl IdeApp {
                     self.status = Some(format!("undo: {e}"));
                     err_res = Err(format!("Undo error: {e}"));
                 }
-                self.form_anterior = self
-                    .host
-                    .doc()
-                    .and_then(|d| d.ir().node(&d.ir().root))
-                    .and_then(|n| n.rect());
+                self.host.set_previous_rect(
+                    self.host
+                        .doc()
+                        .and_then(|d| d.ir().node(&d.ir().root))
+                        .and_then(|n| n.rect()),
+                );
             }
             Some(crawrad_actions::History::Redo) => {
                 if let Some(d) = self.host.doc_mut()
@@ -163,11 +164,12 @@ impl IdeApp {
                     self.status = Some(format!("redo: {e}"));
                     err_res = Err(format!("Redo error: {e}"));
                 }
-                self.form_anterior = self
-                    .host
-                    .doc()
-                    .and_then(|d| d.ir().node(&d.ir().root))
-                    .and_then(|n| n.rect());
+                self.host.set_previous_rect(
+                    self.host
+                        .doc()
+                        .and_then(|d| d.ir().node(&d.ir().root))
+                        .and_then(|n| n.rect()),
+                );
             }
             None => {}
         }

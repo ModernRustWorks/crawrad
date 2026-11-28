@@ -111,15 +111,18 @@ pub const ALLOWED_SHELL_ROOT_FILES: &[&str] = &["ide_app.rs", "main.rs"];
 /// diagnostic dialog is a new 296-line module, and the three screens account for
 /// the remaining 90. The ratchet normally only tightens; it rises here because the
 /// shell genuinely gained a surface, not because something was moved into it.
-/// Raised on 27/11/2026 from 33,424 to 33,454, measured on the tree this merge
-/// produces, not taken from either side of it: the New Project dialog gained 30
-/// lines - it now asks `default_project_parent` where to point (honouring the
-/// folder chosen in Options, which was written there and never read) and
-/// `make_project_parent` whether the folder can be written, instead of taking the
-/// working directory and falling through to a file picker. Counting this tree
-/// reports 33,454, and 33,424 + 30 is the same number. The decision lives in
-/// `crawrad-project`, so the shell holds the wiring and not the rule.
-pub const MAX_SHELL_SOURCE_LINES: usize = 33_454;
+/// Raised on 27/11/2026 from 33,454 to 33,480, measured on the tree this merge
+/// produces, not taken from either side of it: 26 lines wiring the shell to the
+/// strip of forms the host now holds. Opening a form calls `open_form` instead
+/// of `set_doc`, so it joins the strip rather than replacing what was there; the
+/// unsaved-work guard was narrowed to a RELOAD of the form in front, since a
+/// different form no longer costs the first one; and `reacomodar` reads the
+/// previous rectangle before it borrows the document, because that state moved
+/// onto the form itself. 28 lines were added and 2 went dead - the shell's old
+/// `rev_salva` and `form_anterior`, which only `clippy` noticed. Counting this
+/// tree reports 33,480, and 33,454 + 26 is the same number. What a strip of
+/// forms IS lives in `crawrad-host`; the shell holds the wiring.
+pub const MAX_SHELL_SOURCE_LINES: usize = 33_480;
 
 /// Maximum allowed lines for any individual `.rs` file in `crates/crawrad-ide/src/` (outside `test/`).
 ///

@@ -314,12 +314,22 @@ impl IdeApp {
     pub(crate) fn abrir_formulario(&mut self, cx: &mut Cx, caminho: &std::path::Path) -> bool {
         self.confirmar_edicao(cx);
         self.confirm_event(cx);
-        if self
+        // Unsaved work only blocks RELOADING the form in front, which would throw
+        // those edits away. Opening a DIFFERENT form no longer does: it gets a tab
+        // of its own and the unsaved one stays exactly as it is. Refusing it was
+        // right when the IDE held one document and the new one replaced it.
+        let e_recarga = self
             .host
-            .doc()
-            .is_some_and(|d| d.revision() != self.rev_salva)
+            .forms()
+            .get(self.host.front().unwrap_or(usize::MAX))
+            .and_then(|f| f.path.as_deref())
+            == Some(caminho);
+        if e_recarga
+            && self
+                .host
+                .doc()
+                .is_some_and(|d| d.revision() != self.host.saved_revision())
         {
-            // Says what happened (unsaved work): true for both Open and Reload.
             self.status = Some(Self::TRABALHO_NAO_SALVO.into());
             self.sincronizar(cx);
             return false;
@@ -327,9 +337,16 @@ impl IdeApp {
         let abriu = match crawrad_ir::Document::load(caminho) {
             Ok(ir) => {
                 let doc = crawrad_project::form_file::design_doc(caminho, ir);
-                self.rev_salva = doc.revision();
-                self.form_anterior = doc.ir().node(&doc.ir().root).and_then(|n| n.rect());
-                self.host.set_doc(Some(doc));
+                self.host.set_saved_revision(doc.revision());
+                self.host
+                    .set_previous_rect(doc.ir().node(&doc.ir().root).and_then(|n| n.rect()));
+                // A TAB, not a replacement. `set_doc` would have put this form
+                // where the previous one was and thrown it away - which is what
+                // the IDE did before, and why following a reference into another
+                // form lost the place you were working in.
+                let revisao = doc.revision();
+                self.host.open_form(doc, Some(caminho.to_path_buf()));
+                self.host.set_saved_revision(revisao);
                 self.host.set_active_file(Some(caminho.to_path_buf()));
                 self.design_language = None;
                 self.design_locale = None;
