@@ -22,7 +22,7 @@ impl SlintComponentCodegen for GridCodegen {
         fields.push("    pub default_row_height: i64,".to_string());
         fields.push("    pub grid_lines: bool,".to_string());
         fields.push("    pub editing: bool,".to_string());
-        fields.push("    pub cells: crawrad_runtime::string_grid::GridCells,".to_string());
+        fields.push("    pub cells: crawrad_runtime::string_grid::Cells,".to_string());
         fields.push("    pub selected: Option<(usize, usize)>,".to_string());
         fields.extend(util::catalogue_fields(
             &desc,

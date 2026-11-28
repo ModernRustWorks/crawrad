@@ -931,6 +931,7 @@ dependencies = [
  "egui",
  "serde_json",
  "slint-interpreter",
+ "syn 2.0.106",
  "thiserror 2.0.20",
 ]
 

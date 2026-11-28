@@ -13,17 +13,17 @@ impl SlintComponentCodegen for ImageListCodegen {
 
     fn struct_definition(&self) -> String {
         "#[derive(Debug, Clone, Default, PartialEq, Eq)]\n\
-         pub struct ImageItem {{\n\
+         pub struct ImageItem {\n\
          \x20   pub name: String,\n\
          \x20   pub symbol: String,\n\
-         }}\n\n\
+         }\n\n\
          #[derive(Debug, Clone, Default)]\n\
-         pub struct ImageList {{\n\
+         pub struct ImageList {\n\
          \x20   pub image_width: i64,\n\
          \x20   pub image_height: i64,\n\
          \x20   pub images: Vec<ImageItem>,\n\
-         }}\n"
-            .to_string()
+         }\n"
+        .to_string()
     }
 
     fn emit_default(&self, node: &Node) -> String {

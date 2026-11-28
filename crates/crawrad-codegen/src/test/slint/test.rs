@@ -827,8 +827,56 @@ fn test_slint_generator_emits_timer_and_dialogs() {
     assert!(
         designer_file
             .conteudo
-            .contains("let _initial_window_state = FormWindowState::Normal;")
+            .contains("let initial_window_state = FormWindowState::Normal;")
     );
+    assert!(
+        designer_file
+            .conteudo
+            .contains("FormWindowState::Maximized => window.window().set_maximized(true),")
+    );
+}
+
+#[test]
+fn test_slint_window_state_application() {
+    use crawrad_ir::Value;
+
+    let reg = crawrad_registry::Registry::builtin();
+    let generator = crate::targets::slint::GeradorSlint;
+
+    for (prop_val, expected_ident) in [
+        ("wsMaximized", "Maximized"),
+        ("wsMinimized", "Minimized"),
+        ("wsFullScreen", "FullScreen"),
+        ("wsNormal", "Normal"),
+    ] {
+        let mut doc = valid_form_doc();
+        {
+            let root = doc.node_mut("Form1").unwrap();
+            root.props.insert(
+                "window_state".to_string(),
+                Value::Enum(prop_val.to_string()),
+            );
+        }
+        let files = generator
+            .generate_with_bases(&doc, "demo", &reg, &[], false)
+            .expect("generate_with_bases");
+        let designer = files
+            .iter()
+            .find(|f| f.caminho.display().to_string().ends_with("designer.rs"))
+            .expect("designer.rs");
+        let expected_line =
+            format!("let initial_window_state = FormWindowState::{expected_ident};");
+        assert!(
+            designer.conteudo.contains(&expected_line),
+            "Expected '{expected_line}' for window_state = {prop_val}, got:\n{}",
+            designer.conteudo
+        );
+        assert!(
+            designer
+                .conteudo
+                .contains("FormWindowState::Maximized => window.window().set_maximized(true),")
+        );
+    }
 }
 
 #[test]
@@ -850,8 +898,8 @@ fn test_slint_target_manifest_and_dependencies() {
     // 2. Cargo.toml generation check: includes slint, excludes makepad-widgets and eframe
     let toml = gerar_cargo_toml("slint_sample_app", AlvoGerador::Slint, true, false, &[]);
     assert!(
-        toml.contains("slint = \"1.9\""),
-        "Generated Cargo.toml must contain slint = \"1.9\" dependency:\n{toml}"
+        toml.contains("slint = \"=1.9.2\""),
+        "Generated Cargo.toml must contain slint = \"=1.9.2\" dependency:\n{toml}"
     );
     assert!(
         !toml.contains("makepad-widgets"),
@@ -860,6 +908,68 @@ fn test_slint_target_manifest_and_dependencies() {
     assert!(
         !toml.contains("eframe"),
         "Generated Cargo.toml must NOT contain eframe:\n{toml}"
+    );
+}
+
+#[test]
+fn slint_version_is_mechanically_consistent_across_all_sources() {
+    use crate::AlvoGerador;
+    use crate::dependencies::{Dependencia, dependencias_do_projeto};
+
+    // 1. Version pinned for the compiler proof in crawrad-codegen/Cargo.toml
+    let codegen_manifest = include_str!("../../../Cargo.toml");
+    let proof_version_line = codegen_manifest
+        .lines()
+        .find(|l| l.contains("slint-interpreter") && l.contains("version"))
+        .expect("slint-interpreter dependency line in Cargo.toml");
+    let proof_version = proof_version_line
+        .split("version = \"")
+        .nth(1)
+        .and_then(|s| s.split('"').next())
+        .expect("extracted slint-interpreter version");
+
+    // 2. Version emitted into generated projects by dependencies.rs
+    let deps = dependencias_do_projeto(AlvoGerador::Slint, true, false);
+    let slint_dep = deps
+        .iter()
+        .find(|d| d.nome() == "slint")
+        .expect("slint dependency in dependencias_do_projeto");
+    let product_version = match slint_dep {
+        Dependencia::Registro { versao, .. } => versao.as_str(),
+        _ => panic!("slint dependency must be Dependencia::Registro"),
+    };
+
+    // 3. Version registered in crawrad-project/src/workspace.rs
+    let workspace_rs = include_str!("../../../../crawrad-project/src/workspace.rs");
+    let workspace_arm = workspace_rs
+        .lines()
+        .find(|l| l.contains("AlvoGerador::Slint") && l.contains("slint@"))
+        .expect("Slint arm in workspace.rs");
+    let workspace_version = workspace_arm
+        .split("slint@")
+        .nth(1)
+        .and_then(|s| s.split('"').next())
+        .expect("extracted slint version in workspace.rs");
+
+    assert_eq!(
+        proof_version, "=1.9.2",
+        "Proof version in crawrad-codegen/Cargo.toml must be =1.9.2"
+    );
+    assert_eq!(
+        product_version, "=1.9.2",
+        "Product dependency version in dependencies.rs must be =1.9.2"
+    );
+    assert_eq!(
+        workspace_version, "=1.9.2",
+        "Workspace registration version in workspace.rs must be =1.9.2"
+    );
+    assert_eq!(
+        proof_version, product_version,
+        "Proof version and product version in dependencies.rs must be identical"
+    );
+    assert_eq!(
+        product_version, workspace_version,
+        "Product version in dependencies.rs and workspace.rs must be identical"
     );
 }
 
@@ -2733,6 +2843,115 @@ fn special_characters_in_captions_compile_cleanly() {
             diags.is_empty(),
             "Failed for {name}: {}\n-- markup --\n{source}",
             diags.join("\n")
+        );
+    }
+}
+
+fn assert_generated_rust_parses(files: &[crate::Arquivo], context: &str) {
+    for file in files {
+        let path_str = file.caminho.display().to_string();
+        if path_str.ends_with(".rs")
+            && let Err(err) = syn::parse_file(&file.conteudo)
+        {
+            panic!(
+                "Generated Rust syntax error in '{path_str}' ({context}): {err}\n-- Source --\n{}",
+                file.conteudo
+            );
+        }
+    }
+}
+
+#[test]
+fn every_class_generates_rust_the_parser_accepts() {
+    let reg = crawrad_registry::Registry::builtin();
+    let generator = crate::targets::slint::GeradorSlint;
+    for (i, class) in CLASSES.iter().enumerate() {
+        let mut doc = valid_form_doc();
+        add_valid_node(&mut doc, class, i);
+        let files = generator
+            .generate_with_bases(&doc, "demo", &reg, &[], false)
+            .expect("generate_with_bases");
+        assert_generated_rust_parses(&files, class);
+    }
+}
+
+#[test]
+fn a_form_carrying_every_class_generates_rust_the_parser_accepts() {
+    let reg = crawrad_registry::Registry::builtin();
+    let generator = crate::targets::slint::GeradorSlint;
+    let mut doc = valid_form_doc();
+    for (i, class) in CLASSES.iter().enumerate() {
+        add_valid_node(&mut doc, class, i);
+    }
+    let files = generator
+        .generate_with_bases(&doc, "demo", &reg, &[], false)
+        .expect("generate_with_bases");
+    assert_generated_rust_parses(&files, "all classes");
+}
+
+#[test]
+fn test_auditor_scenario_real_compilation() {
+    let reg = crawrad_registry::Registry::builtin();
+    let generator = crate::targets::slint::GeradorSlint;
+    let mut doc = Document::new("FormMain", "Form");
+    {
+        let root = doc.node_mut("FormMain").unwrap();
+        root.set_name("FormMain");
+        root.set_text("Demo Slint");
+        root.set_rect(Rect::new(0.0, 0.0, 800.0, 600.0));
+    }
+    for (i, class) in ["Label", "Edit", "Button", "CheckBox", "Grid"]
+        .iter()
+        .enumerate()
+    {
+        let mut node = Node::new(format!("c{i}"), *class);
+        node.set_name(format!("c{i}"));
+        if let Some(desc) = reg.get(class)
+            && desc.props.iter().any(|p| p.key == "text")
+        {
+            node.set_text(*class);
+        }
+        node.set_rect(Rect::new(10.0, 10.0 + 40.0 * i as f32, 120.0, 30.0));
+        let _ = doc.add_child("FormMain", node);
+    }
+    let files = generator
+        .generate_with_bases(&doc, "scratch_slint", &reg, &[], false)
+        .expect("generate_with_bases");
+    assert_generated_rust_parses(&files, "auditor scenario");
+
+    let scratch_dir = std::env::temp_dir().join("crawrad_scratch_slint");
+    let src_dir = scratch_dir.join("src");
+    let _ = std::fs::remove_dir_all(&scratch_dir);
+    std::fs::create_dir_all(&src_dir).unwrap();
+
+    let mut toml_content = crate::dependencies::gerar_cargo_toml(
+        "scratch_slint",
+        crate::AlvoGerador::Slint,
+        true,
+        false,
+        &[],
+    );
+    toml_content.push_str("\n[workspace]\n");
+    std::fs::write(scratch_dir.join("Cargo.toml"), toml_content).unwrap();
+
+    for file in &files {
+        let dest = scratch_dir.join(&file.caminho);
+        std::fs::write(dest, &file.conteudo).unwrap();
+    }
+
+    let output = std::process::Command::new("cargo")
+        .arg("check")
+        .arg("--manifest-path")
+        .arg(scratch_dir.join("Cargo.toml"))
+        .output()
+        .expect("execute cargo check");
+
+    if !output.status.success() {
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        panic!(
+            "Real compilation check failed (exit code {:?}):\nSTDOUT:\n{stdout}\nSTDERR:\n{stderr}",
+            output.status.code()
         );
     }
 }
