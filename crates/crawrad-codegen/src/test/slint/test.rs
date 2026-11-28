@@ -5,7 +5,7 @@ use crate::targets::slint::main_app::main_rs;
 use crawrad_ir::{Document, Node, Rect, Value};
 
 #[test]
-fn slint_generator_emits_four_files() {
+fn slint_generator_emits_three_files() {
     let mut doc = Document::new("Form1", "Form");
     {
         let form = doc.node_mut("Form1").unwrap();
@@ -26,11 +26,11 @@ fn slint_generator_emits_four_files() {
         .gerar(&doc, "my_app", &crawrad_registry::Registry::builtin())
         .expect("must generate successfully");
 
-    assert_eq!(files.len(), 4);
+    assert_eq!(files.len(), 3);
     let paths: Vec<_> = files.iter().map(|a| a.caminho.to_str().unwrap()).collect();
     assert!(paths.contains(&"src/main.rs"));
     assert!(paths.contains(&"src/Form1.designer.rs"));
-    assert!(paths.contains(&"src/Form1.slint"));
+    assert!(!paths.contains(&"src/Form1.slint"));
     assert!(paths.contains(&"src/Form1.rs"));
 
     let main_rs_file = files
@@ -43,34 +43,38 @@ fn slint_generator_emits_four_files() {
             .contains("Form1_designer::app_main();")
     );
 
-    let slint_file = files
+    let designer_file = files
         .iter()
-        .find(|a| a.caminho.to_str().unwrap() == "src/Form1.slint")
+        .find(|a| a.caminho.to_str().unwrap() == "src/Form1.designer.rs")
         .unwrap();
     assert!(
-        slint_file
+        designer_file
             .conteudo
             .contains("export component Form1Window inherits Window")
     );
-    assert!(slint_file.conteudo.contains("title: \"My Slint Form\";"));
-    assert!(slint_file.conteudo.contains("width: 640.0px;"));
-    assert!(slint_file.conteudo.contains("height: 480.0px;"));
-    assert!(slint_file.conteudo.contains("btn_ok := Button"));
+    assert!(designer_file.conteudo.contains("title: \"My Slint Form\";"));
+    assert!(designer_file.conteudo.contains("width: 640.0px;"));
+    assert!(designer_file.conteudo.contains("height: 480.0px;"));
+    assert!(designer_file.conteudo.contains("btn_ok := Button"));
     // THE CAPTION AND THE WIRING, which the audit found unasserted on 27/11/2026:
     // the generator emitted both, and changing `text:` to a typo or `clicked` to
     // `pressed` left every test passing. A button with no label and no reaction
     // would have shipped.
     assert!(
-        slint_file.conteudo.contains("text: \"Confirm\";"),
+        designer_file.conteudo.contains("text: \"Confirm\";"),
         "the button lost its caption"
     );
     assert!(
-        slint_file
+        designer_file
             .conteudo
             .contains("clicked => { root.btn_ok_clicked(); }"),
         "the button's click no longer reaches the callback it declares"
     );
-    assert!(slint_file.conteudo.contains("callback btn_ok_clicked();"));
+    assert!(
+        designer_file
+            .conteudo
+            .contains("callback btn_ok_clicked();")
+    );
 
     let designer_rs = files
         .iter()
@@ -159,7 +163,7 @@ fn test_slint_generator_emits_inputs_and_toggles() {
 
     let slint_file = files
         .iter()
-        .find(|a| a.caminho.to_str().unwrap() == "src/FormMain.slint")
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormMain.designer.rs")
         .unwrap();
     assert!(slint_file.conteudo.contains("txt_username := LineEdit"));
     // The CONTENT, not only the hint: the audit on 27/11/2026 found the hint
@@ -333,7 +337,7 @@ fn test_slint_generator_emits_lists_and_numerical_controls() {
 
     let slint_file = files
         .iter()
-        .find(|a| a.caminho.to_str().unwrap() == "src/FormLists.slint")
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormLists.designer.rs")
         .unwrap();
     assert!(slint_file.conteudo.contains("cbo_theme := ComboBox"));
     assert!(
@@ -478,7 +482,7 @@ fn test_slint_generator_emits_containers_and_options() {
 
     let slint_file = files
         .iter()
-        .find(|a| a.caminho.to_str().unwrap() == "src/FormContainers.slint")
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormContainers.designer.rs")
         .unwrap();
 
     assert!(slint_file.conteudo.contains("pnl_header := Rectangle"));
@@ -553,7 +557,7 @@ fn test_slint_generator_emits_page_control_and_tabs() {
 
     let slint_file = files
         .iter()
-        .find(|a| a.caminho.to_str().unwrap() == "src/FormTabs.slint")
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormTabs.designer.rs")
         .unwrap();
 
     assert!(slint_file.conteudo.contains("pgc_main := Rectangle"));
@@ -636,7 +640,7 @@ fn test_slint_generator_emits_button_variants_and_link_label() {
 
     let slint_file = files
         .iter()
-        .find(|a| a.caminho.to_str().unwrap() == "src/FormButtons.slint")
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormButtons.designer.rs")
         .unwrap();
 
     assert!(slint_file.conteudo.contains("sbtn_play := Button"));
@@ -718,7 +722,7 @@ fn test_slint_generator_emits_graphic_components() {
 
     let slint_file = files
         .iter()
-        .find(|a| a.caminho.to_str().unwrap() == "src/FormGraphics.slint")
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormGraphics.designer.rs")
         .unwrap();
 
     assert!(slint_file.conteudo.contains("img_logo := Image"));
@@ -972,7 +976,7 @@ fn test_slint_slice1_components() {
 
     let slint_file = files
         .iter()
-        .find(|a| a.caminho.to_str().unwrap() == "src/FormSlice1.slint")
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormSlice1.designer.rs")
         .unwrap();
     let sc = &slint_file.conteudo;
 
@@ -1280,7 +1284,7 @@ fn test_slint_slice2_components() {
 
     let slint_file = files
         .iter()
-        .find(|a| a.caminho.to_str().unwrap() == "src/FormSlice2.slint")
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormSlice2.designer.rs")
         .unwrap();
     let sc = &slint_file.conteudo;
 
@@ -1550,7 +1554,7 @@ fn test_slint_slice3_components() {
 
     let slint_file = files
         .iter()
-        .find(|a| a.caminho.to_str().unwrap() == "src/FormSlice3.slint")
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormSlice3.designer.rs")
         .unwrap();
     let sc = &slint_file.conteudo;
 
@@ -1873,7 +1877,7 @@ fn test_slint_slice4_components() {
 
     let slint_file = files
         .iter()
-        .find(|a| a.caminho.to_str().unwrap() == "src/FormInputs.slint")
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormInputs.designer.rs")
         .unwrap();
     let sc = &slint_file.conteudo;
 
@@ -2299,7 +2303,7 @@ fn test_slint_slice5_components() {
 
     let slint_file = files
         .iter()
-        .find(|a| a.caminho.to_str().unwrap() == "src/FormDataBound.slint")
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormDataBound.designer.rs")
         .unwrap();
     let sc = &slint_file.conteudo;
 
@@ -2593,7 +2597,7 @@ fn test_slint_border_radius_property() {
 
     let slint_file = files
         .iter()
-        .find(|a| a.caminho.to_str().unwrap() == "src/FormRadius.slint")
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormRadius.designer.rs")
         .unwrap();
     let sc = &slint_file.conteudo;
 
@@ -2664,12 +2668,13 @@ fn add_valid_node(doc: &mut Document, class: &str, index: usize) {
 
 fn valid_markup(doc: &Document) -> String {
     let reg = crawrad_registry::Registry::builtin();
-    let files: Vec<crate::Arquivo> = GeradorSlint.gerar(doc, "app", &reg).expect("generate");
-    let slint = files
+    let root = doc.node(&doc.root).unwrap();
+    let emitted: Vec<&Node> = doc
+        .in_paint_order()
         .iter()
-        .find(|f| f.caminho.extension().is_some_and(|e| e == "slint"))
-        .expect("a .slint file");
-    slint.conteudo.clone()
+        .filter_map(|id| doc.node(id))
+        .collect();
+    crate::targets::slint::form::form_slint(doc, &reg, root, "Form1", &emitted).expect("form_slint")
 }
 
 #[test]
