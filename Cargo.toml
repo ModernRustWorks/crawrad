@@ -13,6 +13,7 @@ members = [
     "crates/crawrad-runtime-mock",
     "crates/crawrad-runtime-egui",
     "crates/crawrad-runtime-makepad",
+    "crates/crawrad-runtime-slint",
     "crates/crawrad-codegen",
     "crates/crawrad-component",
     "crates/crawrad-component-derive",
@@ -75,6 +76,7 @@ crawrad-actions = { path = "crates/crawrad-actions", version = "0.1.0" }
 crawrad-runtime-mock = { path = "crates/crawrad-runtime-mock", version = "0.1.0" }
 crawrad-runtime-egui = { path = "crates/crawrad-runtime-egui", version = "0.1.0" }
 crawrad-runtime-makepad = { path = "crates/crawrad-runtime-makepad", version = "0.1.0" }
+crawrad-runtime-slint = { path = "crates/crawrad-runtime-slint", version = "0.1.0" }
 crawrad-codegen = { path = "crates/crawrad-codegen", version = "0.1.0" }
 crawrad-component = { path = "crates/crawrad-component", version = "0.1.0" }
 crawrad-component-derive = { path = "crates/crawrad-component-derive", version = "0.1.0" }

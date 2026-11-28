@@ -589,6 +589,54 @@ crawrad-runtime-makepad = {{ path = \"../r\" }}"
     assert_eq!(target_of_manifest(&deps("eframe-extras = \"1\"")), None);
 }
 
+/// Reopening a SLINT project must answer Slint, not the default.
+///
+/// This read two booleans until 28/11/2026, so a Slint manifest answered `None`,
+/// `active_target()` stayed on its default of Makepad, and the Object Inspector
+/// listed Makepad's properties for a project created as Slint. The New Project
+/// dialog set the target correctly and reopening the project threw it away.
+#[test]
+fn a_slint_project_is_recognised_when_it_is_reopened() {
+    use crawrad_codegen::AlvoGerador::{Makepad, Slint};
+    let deps = |body: &str| {
+        format!(
+            "[package]
+name = \"app\"
+
+[dependencies]
+{body}
+"
+        )
+    };
+
+    // What `dependencies.rs` actually writes into a generated Slint project.
+    let generated = "slint = \"1.9\"
+crawrad-runtime = { path = \"../crawrad-runtime\" }
+crawrad-runtime-slint = { path = \"../crawrad-runtime-slint\" }";
+    assert_eq!(target_of_manifest(&deps(generated)), Some(Slint));
+
+    // The toolkit alone, for a project written by hand.
+    assert_eq!(target_of_manifest(&deps("slint = \"1.9\"")), Some(Slint));
+    assert_eq!(
+        target_of_manifest(&deps("slint.workspace = true")),
+        Some(Slint)
+    );
+
+    // The ambiguity rule did not get looser by growing a third target.
+    let two = "slint = \"1.9\"
+makepad-widgets = \"1.0.0\"";
+    assert_eq!(target_of_manifest(&deps(two)), None);
+    // ...and our own runtime crate still settles it.
+    let settled = format!(
+        "{two}
+crawrad-runtime-makepad = {{ path = \"../r\" }}"
+    );
+    assert_eq!(target_of_manifest(&deps(&settled)), Some(Makepad));
+
+    // A name that merely starts with the toolkit's is not the toolkit.
+    assert_eq!(target_of_manifest(&deps("slint-interpreter = \"1\"")), None);
+}
+
 /// [`project_target`] reads the member's manifest; no manifest, no framework.
 #[test]
 fn the_project_target_reads_the_member_manifest() {

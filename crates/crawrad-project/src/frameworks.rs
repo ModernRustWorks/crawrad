@@ -64,6 +64,23 @@ pub const CATALOGUE: &[Framework] = &[
         // The card above never claimed phones, and the templates must not either.
         mobile: false,
     },
+    Framework {
+        name: "Slint",
+        target: Some(AlvoGerador::Slint),
+        summary: "Declarative markup, one description of the form, native look.",
+        platforms: "⊞ Windows   🐧 Linux   🍎 macOS",
+        crate_dep: "slint",
+        availability: Availability::Ready,
+        // Slint itself reaches the browser and phones. CrawRAD's SCAFFOLD does not
+        // reach them for Slint: `scaffold_main_rs` falls through to `mod app;` and
+        // `scaffold_app_rs` answers with makepad_widgets `live_design!` for
+        // everything that is not egui. Claiming the browser here would hand someone
+        // who picked Slint a MAKEPAD project - the exact defect closed on 28/11/2026
+        // for egui + WASM. These two stay false until the scaffold speaks Slint, so
+        // the dialog refuses those two templates by name instead of lying.
+        web: false,
+        mobile: false,
+    },
 ];
 
 #[note("frameworks-of")]
