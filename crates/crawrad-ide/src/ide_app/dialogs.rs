@@ -6,6 +6,8 @@ pub mod acp_diagnostic;
 mod actions;
 #[path = "dialogs/build.rs"]
 pub mod build;
+#[path = "dialogs/build_run.rs"]
+pub mod build_run;
 #[path = "dialogs/color.rs"]
 mod color;
 #[path = "dialogs/dsl.rs"]
