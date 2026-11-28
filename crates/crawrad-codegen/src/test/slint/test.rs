@@ -1733,3 +1733,338 @@ fn test_slint_slice3_components() {
         "MenuItem on_click action invocation missing"
     );
 }
+
+#[test]
+fn test_slint_slice4_components() {
+    let mut doc = Document::new("FormInputs", "Form");
+    if let Some(form) = doc.node_mut("FormInputs") {
+        form.set_rect(Rect::new(0.0, 0.0, 800.0, 600.0));
+        form.set_name("FormInputs");
+        form.set_text("Inputs Form");
+    }
+
+    // 1. ColorBox
+    let mut clb = Node::new("clb_pick", "ColorBox");
+    clb.set_name("clb_pick");
+    clb.set_rect(Rect::new(10.0, 10.0, 145.0, 24.0));
+    clb.props.insert(
+        "selected".to_string(),
+        crawrad_ir::Value::Color(crawrad_ir::Color::rgb(255, 0, 0)),
+    );
+    clb.events
+        .insert("on_change".to_string(), "clb_change".to_string());
+    let _ = doc.add_child("FormInputs", clb);
+
+    // 2. DateTimePicker
+    let mut dtp = Node::new("dtp_sched", "DateTimePicker");
+    dtp.set_name("dtp_sched");
+    dtp.set_rect(Rect::new(10.0, 45.0, 140.0, 24.0));
+    dtp.props.insert(
+        "kind".to_string(),
+        crawrad_ir::Value::Str("dtkDate".to_string()),
+    );
+    dtp.props.insert(
+        "date_time".to_string(),
+        crawrad_ir::Value::Str("2026-11-27".to_string()),
+    );
+    dtp.events
+        .insert("on_change".to_string(), "dtp_change".to_string());
+    let _ = doc.add_child("FormInputs", dtp);
+
+    // 3. MaskEdit
+    let mut msk = Node::new("msk_phone", "MaskEdit");
+    msk.set_name("msk_phone");
+    msk.set_rect(Rect::new(10.0, 80.0, 120.0, 24.0));
+    msk.props.insert(
+        "text".to_string(),
+        crawrad_ir::Value::Str("1199998888".to_string()),
+    );
+    msk.props.insert(
+        "edit_mask".to_string(),
+        crawrad_ir::Value::Str("(99) 9999-9999".to_string()),
+    );
+    msk.events
+        .insert("on_change".to_string(), "msk_change".to_string());
+    msk.events
+        .insert("on_return".to_string(), "msk_return".to_string());
+    let _ = doc.add_child("FormInputs", msk);
+
+    // 4. MultiSelect
+    let mut mse = Node::new("mse_tags", "MultiSelect");
+    mse.set_name("mse_tags");
+    mse.set_rect(Rect::new(10.0, 115.0, 180.0, 24.0));
+    mse.props.insert(
+        "items".to_string(),
+        crawrad_ir::Value::List(vec![
+            crawrad_ir::Value::Str("Rust".to_string()),
+            crawrad_ir::Value::Str("Slint".to_string()),
+            crawrad_ir::Value::Str("CrawRAD".to_string()),
+        ]),
+    );
+    mse.props.insert(
+        "selected_items".to_string(),
+        crawrad_ir::Value::List(vec![
+            crawrad_ir::Value::Str("Rust".to_string()),
+            crawrad_ir::Value::Str("Slint".to_string()),
+        ]),
+    );
+    mse.props.insert(
+        "text_hint".to_string(),
+        crawrad_ir::Value::Str("Choose tags...".to_string()),
+    );
+    mse.events
+        .insert("on_change".to_string(), "mse_change".to_string());
+    let _ = doc.add_child("FormInputs", mse);
+
+    let generator = GeradorSlint;
+    let files = generator
+        .gerar(&doc, "my_app", &crawrad_registry::Registry::builtin())
+        .expect("must generate Slice 4 components successfully");
+
+    let slint_file = files
+        .iter()
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormInputs.slint")
+        .unwrap();
+    let sc = &slint_file.conteudo;
+
+    // ColorBox assertions
+    assert!(
+        sc.contains("clb_pick := Rectangle"),
+        "ColorBox element missing"
+    );
+    assert!(sc.contains("width: 145.0px;"), "ColorBox width missing");
+    assert!(sc.contains("height: 24.0px;"), "ColorBox height missing");
+    assert!(
+        sc.contains("clb_pick_swatch := Rectangle"),
+        "ColorBox swatch missing"
+    );
+    assert!(
+        sc.contains("background: #FF0000;"),
+        "ColorBox swatch color missing"
+    );
+    assert!(
+        sc.contains("border-radius: 2px;"),
+        "ColorBox swatch border-radius missing"
+    );
+    assert!(
+        sc.contains("clb_pick_combo := ComboBox"),
+        "ColorBox combo missing"
+    );
+    assert!(
+        sc.contains("current-value: \"Red\";"),
+        "ColorBox combo current-value missing"
+    );
+    assert!(
+        sc.contains("selected(val) => { root.clb_pick_changed(val); }"),
+        "ColorBox selected callback missing"
+    );
+    assert!(
+        sc.contains("callback clb_pick_changed(string);"),
+        "ColorBox callback declaration missing"
+    );
+
+    // DateTimePicker assertions
+    assert!(
+        sc.contains("dtp_sched := Rectangle"),
+        "DateTimePicker element missing"
+    );
+    assert!(
+        sc.contains("width: 140.0px;"),
+        "DateTimePicker width missing"
+    );
+    assert!(
+        sc.contains("height: 24.0px;"),
+        "DateTimePicker height missing"
+    );
+    assert!(
+        sc.contains("dtp_sched_input := LineEdit"),
+        "DateTimePicker LineEdit missing"
+    );
+    assert!(
+        sc.contains("edited(val) => { root.dtp_sched_edited(val); }"),
+        "DateTimePicker edited wiring missing"
+    );
+    assert!(
+        sc.contains("text: \"📅\";"),
+        "DateTimePicker date icon missing"
+    );
+    assert!(
+        sc.contains("callback dtp_sched_edited(string);"),
+        "DateTimePicker callback declaration missing"
+    );
+
+    // MaskEdit assertions
+    assert!(
+        sc.contains("msk_phone := LineEdit"),
+        "MaskEdit element missing"
+    );
+    assert!(sc.contains("width: 120.0px;"), "MaskEdit width missing");
+    assert!(sc.contains("height: 24.0px;"), "MaskEdit height missing");
+    assert!(
+        sc.contains("text: \"1199998888\";"),
+        "MaskEdit text missing"
+    );
+    assert!(
+        sc.contains("placeholder-text: \"(99) 9999-9999\";"),
+        "MaskEdit placeholder-text missing"
+    );
+    assert!(
+        sc.contains("edited(val) => { root.msk_phone_edited(val); }"),
+        "MaskEdit edited wiring missing"
+    );
+    assert!(
+        sc.contains("accepted => { root.msk_phone_accepted(); }"),
+        "MaskEdit accepted wiring missing"
+    );
+    assert!(
+        sc.contains("callback msk_phone_edited(string);"),
+        "MaskEdit edited callback declaration missing"
+    );
+    assert!(
+        sc.contains("callback msk_phone_accepted();"),
+        "MaskEdit accepted callback declaration missing"
+    );
+
+    // MultiSelect assertions
+    assert!(
+        sc.contains("mse_tags := Rectangle"),
+        "MultiSelect element missing"
+    );
+    assert!(sc.contains("width: 180.0px;"), "MultiSelect width missing");
+    assert!(sc.contains("height: 24.0px;"), "MultiSelect height missing");
+    assert!(
+        sc.contains("mse_tags_summary := Text"),
+        "MultiSelect summary text element missing"
+    );
+    assert!(
+        sc.contains("text: \"Rust, Slint\";"),
+        "MultiSelect selected items display missing"
+    );
+    assert!(
+        sc.contains("color: #1c1b1f;"),
+        "MultiSelect text color missing"
+    );
+    assert!(
+        sc.contains("text: \"▼\";"),
+        "MultiSelect dropdown arrow missing"
+    );
+    assert!(
+        sc.contains("clicked => { root.mse_tags_clicked(); }"),
+        "MultiSelect clicked wiring missing"
+    );
+    assert!(
+        sc.contains("callback mse_tags_clicked();"),
+        "MultiSelect callback declaration missing"
+    );
+
+    // Designer file assertions
+    let designer_file = files
+        .iter()
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormInputs.designer.rs")
+        .unwrap();
+    let dc = &designer_file.conteudo;
+
+    assert!(
+        dc.contains("pub clb_pick: ColorBox,"),
+        "ColorBox field missing in designer struct"
+    );
+    assert!(
+        dc.contains("pub dtp_sched: DateTimePicker,"),
+        "DateTimePicker field missing in designer struct"
+    );
+    assert!(
+        dc.contains("pub msk_phone: MaskEdit,"),
+        "MaskEdit field missing in designer struct"
+    );
+    assert!(
+        dc.contains("pub mse_tags: MultiSelect,"),
+        "MultiSelect field missing in designer struct"
+    );
+
+    assert!(
+        dc.contains("pub struct ColorBox"),
+        "ColorBox struct definition missing"
+    );
+    assert!(
+        dc.contains("pub selected: crawrad_ir::Color,"),
+        "ColorBox selected field missing"
+    );
+    assert!(
+        dc.contains("CRAWRAD_STANDARD_COLORS"),
+        "CRAWRAD_STANDARD_COLORS constant missing"
+    );
+    assert!(
+        dc.contains("pub struct DateTimePicker"),
+        "DateTimePicker struct definition missing"
+    );
+    assert!(
+        dc.contains("pub kind: String,"),
+        "DateTimePicker kind field missing"
+    );
+    assert!(
+        dc.contains("pub date_time: String,"),
+        "DateTimePicker date_time field missing"
+    );
+    assert!(
+        dc.contains("pub struct MaskEdit"),
+        "MaskEdit struct definition missing"
+    );
+    assert!(
+        dc.contains("pub edit_mask: String,"),
+        "MaskEdit edit_mask field missing"
+    );
+    assert!(
+        dc.contains("pub struct MultiSelect"),
+        "MultiSelect struct definition missing"
+    );
+    assert!(
+        dc.contains("pub selected_items: Strings,"),
+        "MultiSelect selected_items field missing"
+    );
+
+    // Action wirings
+    assert!(
+        dc.contains("window.on_clb_pick_changed"),
+        "ColorBox on_changed wiring missing"
+    );
+    assert!(
+        dc.contains("f.form.clb_pick.selected = *c;"),
+        "ColorBox selection update missing"
+    );
+    assert!(
+        dc.contains("f.form.clb_change();"),
+        "ColorBox on_change action invocation missing"
+    );
+    assert!(
+        dc.contains("window.on_dtp_sched_edited"),
+        "DateTimePicker on_edited wiring missing"
+    );
+    assert!(
+        dc.contains("f.form.dtp_change();"),
+        "DateTimePicker on_change action invocation missing"
+    );
+    assert!(
+        dc.contains("window.on_msk_phone_edited"),
+        "MaskEdit on_edited wiring missing"
+    );
+    assert!(
+        dc.contains("f.form.msk_change();"),
+        "MaskEdit on_change action invocation missing"
+    );
+    assert!(
+        dc.contains("window.on_msk_phone_accepted"),
+        "MaskEdit on_accepted wiring missing"
+    );
+    assert!(
+        dc.contains("f.form.msk_return();"),
+        "MaskEdit on_return action invocation missing"
+    );
+    assert!(
+        dc.contains("window.on_mse_tags_clicked"),
+        "MultiSelect on_clicked wiring missing"
+    );
+    assert!(
+        dc.contains("f.form.mse_change();"),
+        "MultiSelect on_change action invocation missing"
+    );
+}

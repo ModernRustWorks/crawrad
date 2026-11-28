@@ -18,7 +18,9 @@ pub mod category_panel;
 pub mod checkbox;
 pub mod chips;
 pub mod codegen;
+pub mod color_box;
 pub mod combobox;
+pub mod date_time_picker;
 pub mod drawer;
 pub mod edit;
 pub mod group_box;
@@ -27,8 +29,10 @@ pub mod label;
 pub mod link_label;
 pub mod list_box;
 pub mod main_menu;
+pub mod mask_edit;
 pub mod memo;
 pub mod message_dialog;
+pub mod multi_select;
 pub mod open_dialog;
 pub mod page_control;
 pub mod pagination;
@@ -102,6 +106,10 @@ static REGISTRY: &[&'static dyn SlintComponentCodegen] = &[
     &main_menu::MainMenuCodegen,
     &main_menu::MenuItemCodegen,
     &popup_menu::PopupMenuCodegen,
+    &color_box::ColorBoxCodegen,
+    &date_time_picker::DateTimePickerCodegen,
+    &mask_edit::MaskEditCodegen,
+    &multi_select::MultiSelectCodegen,
 ];
 
 pub fn for_class(class: &str) -> Option<&'static dyn SlintComponentCodegen> {
