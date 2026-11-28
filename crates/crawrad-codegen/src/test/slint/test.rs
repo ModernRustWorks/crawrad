@@ -56,6 +56,20 @@ fn slint_generator_emits_four_files() {
     assert!(slint_file.conteudo.contains("width: 640.0px;"));
     assert!(slint_file.conteudo.contains("height: 480.0px;"));
     assert!(slint_file.conteudo.contains("btn_ok := Button"));
+    // THE CAPTION AND THE WIRING, which the audit found unasserted on 27/11/2026:
+    // the generator emitted both, and changing `text:` to a typo or `clicked` to
+    // `pressed` left every test passing. A button with no label and no reaction
+    // would have shipped.
+    assert!(
+        slint_file.conteudo.contains("text: \"Confirm\";"),
+        "the button lost its caption"
+    );
+    assert!(
+        slint_file
+            .conteudo
+            .contains("clicked => { root.btn_ok_clicked(); }"),
+        "the button's click no longer reaches the callback it declares"
+    );
     assert!(slint_file.conteudo.contains("callback btn_ok_clicked();"));
 
     let designer_rs = files
@@ -148,6 +162,13 @@ fn test_slint_generator_emits_inputs_and_toggles() {
         .find(|a| a.caminho.to_str().unwrap() == "src/FormMain.slint")
         .unwrap();
     assert!(slint_file.conteudo.contains("txt_username := LineEdit"));
+    // The CONTENT, not only the hint: the audit on 27/11/2026 found the hint
+    // asserted and the text itself not, so a field could come up empty where the
+    // form says it is filled.
+    assert!(
+        slint_file.conteudo.contains("text: \"admin\";"),
+        "the edit lost the text the form gave it"
+    );
     assert!(
         slint_file
             .conteudo
