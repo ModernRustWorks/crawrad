@@ -295,6 +295,56 @@ fn the_refusal_follows_the_card_and_not_a_hardcoded_name() {
     }
 }
 
+/// A card that claims a platform must get THAT framework's scaffold for it.
+///
+/// The two booleans were an OPINION until this test. `web` and `mobile` said
+/// what a framework can build for, and nothing checked that the scaffold agrees
+/// -- so the card was free to claim a platform the scaffold served with another
+/// framework's code. Both gaps found so far are that same mistake: egui + WASM,
+/// and Slint on 28/11/2026, where `scaffold_app_rs` answers with
+/// `makepad_widgets` for everything that is not egui.
+///
+/// This is what makes the Slint card's two `false` a measured fact instead of a
+/// claim: flip either to `true` and this test fails, naming the foreign crate.
+#[test]
+fn a_card_that_claims_a_platform_gets_that_frameworks_scaffold() {
+    use crawrad_codegen::AlvoGerador;
+    // `makepad-widgets` is written `makepad_widgets` in code.
+    let crate_of = |a: AlvoGerador| crate::frameworks::of(a).crate_dep.replace('-', "_");
+
+    for &alvo in AlvoGerador::TODOS {
+        let card = crate::frameworks::of(alvo);
+        let mine = crate_of(alvo);
+        let foreign: Vec<String> = AlvoGerador::TODOS
+            .iter()
+            .filter(|&&other| other != alvo)
+            .map(|&other| crate_of(other))
+            .collect();
+
+        for (claims, template) in [(card.web, "wasm_app"), (card.mobile, "mobile_app")] {
+            if !claims {
+                continue;
+            }
+            let mut code = crawrad_codegen::scaffold::scaffold_main_rs(alvo, "demo", template);
+            if let Some(app) = crawrad_codegen::scaffold::scaffold_app_rs(alvo, "demo", template) {
+                code.push_str(&app);
+            }
+            for other in &foreign {
+                assert!(
+                    !code.contains(other.as_str()),
+                    "{}: the {template} scaffold names `{other}`,                      which belongs to another framework",
+                    card.name
+                );
+            }
+            assert!(
+                code.contains(mine.as_str()),
+                "{}: the {template} scaffold names nothing of `{mine}`",
+                card.name
+            );
+        }
+    }
+}
+
 /// THE STARTER FORM MUST BE THE CHOSEN FRAMEWORK'S, not Makepad's by default.
 ///
 /// Found by mutation on 28/11/2026: putting `AlvoGerador::Makepad` back into
