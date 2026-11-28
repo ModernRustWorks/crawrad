@@ -50,6 +50,10 @@ mod crash_hook_test;
 #[path = "test/app_icon/test.rs"]
 mod app_icon_test;
 
+#[cfg(test)]
+#[path = "test/mcp_descriptions/test.rs"]
+mod mcp_descriptions_test;
+
 fn main() {
     // A packaged build (tools/bundle) reads its fonts from `resources/` beside the exe.
     if option_env!("MAKEPAD_PACKAGE_DIR").is_some()

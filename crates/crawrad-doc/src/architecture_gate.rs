@@ -159,7 +159,17 @@ pub const ALLOWED_SHELL_ROOT_FILES: &[&str] = &["ide_app.rs", "main.rs"];
 /// 33_536 + 49 = 33_585, and `git diff --stat` on the crate reports 67 insertions
 /// against 18 deletions in that one non-test file, with nothing else outside
 /// `test/` changed.
-pub const MAX_SHELL_SOURCE_LINES: usize = 33_585;
+/// Raised to 33_589 on 28/11/2026 by the four lines that register
+/// `test/mcp_descriptions/test.rs` in `main.rs` — a `#[cfg(test)]`, a `#[path]`,
+/// a `mod` and the blank line before them. The test itself is under `test/` and
+/// does not count; only its registration does, the same shape that took the
+/// ratchet from 33_532 to 33_536. No shell logic was added: the fixes in this
+/// change are in `crawrad-mcp`, which this ratchet does not reach.
+///
+/// Measured by the gate itself rather than counted by hand: it reported
+/// "Current lines (excluding test/): 33589" against the old limit, which is
+/// 33_585 + 4.
+pub const MAX_SHELL_SOURCE_LINES: usize = 33_589;
 
 /// Maximum allowed lines for any individual `.rs` file in `crates/crawrad-ide/src/` (outside `test/`).
 ///
