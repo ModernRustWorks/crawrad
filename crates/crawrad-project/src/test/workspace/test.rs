@@ -1889,3 +1889,234 @@ fn reopening_brings_back_the_form_that_was_open() {
 
     let _ = std::fs::remove_dir_all(&root);
 }
+
+/// The question is answered BEFORE `Create` is pressed, and answering it
+/// creates nothing.
+///
+/// Until 28/11/2026 the only answer came from `make_project_parent`, which runs
+/// on `Create`. So someone who edited the Location to a protected place was
+/// told "Will create project `x` inside `...`" right up to the moment it could
+/// not, which is the complaint this closes: the person who types a path into a
+/// protected place has to be told so, not handed a picker or a promise.
+#[test]
+fn a_protected_folder_is_said_while_the_path_is_typed() {
+    use super::refusal_unwritable_folder;
+    let root = std::env::temp_dir().join(format!("crawrad-a3-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    let install = root.join("WindowsApps").join("CrawRAD_0.1.1.0");
+    std::fs::create_dir_all(&install).expect("install folder");
+
+    // A folder the person owns: nothing to say.
+    assert!(refusal_unwritable_folder(&root, None).is_none());
+    // A folder that does not exist yet, under a parent that does: creatable.
+    assert!(refusal_unwritable_folder(&root.join("Projects"), None).is_none());
+    assert!(
+        !root.join("Projects").exists(),
+        "ASKING created the folder; the answer must cost nothing"
+    );
+
+    // The path typed into the install folder, which is the reported case.
+    let typed = install.join("my_app");
+    let said = refusal_unwritable_folder(&typed, Some(&install))
+        .expect("a path inside the install folder cannot take a project");
+    assert!(said.phrase.contains("read-only"), "{}", said.phrase);
+    assert!(
+        said.phrase.contains("Nothing was written"),
+        "{}",
+        said.phrase
+    );
+    assert!(!typed.exists(), "it refused and created the folder anyway");
+
+    // A file is not a folder, said with the same words as before.
+    let file = root.join("not_a_folder");
+    std::fs::write(&file, b"x").expect("the file");
+    let said = refusal_unwritable_folder(&file, None).expect("a file cannot hold a project");
+    assert!(said.phrase.contains("is a file"), "{}", said.phrase);
+
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+/// ONE SENTENCE, ONE SOURCE: the warning and the refusal cannot disagree.
+///
+/// A dialog that warns in one wording and then refuses in another reads like two
+/// different problems. `make_project_parent` asks `refusal_unwritable_folder`
+/// first, so this holds by construction -- and this test is what keeps it so.
+#[test]
+fn the_warning_and_the_refusal_are_the_same_sentence() {
+    use super::refusal_unwritable_folder;
+    let root = std::env::temp_dir().join(format!("crawrad-a3-same-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    let install = root.join("WindowsApps").join("CrawRAD_0.1.1.0");
+    std::fs::create_dir_all(&install).expect("install folder");
+    let file = root.join("not_a_folder");
+    std::fs::write(&file, b"x").expect("the file");
+
+    for (folder, app_dir) in [
+        (install.join("my_app"), Some(install.as_path())),
+        (file.clone(), None),
+    ] {
+        let warned = refusal_unwritable_folder(&folder, app_dir).expect("warned");
+        let refused = make_project_parent(&folder, app_dir).expect_err("refused");
+        assert_eq!(
+            warned.phrase,
+            refused.phrase,
+            "the live warning and `Create` say different things about {}",
+            folder.display()
+        );
+    }
+
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+/// The probe cleans up after itself.
+///
+/// It answers by creating one directory and removing it, so a folder that has
+/// been asked about must look exactly as it did -- otherwise typing in the
+/// Location field would litter the person's disk.
+#[test]
+fn asking_the_folder_leaves_nothing_behind() {
+    use super::refusal_unwritable_folder;
+    let root = std::env::temp_dir().join(format!("crawrad-a3-probe-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(&root).expect("test root");
+    std::fs::write(root.join("keep.txt"), b"x").expect("a file to keep");
+
+    for _ in 0..12 {
+        assert!(refusal_unwritable_folder(&root, None).is_none());
+    }
+
+    let left: Vec<String> = std::fs::read_dir(&root)
+        .expect("read back")
+        .filter_map(|e| Some(e.ok()?.file_name().to_string_lossy().to_string()))
+        .collect();
+    assert_eq!(left, vec!["keep.txt".to_string()], "the probe left litter");
+
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+/// A drive this computer does not have is said, not turned into a cargo error.
+#[cfg(windows)]
+#[test]
+fn a_drive_that_is_not_there_is_said() {
+    use super::refusal_unwritable_folder;
+    // `Q:` is the one the report came from: editing the drive letter of the
+    // default location is how the path stopped pointing anywhere.
+    let said = refusal_unwritable_folder(std::path::Path::new(r"Q:\nowhere\my_app"), None);
+    let Some(said) = said else {
+        // The machine running the test may actually have the drive.
+        return;
+    };
+    assert!(
+        said.phrase.contains("Nothing was written"),
+        "{}",
+        said.phrase
+    );
+}
+
+/// An EXISTING folder that refuses a write is said too, and only the probe can
+/// say it.
+///
+/// Found by mutation on 28/11/2026: deleting the probe left every other test
+/// green, because they all cover cases decided without touching the disk -- a
+/// file, the install folder, a missing drive. `is_dir()` answers that a folder
+/// EXISTS, never that it accepts a write, and on Windows the metadata
+/// permission bits do not answer it either: the ACL does. So the folder has to
+/// be asked, and this is the test that proves the asking happens.
+#[test]
+fn an_existing_folder_that_refuses_a_write_is_said() {
+    use super::refusal_unwritable_folder;
+    let root = std::env::temp_dir().join(format!("crawrad-a3-locked-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(&root).expect("test root");
+
+    // Lock it against this very process, the way the OS at hand allows.
+    #[cfg(windows)]
+    {
+        // The Everyone SID, not the user name: a deny for the account still
+        // loses to the Administrators group this process may run under, and the
+        // user name is not even the right spelling on a domain machine.
+        let _ = std::process::Command::new("icacls")
+            .arg(&root)
+            .arg("/deny")
+            .arg("*S-1-1-0:(WD,AD)")
+            .output();
+    }
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let _ = std::fs::set_permissions(&root, std::fs::Permissions::from_mode(0o555));
+    }
+
+    // Did the lock take? Root, or an OS that ignores it, answers no -- and then
+    // this test has nothing to prove, so it says so instead of passing quietly.
+    let can_still_write = std::fs::create_dir(root.join("still-writable")).is_ok();
+    if can_still_write {
+        let _ = std::fs::remove_dir(root.join("still-writable"));
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let _ = std::fs::set_permissions(&root, std::fs::Permissions::from_mode(0o755));
+        }
+        let _ = std::fs::remove_dir_all(&root);
+        println!("the folder could not be locked on this machine; nothing proved here");
+        return;
+    }
+
+    let said = refusal_unwritable_folder(&root, None)
+        .expect("a folder that refuses a write must be said, not shrugged at");
+    assert!(
+        said.phrase.contains("cannot be written to"),
+        "the phrase does not say what is wrong: {}",
+        said.phrase
+    );
+    assert!(
+        said.phrase.contains("Nothing was written"),
+        "{}",
+        said.phrase
+    );
+    // And `Create` refuses in those same words.
+    let refused = make_project_parent(&root, None).expect_err("Create must refuse it too");
+    assert_eq!(said.phrase, refused.phrase);
+
+    // A path UNDER it is judged by it, because that is where the first mkdir lands.
+    let inside = refusal_unwritable_folder(&root.join("my_app"), None)
+        .expect("a child of an unwritable folder cannot be created either");
+    assert!(inside.phrase.contains("my_app"), "{}", inside.phrase);
+
+    #[cfg(windows)]
+    {
+        let _ = std::process::Command::new("icacls")
+            .arg(&root)
+            .arg("/remove:d")
+            .arg("*S-1-1-0")
+            .output();
+    }
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+/// A path THROUGH a file is refused, and it names the file.
+///
+/// Found while trying to break my own fix on 28/11/2026: the nearest existing
+/// ancestor was searched for with `is_dir()`, so `.../notes.txt/my_app` skipped
+/// straight past the file to a writable grandparent and answered `Ok` -- a path
+/// no `mkdir` can ever reach. The search is for what EXISTS; a file there is the
+/// answer.
+#[test]
+fn a_path_that_runs_through_a_file_is_refused_and_names_it() {
+    use super::refusal_unwritable_folder;
+    let root = std::env::temp_dir().join(format!("crawrad-a3-through-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(&root).expect("test root");
+    let file = root.join("notes.txt");
+    std::fs::write(&file, b"x").expect("the file");
+
+    let said = refusal_unwritable_folder(&file.join("my_app"), None)
+        .expect("a folder cannot be made inside a file");
+    assert!(said.phrase.contains("is a file"), "{}", said.phrase);
+    assert!(said.phrase.contains("notes.txt"), "{}", said.phrase);
+    // And `Create` refuses in the same words instead of failing later.
+    let refused = make_project_parent(&file.join("my_app"), None).expect_err("Create refuses");
+    assert_eq!(said.phrase, refused.phrase);
+
+    let _ = std::fs::remove_dir_all(&root);
+}
