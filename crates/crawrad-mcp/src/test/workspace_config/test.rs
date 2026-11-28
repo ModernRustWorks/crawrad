@@ -116,9 +116,27 @@ fn the_bare_name_matches_the_alias_the_manifest_declares() {
         "the manifest declares no execution alias for the bridge, so the bare name \
          resolves to nothing on a Store install"
     );
-    assert!(
-        xml.contains(&format!(r#"Alias="{}""#, "crawrad-mcp-bridge.exe")),
-        "the alias in the manifest and the name written to .mcp.json disagree"
+    // THE TWO NAMES, ACTUALLY COMPARED. The assertion that used to stand here
+    // searched the manifest for the same hand-written literal as the one above it,
+    // so it compared the manifest with itself: `bare_command` could return any
+    // name at all and this test stayed green (proved by mutation on 27/11/2026 -
+    // `test_sync_workspace_mcp_config_creates_valid_mcp_json` caught it, this test
+    // did not, although this is the test named for it). So the manifest's alias is
+    // read out and compared with what `bare_command` actually returns.
+    //
+    // The extensions must come off first: `bare_command` returns `.exe` only on
+    // Windows and the CI also runs Linux and macOS, so comparing the two verbatim
+    // would fail there for a reason that has nothing to do with the bug.
+    let declared = xml
+        .split(r#"Alias=""#)
+        .nth(1)
+        .and_then(|rest| rest.split('"').next())
+        .expect("the manifest declares no execution alias at all");
+    let stem = |s: &str| s.trim_end_matches(".exe").to_string();
+    assert_eq!(
+        stem(declared),
+        stem(&cmd),
+        "the alias the manifest declares and the name written to .mcp.json disagree,          so the bare name resolves to nothing on a Store install"
     );
 
     // THE THIRD LINK. An alias pointing at a binary nobody ships resolves to
