@@ -1,14 +1,19 @@
 use super::*;
-use std::sync::Mutex;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::{Duration, Instant};
 
-// The waker is global: every test here runs one at a time, so the wake count
-// in `wake_is_called_on_every_event` is this file's own.
-static SERIAL: Mutex<()> = Mutex::new(());
+// The lock is NOT this file's own, and that was the bug: `watch/test.rs` wakes
+// the same global counter from a `notify` thread. See `test/serial/mod.rs`.
+use crate::serial_lock;
 
 fn serial() -> std::sync::MutexGuard<'static, ()> {
-    SERIAL.lock().unwrap_or_else(|e| e.into_inner())
+    let guard = serial_lock::serial();
+    // Installed here, not in the one test that reads the count: `set_waker` holds
+    // a `OnceLock`, so whichever test the runner starts with installs it for the
+    // whole process. Counting from the first test is what lets `wait_for_events`
+    // below guarantee no test leaves a wake behind it.
+    set_waker(counting_waker);
+    guard
 }
 
 fn wait_for_events<T: Send + 'static>(
@@ -112,4 +117,45 @@ fn wake_is_called_on_every_event() {
     assert_eq!(events.len(), 2);
     let after = WAKE_COUNT.load(Ordering::SeqCst);
     assert_eq!(after - before, 2);
+}
+
+/// **A file event wakes the same counter a task does.**
+///
+/// This is why the lock in `test/serial/mod.rs` sits above both test files instead
+/// of inside this one. `watch/test.rs` starts a real `ProjectWatcher` and waits up
+/// to five seconds for the OS to deliver its events; each delivery calls
+/// `tasks::wake()` from a `notify` thread, which knows no lock. While this file
+/// held only its own lock, such an event could land between the two reads in
+/// `wake_is_called_on_every_event` and make two events look like three.
+///
+/// If this test ever stops seeing the file event, the shared lock has become
+/// decoration and can go.
+#[test]
+fn wakes_from_a_file_event_reach_the_same_counter() {
+    let _serial = serial();
+    let root = std::env::temp_dir().join(format!(
+        "crawrad_wake_counter_{}_{}",
+        std::process::id(),
+        WAKE_COUNT.load(Ordering::SeqCst)
+    ));
+    std::fs::create_dir_all(&root).unwrap();
+    let watcher = crate::watch::ProjectWatcher::start(&root).expect("watcher");
+    std::thread::sleep(Duration::from_millis(100));
+
+    let before = WAKE_COUNT.load(Ordering::SeqCst);
+    std::fs::write(root.join("touched.rs"), "fn main() {}").unwrap();
+
+    let deadline = Instant::now() + Duration::from_secs(5);
+    while WAKE_COUNT.load(Ordering::SeqCst) == before && Instant::now() < deadline {
+        std::thread::sleep(Duration::from_millis(10));
+    }
+    let moved = WAKE_COUNT.load(Ordering::SeqCst) > before;
+
+    drop(watcher);
+    let _ = std::fs::remove_dir_all(&root);
+
+    assert!(
+        moved,
+        "a file event did not reach the wake counter; the shared lock guards nothing"
+    );
 }

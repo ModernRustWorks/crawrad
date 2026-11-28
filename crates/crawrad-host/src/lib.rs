@@ -139,6 +139,37 @@ impl ViewCenter {
 ///
 /// The path is what tells two tabs apart and what keeps a file from opening
 /// twice; it is `None` for a form that has never been saved.
+/// One row of the strip of tabs, as `HostModel::strip` builds it.
+#[note("hostmodel-strip-row")]
+#[derive(Clone, Debug, PartialEq)]
+pub struct StripRow {
+    /// What the tab reads, icon included.
+    pub label: String,
+    /// Unsaved work, which is what the tab's X shows.
+    pub dirty: bool,
+    /// A form carries Designer AND Code; a loose file carries only Code.
+    pub is_form: bool,
+}
+
+/// What a click on a strip row means.
+#[note("hostmodel-strip-click")]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum StripClick {
+    /// The form at this position in `forms()`.
+    Form(usize),
+    /// The loose file at this position in the shell's own tab list.
+    File(usize),
+}
+
+/// The name a form's tab reads: its file stem, or the document's own root.
+fn form_label(f: &OpenForm) -> String {
+    f.path
+        .as_deref()
+        .and_then(std::path::Path::file_stem)
+        .map(|s| s.to_string_lossy().into_owned())
+        .unwrap_or_else(|| f.doc.ir().root.clone())
+}
+
 #[note("hostmodel-openform")]
 pub struct OpenForm {
     pub doc: Doc,
@@ -303,6 +334,58 @@ impl HostModel {
         let i = self.forms.len() - 1;
         self.front = Some(i);
         i
+    }
+
+    /// One row of the strip the person clicks.
+    ///
+    /// The forms come first and the loose files after. They are genuinely
+    /// different things - a form carries a Designer AND a Code page, a loose
+    /// `.rs` carries only Code - which is why they live in different lists. One
+    /// strip is what a PERSON reads, so they are joined here, where the forms
+    /// are, and the shell only draws what this says.
+    #[note("hostmodel-strip")]
+    pub fn strip(&self, files: &[(String, bool)]) -> Vec<StripRow> {
+        let mut rows: Vec<StripRow> = self
+            .forms
+            .iter()
+            .map(|f| StripRow {
+                label: format!("\u{1FA9F} {}", form_label(f)),
+                dirty: f.doc.revision() != f.saved_revision,
+                is_form: true,
+            })
+            .collect();
+        rows.extend(files.iter().map(|(label, dirty)| StripRow {
+            label: label.clone(),
+            dirty: *dirty,
+            is_form: false,
+        }));
+        rows
+    }
+
+    /// Which row of `strip` is lit, given which loose file is active.
+    ///
+    /// A form is lit only while the centre is showing one: with the editor up the
+    /// lit tab is the file's, so the strip never lights two at once.
+    #[note("hostmodel-strip-front")]
+    pub fn strip_front(&self, active_file: Option<usize>) -> Option<usize> {
+        if self.center() == ViewCenter::Code {
+            active_file.map(|i| self.forms.len() + i)
+        } else {
+            self.front
+        }
+    }
+
+    /// What a click on row `i` of the strip means.
+    ///
+    /// The shell asks instead of subtracting: the boundary is a fact about how
+    /// many forms are open, and that fact lives here.
+    #[note("hostmodel-strip-target")]
+    pub fn strip_target(&self, i: usize) -> StripClick {
+        if i < self.forms.len() {
+            StripClick::Form(i)
+        } else {
+            StripClick::File(i - self.forms.len())
+        }
     }
 
     #[note("hostmodel-bring-to-front")]

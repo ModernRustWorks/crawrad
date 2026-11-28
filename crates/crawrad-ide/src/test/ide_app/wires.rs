@@ -1093,7 +1093,7 @@ fn a_tira_de_abas_do_editor_desenha_escuta_e_fecha() {
         "the tab stopped marking the file with unsaved changes"
     );
     assert!(
-        c.contains("draw_rows!{cx,proximo,abas_do_editor,rotulos_das_abas,")
+        c.contains("draw_rows!{cx,proximo,abas_do_editor,tab_labels,")
             && c.contains("list.set_item_range($cx,0,$rows.len());"),
         "the strip stopped reporting how many tabs it has, and a `PortalList` without \
          a range draws ZERO items silently"
