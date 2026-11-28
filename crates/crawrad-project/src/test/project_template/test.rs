@@ -271,7 +271,10 @@ fn a_framework_that_does_reach_the_platform_is_let_through() {
 fn the_refusal_follows_the_card_and_not_a_hardcoded_name() {
     use crawrad_codegen::AlvoGerador;
 
-    for alvo in [AlvoGerador::Makepad, AlvoGerador::Egui] {
+    // TODOS, not a list written here: a target registered later is covered by
+    // this test the moment it joins the generator, which is how the Slint card
+    // got caught missing on 28/11/2026.
+    for &alvo in AlvoGerador::TODOS {
         let card = crate::frameworks::of(alvo);
         let options = ProjectTemplateOptions {
             framework: alvo,

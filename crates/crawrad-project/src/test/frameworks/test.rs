@@ -44,3 +44,29 @@ fn resolve_framework_maps_defaults_and_known_names() {
     assert_eq!(resolve_framework(Some("Egui")), Ok(AlvoGerador::Egui));
     assert!(resolve_framework(Some("unknown_fw")).is_err());
 }
+
+/// Slint is on the list, selectable, and does not claim a platform it cannot reach.
+///
+/// The dialog draws `CATALOGUE` and nothing else, so a framework the generator
+/// supports but the catalogue omits is a framework nobody can pick: `of()` would
+/// panic on it. That was the single red on the Slint branch.
+#[test]
+fn slint_is_offered_by_the_dialog_and_claims_only_what_it_reaches() {
+    let slint = of(AlvoGerador::Slint);
+    assert_eq!(slint.name, "Slint");
+    assert_eq!(slint.availability, Availability::Ready);
+    assert_eq!(slint.crate_dep, "slint");
+    assert_eq!(resolve_framework(Some("slint")), Ok(AlvoGerador::Slint));
+    assert_eq!(resolve_framework(Some("Slint")), Ok(AlvoGerador::Slint));
+
+    // The platforms LINE is what a person reads and the two flags are what the
+    // code decides with: they must agree, or the dialog offers a template that
+    // refuses itself.
+    assert!(!slint.web, "the scaffold still emits Makepad for wasm_app");
+    assert!(
+        !slint.mobile,
+        "the scaffold still emits Makepad for mobile_app"
+    );
+    assert!(!slint.platforms.contains("Web"), "{}", slint.platforms);
+    assert!(!slint.platforms.contains("Mobile"), "{}", slint.platforms);
+}
