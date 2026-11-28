@@ -828,3 +828,365 @@ fn test_slint_target_manifest_and_dependencies() {
         "Generated Cargo.toml must NOT contain eframe:\n{toml}"
     );
 }
+
+#[test]
+fn test_slint_slice1_components() {
+    use crawrad_ir::Value;
+
+    let mut doc = Document::new("FormSlice1", "Form");
+    {
+        let form = doc.node_mut("FormSlice1").unwrap();
+        form.set_rect(Rect::new(0.0, 0.0, 800.0, 600.0));
+        form.set_name("FormSlice1");
+        form.set_text("Slice 1 Form");
+    }
+
+    // 1. Badge
+    let mut badge = Node::new("bdg_count", "Badge");
+    badge.set_name("bdg_count");
+    badge.set_rect(Rect::new(10.0, 20.0, 56.0, 20.0));
+    badge.set_text("New");
+    badge.props.insert("count".to_string(), Value::Int(5));
+    badge.props.insert("max_count".to_string(), Value::Int(99));
+    badge
+        .props
+        .insert("kind".to_string(), Value::Str("bkPrimary".to_string()));
+    badge
+        .props
+        .insert("outline".to_string(), Value::Bool(false));
+    badge
+        .events
+        .insert("on_click".to_string(), "bdg_click".to_string());
+    let _ = doc.add_child("FormSlice1", badge);
+
+    // 2. Chips
+    let mut chips = Node::new("chp_tags", "Chips");
+    chips.set_name("chp_tags");
+    chips.set_rect(Rect::new(10.0, 50.0, 220.0, 56.0));
+    chips.props.insert(
+        "items".to_string(),
+        Value::List(vec![
+            Value::Str("Rust".to_string()),
+            Value::Str("egui".to_string()),
+            Value::Str("Makepad".to_string()),
+        ]),
+    );
+    chips.props.insert("item_index".to_string(), Value::Int(1));
+    chips
+        .props
+        .insert("removable".to_string(), Value::Bool(true));
+    chips
+        .events
+        .insert("on_click".to_string(), "chp_click".to_string());
+    chips
+        .events
+        .insert("on_change".to_string(), "chp_change".to_string());
+    let _ = doc.add_child("FormSlice1", chips);
+
+    // 3. Breadcrumb
+    let mut breadcrumb = Node::new("brc_path", "Breadcrumb");
+    breadcrumb.set_name("brc_path");
+    breadcrumb.set_rect(Rect::new(10.0, 120.0, 260.0, 24.0));
+    breadcrumb.props.insert(
+        "items".to_string(),
+        Value::List(vec![
+            Value::Str("Home".to_string()),
+            Value::Str("Projects".to_string()),
+            Value::Str("CrawRAD".to_string()),
+        ]),
+    );
+    breadcrumb
+        .props
+        .insert("separator".to_string(), Value::Str("›".to_string()));
+    breadcrumb
+        .props
+        .insert("item_index".to_string(), Value::Int(2));
+    breadcrumb.props.insert(
+        "segment_color".to_string(),
+        Value::Color(crawrad_ir::Color::rgb(0x45, 0x46, 0x4B)),
+    );
+    breadcrumb.props.insert(
+        "current_color".to_string(),
+        Value::Color(crawrad_ir::Color::rgb(0xE0, 0x61, 0x2B)),
+    );
+    breadcrumb
+        .events
+        .insert("on_click".to_string(), "brc_click".to_string());
+    let _ = doc.add_child("FormSlice1", breadcrumb);
+
+    // 4. Pagination
+    let mut pagination = Node::new("pag_nav", "Pagination");
+    pagination.set_name("pag_nav");
+    pagination.set_rect(Rect::new(10.0, 160.0, 280.0, 28.0));
+    pagination
+        .props
+        .insert("page_count".to_string(), Value::Int(5));
+    pagination
+        .props
+        .insert("page_index".to_string(), Value::Int(2));
+    pagination
+        .props
+        .insert("max_buttons".to_string(), Value::Int(5));
+    pagination
+        .props
+        .insert("show_arrows".to_string(), Value::Bool(true));
+    pagination
+        .events
+        .insert("on_change".to_string(), "pag_change".to_string());
+    let _ = doc.add_child("FormSlice1", pagination);
+
+    let generator = GeradorSlint;
+    let files = generator
+        .gerar(&doc, "slice1_app", &crawrad_registry::Registry::builtin())
+        .expect("must generate slice 1 successfully");
+
+    let slint_file = files
+        .iter()
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormSlice1.slint")
+        .unwrap();
+    let sc = &slint_file.conteudo;
+
+    // === Assertions for Badge ===
+    assert!(
+        sc.contains("bdg_count := Rectangle {"),
+        "Badge element missing"
+    );
+    assert!(sc.contains("x: 10.0px;"), "Badge x missing");
+    assert!(sc.contains("y: 20.0px;"), "Badge y missing");
+    assert!(sc.contains("width: 56.0px;"), "Badge width missing");
+    assert!(sc.contains("height: 20.0px;"), "Badge height missing");
+    assert!(
+        sc.contains("border-radius: 10.0px;"),
+        "Badge border-radius missing"
+    );
+    assert!(
+        sc.contains("background: #cc3838;"),
+        "Badge background missing"
+    );
+    assert!(
+        sc.contains("border-color: #cc3838;"),
+        "Badge border-color missing"
+    );
+    assert!(
+        sc.contains("border-width: 1px;"),
+        "Badge border-width missing"
+    );
+    assert!(sc.contains("visible: true;"), "Badge visible missing");
+    assert!(
+        sc.contains("text: \"5\";"),
+        "Badge effective count text missing"
+    );
+    assert!(sc.contains("color: #f2f2fa;"), "Badge text color missing");
+    assert!(
+        sc.contains("clicked => { root.bdg_count_clicked(); }"),
+        "Badge click wiring missing"
+    );
+    assert!(
+        sc.contains("callback bdg_count_clicked();"),
+        "Badge callback declaration missing"
+    );
+
+    // === Assertions for Chips ===
+    assert!(
+        sc.contains("chp_tags := HorizontalLayout {"),
+        "Chips element missing"
+    );
+    assert!(sc.contains("x: 10.0px;"), "Chips x missing");
+    assert!(sc.contains("y: 50.0px;"), "Chips y missing");
+    assert!(sc.contains("width: 220.0px;"), "Chips width missing");
+    assert!(sc.contains("height: 56.0px;"), "Chips height missing");
+    assert!(sc.contains("spacing: 6px;"), "Chips spacing missing");
+    assert!(sc.contains("visible: true;"), "Chips visible missing");
+    assert!(sc.contains("enabled: true;"), "Chips enabled missing");
+    assert!(
+        sc.contains("for item[index] in [\"Rust\", \"egui\", \"Makepad\"]: Rectangle {"),
+        "Chips repeater missing"
+    );
+    assert!(
+        sc.contains("border-radius: 12px;"),
+        "Chips border-radius missing"
+    );
+    assert!(
+        sc.contains("background: index == 1 ? #3a598c : #e0e0e0;"),
+        "Chips background binding missing"
+    );
+    assert!(
+        sc.contains("border-width: 1px;"),
+        "Chips border-width missing"
+    );
+    assert!(
+        sc.contains("border-color: #cccccc;"),
+        "Chips border-color missing"
+    );
+    assert!(
+        sc.contains("color: index == 1 ? #ffffff : #222222;"),
+        "Chips text color binding missing"
+    );
+    assert!(sc.contains("text: \"×\";"), "Chips removable cross missing");
+    assert!(
+        sc.contains("clicked => { root.chp_tags_selected(index); }"),
+        "Chips click wiring missing"
+    );
+    assert!(
+        sc.contains("callback chp_tags_selected(int);"),
+        "Chips selected callback declaration missing"
+    );
+    assert!(
+        sc.contains("callback chp_tags_removed(int);"),
+        "Chips removed callback declaration missing"
+    );
+
+    // === Assertions for Breadcrumb ===
+    assert!(
+        sc.contains("brc_path := HorizontalLayout {"),
+        "Breadcrumb element missing"
+    );
+    assert!(sc.contains("x: 10.0px;"), "Breadcrumb x missing");
+    assert!(sc.contains("y: 120.0px;"), "Breadcrumb y missing");
+    assert!(sc.contains("width: 260.0px;"), "Breadcrumb width missing");
+    assert!(sc.contains("height: 24.0px;"), "Breadcrumb height missing");
+    assert!(
+        sc.contains("for item[index] in [\"Home\", \"Projects\", \"CrawRAD\"]: HorizontalLayout {"),
+        "Breadcrumb repeater missing"
+    );
+    assert!(
+        sc.contains("color: index == 2 ? #E0612B : #45464B;"),
+        "Breadcrumb current color binding missing"
+    );
+    assert!(
+        sc.contains("clicked => { root.brc_path_clicked(index); }"),
+        "Breadcrumb click wiring missing"
+    );
+    assert!(
+        sc.contains("if index < 2: Text {"),
+        "Breadcrumb separator condition missing"
+    );
+    assert!(
+        sc.contains("text: \"›\";"),
+        "Breadcrumb separator char missing"
+    );
+    assert!(
+        sc.contains("callback brc_path_clicked(int);"),
+        "Breadcrumb callback declaration missing"
+    );
+
+    // === Assertions for Pagination ===
+    assert!(
+        sc.contains("pag_nav := HorizontalLayout {"),
+        "Pagination element missing"
+    );
+    assert!(sc.contains("x: 10.0px;"), "Pagination x missing");
+    assert!(sc.contains("y: 160.0px;"), "Pagination y missing");
+    assert!(sc.contains("width: 280.0px;"), "Pagination width missing");
+    assert!(sc.contains("height: 28.0px;"), "Pagination height missing");
+    assert!(
+        sc.contains("Text { text: \"‹\";"),
+        "Pagination prev arrow missing"
+    );
+    assert!(
+        sc.contains("clicked => { root.pag_nav_page_changed(1); }"),
+        "Pagination prev wiring missing"
+    );
+    assert!(
+        sc.contains("Text { text: \"3\"; color: #ffffff;"),
+        "Pagination active page button missing"
+    );
+    assert!(
+        sc.contains("Text { text: \"1\"; color: #333333;"),
+        "Pagination inactive page button missing"
+    );
+    assert!(
+        sc.contains("Text { text: \"›\";"),
+        "Pagination next arrow missing"
+    );
+    assert!(
+        sc.contains("clicked => { root.pag_nav_page_changed(3); }"),
+        "Pagination next wiring missing"
+    );
+    assert!(
+        sc.contains("callback pag_nav_page_changed(int);"),
+        "Pagination callback declaration missing"
+    );
+
+    let designer_file = files
+        .iter()
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormSlice1.designer.rs")
+        .unwrap();
+    let dc = &designer_file.conteudo;
+
+    // Designer struct and field checks
+    assert!(
+        dc.contains("pub bdg_count: Badge,"),
+        "Badge field missing in designer struct"
+    );
+    assert!(
+        dc.contains("pub chp_tags: Chips,"),
+        "Chips field missing in designer struct"
+    );
+    assert!(
+        dc.contains("pub brc_path: Breadcrumb,"),
+        "Breadcrumb field missing in designer struct"
+    );
+    assert!(
+        dc.contains("pub pag_nav: Pagination,"),
+        "Pagination field missing in designer struct"
+    );
+    assert!(
+        dc.contains("pub struct Badge"),
+        "Badge struct definition missing"
+    );
+    assert!(
+        dc.contains("pub struct Chips"),
+        "Chips struct definition missing"
+    );
+    assert!(
+        dc.contains("pub struct Breadcrumb"),
+        "Breadcrumb struct definition missing"
+    );
+    assert!(
+        dc.contains("pub struct Pagination"),
+        "Pagination struct definition missing"
+    );
+
+    // Action wiring in designer
+    assert!(
+        dc.contains("window.on_bdg_count_clicked"),
+        "Badge on_click wiring missing"
+    );
+    assert!(
+        dc.contains("f.form.bdg_click();"),
+        "Badge action invocation missing"
+    );
+    assert!(
+        dc.contains("window.on_chp_tags_selected"),
+        "Chips on_selected wiring missing"
+    );
+    assert!(
+        dc.contains("f.form.chp_click();"),
+        "Chips on_click invocation missing"
+    );
+    assert!(
+        dc.contains("f.form.chp_change();"),
+        "Chips on_change invocation missing"
+    );
+    assert!(
+        dc.contains("window.on_chp_tags_removed"),
+        "Chips on_removed wiring missing"
+    );
+    assert!(
+        dc.contains("window.on_brc_path_clicked"),
+        "Breadcrumb on_click wiring missing"
+    );
+    assert!(
+        dc.contains("f.form.brc_click();"),
+        "Breadcrumb action invocation missing"
+    );
+    assert!(
+        dc.contains("window.on_pag_nav_page_changed"),
+        "Pagination on_change wiring missing"
+    );
+    assert!(
+        dc.contains("f.form.pag_change();"),
+        "Pagination action invocation missing"
+    );
+}

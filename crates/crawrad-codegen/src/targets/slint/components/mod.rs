@@ -8,10 +8,13 @@ pub mod prelude {
     pub use crawrad_ir::{Document, Node, Value};
 }
 
+pub mod badge;
 pub mod bevel;
 pub mod bit_btn;
+pub mod breadcrumb;
 pub mod button;
 pub mod checkbox;
+pub mod chips;
 pub mod codegen;
 pub mod combobox;
 pub mod edit;
@@ -24,6 +27,7 @@ pub mod memo;
 pub mod message_dialog;
 pub mod open_dialog;
 pub mod page_control;
+pub mod pagination;
 pub mod paint_box;
 pub mod panel;
 pub mod progress_bar;
@@ -72,6 +76,10 @@ static REGISTRY: &[&'static dyn SlintComponentCodegen] = &[
     &open_dialog::OpenDialogCodegen,
     &save_dialog::SaveDialogCodegen,
     &message_dialog::MessageDialogCodegen,
+    &badge::BadgeCodegen,
+    &chips::ChipsCodegen,
+    &breadcrumb::BreadcrumbCodegen,
+    &pagination::PaginationCodegen,
 ];
 
 pub fn for_class(class: &str) -> Option<&'static dyn SlintComponentCodegen> {
