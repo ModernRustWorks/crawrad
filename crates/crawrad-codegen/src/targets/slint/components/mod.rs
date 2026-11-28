@@ -13,6 +13,8 @@ pub mod bevel;
 pub mod bit_btn;
 pub mod breadcrumb;
 pub mod button;
+pub mod card;
+pub mod category_panel;
 pub mod checkbox;
 pub mod chips;
 pub mod codegen;
@@ -24,6 +26,7 @@ pub mod image;
 pub mod label;
 pub mod link_label;
 pub mod list_box;
+pub mod main_menu;
 pub mod memo;
 pub mod message_dialog;
 pub mod open_dialog;
@@ -31,6 +34,7 @@ pub mod page_control;
 pub mod pagination;
 pub mod paint_box;
 pub mod panel;
+pub mod popup_menu;
 pub mod progress_bar;
 pub mod radio_button;
 pub mod radio_group;
@@ -41,8 +45,10 @@ pub mod shape;
 pub mod speed_button;
 pub mod spin_edit;
 pub mod splitter;
+pub mod status_bar;
 pub mod timer;
 pub mod toggle;
+pub mod tool_bar;
 pub mod track_bar;
 pub mod util;
 
@@ -88,6 +94,14 @@ static REGISTRY: &[&'static dyn SlintComponentCodegen] = &[
     &scroll_box::ScrollBoxCodegen,
     &splitter::SplitterCodegen,
     &drawer::DrawerCodegen,
+    &card::CardCodegen,
+    &category_panel::CategoryPanelCodegen,
+    &status_bar::StatusBarCodegen,
+    &status_bar::StatusPanelCodegen,
+    &tool_bar::ToolBarCodegen,
+    &main_menu::MainMenuCodegen,
+    &main_menu::MenuItemCodegen,
+    &popup_menu::PopupMenuCodegen,
 ];
 
 pub fn for_class(class: &str) -> Option<&'static dyn SlintComponentCodegen> {

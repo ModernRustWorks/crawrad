@@ -1434,3 +1434,302 @@ fn test_slint_slice2_components() {
         "Drawer state close missing"
     );
 }
+
+#[test]
+fn test_slint_slice3_components() {
+    use crawrad_ir::Value;
+
+    let mut doc = Document::new("FormSlice3", "Form");
+    {
+        let form = doc.node_mut("FormSlice3").unwrap();
+        form.set_rect(Rect::new(0.0, 0.0, 800.0, 600.0));
+        form.set_name("FormSlice3");
+        form.set_text("Slice 3 Form");
+    }
+
+    // 1. ToolBar
+    let mut tbr = Node::new("tbr_actions", "ToolBar");
+    tbr.set_name("tbr_actions");
+    tbr.set_rect(Rect::new(0.0, 0.0, 800.0, 32.0));
+    tbr.props.insert("flat".to_string(), Value::Bool(true));
+    let _ = doc.add_child("FormSlice3", tbr);
+
+    // 2. Card
+    let mut crd = Node::new("crd_box", "Card");
+    crd.set_name("crd_box");
+    crd.set_rect(Rect::new(10.0, 40.0, 220.0, 140.0));
+    crd.set_text("Card Title");
+    crd.props.insert(
+        "subtitle".to_string(),
+        Value::Str("Card Subtitle".to_string()),
+    );
+    crd.props.insert("corner_radius".to_string(), Value::Int(8));
+    crd.props
+        .insert("show_header".to_string(), Value::Bool(true));
+    crd.events
+        .insert("on_click".to_string(), "crd_click".to_string());
+    let _ = doc.add_child("FormSlice3", crd);
+
+    // 3. CategoryPanel
+    let mut cat = Node::new("cat_group", "CategoryPanel");
+    cat.set_name("cat_group");
+    cat.set_rect(Rect::new(10.0, 190.0, 200.0, 160.0));
+    cat.set_text("General");
+    cat.props
+        .insert("collapsed".to_string(), Value::Bool(false));
+    cat.events
+        .insert("on_collapsed".to_string(), "cat_collapse".to_string());
+    cat.events
+        .insert("on_expanded".to_string(), "cat_expand".to_string());
+    let _ = doc.add_child("FormSlice3", cat);
+
+    // 4. StatusBar
+    let mut stb = Node::new("stb_foot", "StatusBar");
+    stb.set_name("stb_foot");
+    stb.set_rect(Rect::new(0.0, 580.0, 800.0, 20.0));
+    stb.props
+        .insert("simple_text".to_string(), Value::Str("Ready".to_string()));
+    stb.events
+        .insert("on_click".to_string(), "stb_click".to_string());
+    let _ = doc.add_child("FormSlice3", stb);
+
+    // 5. MainMenu and MenuItem child
+    let mut mnu = Node::new("mnu_main", "MainMenu");
+    mnu.set_name("mnu_main");
+    let mut mni = Node::new("mni_file", "MenuItem");
+    mni.set_name("mni_file");
+    mni.set_text("File");
+    mni.events
+        .insert("on_click".to_string(), "file_click".to_string());
+    let _ = doc.add_child("FormSlice3", mnu);
+    let _ = doc.add_child("mnu_main", mni);
+
+    // 6. PopupMenu
+    let mut pop = Node::new("pop_ctx", "PopupMenu");
+    pop.set_name("pop_ctx");
+    let _ = doc.add_child("FormSlice3", pop);
+
+    let generator = GeradorSlint;
+    let files = generator
+        .gerar(&doc, "slice3_app", &crawrad_registry::Registry::builtin())
+        .expect("must generate slice 3 successfully");
+
+    let slint_file = files
+        .iter()
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormSlice3.slint")
+        .unwrap();
+    let sc = &slint_file.conteudo;
+
+    // === Assertions for ToolBar ===
+    assert!(
+        sc.contains("tbr_actions := Rectangle {"),
+        "ToolBar element missing"
+    );
+    assert!(sc.contains("x: 0.0px;"), "ToolBar x missing");
+    assert!(sc.contains("y: 0.0px;"), "ToolBar y missing");
+    assert!(sc.contains("width: 800.0px;"), "ToolBar width missing");
+    assert!(sc.contains("height: 32.0px;"), "ToolBar height missing");
+    assert!(
+        sc.contains("background: #2d3139;"),
+        "ToolBar background missing"
+    );
+    assert!(
+        sc.contains("border-bottom-width: 1px;"),
+        "ToolBar border-bottom-width missing"
+    );
+    assert!(
+        sc.contains("border-color: #1e1e24;"),
+        "ToolBar border-color missing"
+    );
+
+    // === Assertions for Card ===
+    assert!(
+        sc.contains("crd_box := Rectangle {"),
+        "Card element missing"
+    );
+    assert!(sc.contains("x: 10.0px;"), "Card x missing");
+    assert!(sc.contains("y: 40.0px;"), "Card y missing");
+    assert!(sc.contains("width: 220.0px;"), "Card width missing");
+    assert!(sc.contains("height: 140.0px;"), "Card height missing");
+    assert!(
+        sc.contains("border-radius: 8px;"),
+        "Card border-radius missing"
+    );
+    assert!(
+        sc.contains("background: #252538;"),
+        "Card background missing"
+    );
+    assert!(
+        sc.contains("border-color: #3e3e56;"),
+        "Card border-color missing"
+    );
+    assert!(sc.contains("text: \"Card Title\";"), "Card title missing");
+    assert!(
+        sc.contains("text: \"Card Subtitle\";"),
+        "Card subtitle missing"
+    );
+    assert!(
+        sc.contains("clicked => { root.crd_box_clicked(); }"),
+        "Card click wiring missing"
+    );
+    assert!(
+        sc.contains("callback crd_box_clicked();"),
+        "Card callback declaration missing"
+    );
+
+    // === Assertions for CategoryPanel ===
+    assert!(
+        sc.contains("cat_group := Rectangle {"),
+        "CategoryPanel element missing"
+    );
+    assert!(sc.contains("x: 10.0px;"), "CategoryPanel x missing");
+    assert!(sc.contains("y: 190.0px;"), "CategoryPanel y missing");
+    assert!(
+        sc.contains("width: 200.0px;"),
+        "CategoryPanel width missing"
+    );
+    assert!(
+        sc.contains("height: 160.0px;"),
+        "CategoryPanel height missing"
+    );
+    assert!(
+        sc.contains("text: \"- General\";"),
+        "CategoryPanel header text missing"
+    );
+    assert!(
+        sc.contains("clicked => { root.cat_group_header_clicked(); }"),
+        "CategoryPanel click wiring missing"
+    );
+    assert!(
+        sc.contains("callback cat_group_header_clicked();"),
+        "CategoryPanel callback declaration missing"
+    );
+
+    // === Assertions for StatusBar ===
+    assert!(
+        sc.contains("stb_foot := Rectangle {"),
+        "StatusBar element missing"
+    );
+    assert!(sc.contains("x: 0.0px;"), "StatusBar x missing");
+    assert!(sc.contains("y: 580.0px;"), "StatusBar y missing");
+    assert!(sc.contains("width: 800.0px;"), "StatusBar width missing");
+    assert!(sc.contains("height: 20.0px;"), "StatusBar height missing");
+    assert!(
+        sc.contains("background: #252526;"),
+        "StatusBar background missing"
+    );
+    assert!(
+        sc.contains("text: \"Ready\";"),
+        "StatusBar simple text missing"
+    );
+    assert!(
+        sc.contains("clicked => { root.stb_foot_clicked(); }"),
+        "StatusBar click wiring missing"
+    );
+    assert!(
+        sc.contains("callback stb_foot_clicked();"),
+        "StatusBar callback declaration missing"
+    );
+
+    let designer_file = files
+        .iter()
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormSlice3.designer.rs")
+        .unwrap();
+    let dc = &designer_file.conteudo;
+
+    // Designer struct and field checks
+    assert!(
+        dc.contains("pub tbr_actions: ToolBar,"),
+        "ToolBar field missing in designer struct"
+    );
+    assert!(
+        dc.contains("pub crd_box: Card,"),
+        "Card field missing in designer struct"
+    );
+    assert!(
+        dc.contains("pub cat_group: CategoryPanel,"),
+        "CategoryPanel field missing in designer struct"
+    );
+    assert!(
+        dc.contains("pub stb_foot: StatusBar,"),
+        "StatusBar field missing in designer struct"
+    );
+    assert!(
+        dc.contains("pub mnu_main: MainMenu,"),
+        "MainMenu field missing in designer struct"
+    );
+    assert!(
+        dc.contains("pub mni_file: MenuItem,"),
+        "MenuItem field missing in designer struct"
+    );
+    assert!(
+        dc.contains("pub pop_ctx: PopupMenu,"),
+        "PopupMenu field missing in designer struct"
+    );
+    assert!(
+        dc.contains("pub struct ToolBar"),
+        "ToolBar struct definition missing"
+    );
+    assert!(
+        dc.contains("pub struct Card"),
+        "Card struct definition missing"
+    );
+    assert!(
+        dc.contains("pub struct CategoryPanel"),
+        "CategoryPanel struct definition missing"
+    );
+    assert!(
+        dc.contains("pub struct StatusBar"),
+        "StatusBar struct definition missing"
+    );
+    assert!(
+        dc.contains("pub struct MainMenu"),
+        "MainMenu struct definition missing"
+    );
+    assert!(
+        dc.contains("pub struct MenuItem"),
+        "MenuItem struct definition missing"
+    );
+    assert!(
+        dc.contains("pub struct PopupMenu"),
+        "PopupMenu struct definition missing"
+    );
+
+    // Action wiring in designer
+    assert!(
+        dc.contains("window.on_crd_box_clicked"),
+        "Card on_click wiring missing"
+    );
+    assert!(
+        dc.contains("f.form.crd_click();"),
+        "Card on_click action invocation missing"
+    );
+    assert!(
+        dc.contains("window.on_cat_group_header_clicked"),
+        "CategoryPanel on_click wiring missing"
+    );
+    assert!(
+        dc.contains("f.form.cat_collapse();"),
+        "CategoryPanel on_collapsed action missing"
+    );
+    assert!(
+        dc.contains("f.form.cat_expand();"),
+        "CategoryPanel on_expanded action missing"
+    );
+    assert!(
+        dc.contains("window.on_stb_foot_clicked"),
+        "StatusBar on_click wiring missing"
+    );
+    assert!(
+        dc.contains("f.form.stb_click();"),
+        "StatusBar on_click action invocation missing"
+    );
+    assert!(
+        dc.contains("window.on_mni_file_clicked"),
+        "MenuItem on_click wiring missing"
+    );
+    assert!(
+        dc.contains("f.form.file_click();"),
+        "MenuItem on_click action invocation missing"
+    );
+}
