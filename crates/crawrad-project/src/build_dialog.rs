@@ -3,7 +3,7 @@
 //! # Why this module exists
 //!
 //! When compiling an application on **Run**, the IDE shows a centered modal dialog
-//! (the classic Delphi experience) that keeps the developer informed about the
+//! (the classic RAD IDE experience) that keeps the developer informed about the
 //! compilation progress. This module provides pure, testable functions that determine
 //! WHAT the dialog displays without any dependency on UI shell widgets.
 //!
