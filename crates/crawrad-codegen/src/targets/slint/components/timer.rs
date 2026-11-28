@@ -40,6 +40,7 @@ impl SlintComponentCodegen for TimerCodegen {
 pub fn struct_definition() -> String {
     let desc = crawrad_registry::components::timer();
     let mut fields = vec![
+        "    pub state: crawrad_runtime_slint::TimerState,".to_string(),
         util::FIELD_ENABLED.to_string(),
         "    pub interval_ms: u64,".to_string(),
     ];
@@ -54,7 +55,11 @@ pub fn emit_default(node: &Node) -> String {
         Some(Value::Int(i)) => (*i).max(0) as u64,
         _ => 1000,
     };
-    let mut inits = vec![format!("enabled: {en}"), format!("interval_ms: {interval}")];
+    let mut inits = vec![
+        format!("state: crawrad_runtime_slint::TimerState::new({interval}, {en})"),
+        format!("enabled: {en}"),
+        format!("interval_ms: {interval}"),
+    ];
     let desc = crawrad_registry::components::timer();
     inits.extend(util::catalogue_inits(node, &desc, &["enabled", "interval"]));
     let body = inits.join(", ");

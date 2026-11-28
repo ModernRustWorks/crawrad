@@ -795,6 +795,36 @@ fn test_slint_generator_emits_timer_and_dialogs() {
     assert!(designer_file.conteudo.contains("pub struct SaveDialog"));
     assert!(designer_file.conteudo.contains("pub struct MessageDialog"));
     assert!(designer_file.conteudo.contains("f.form.tmr_tick_timer();"));
+    assert!(
+        designer_file
+            .conteudo
+            .contains("use crawrad_runtime_slint::*;")
+    );
+    assert!(
+        designer_file
+            .conteudo
+            .contains("crawrad_runtime_slint::show_open_dialog(&self.file_name, &self.filter)")
+    );
+    assert!(
+        designer_file
+            .conteudo
+            .contains("crawrad_runtime_slint::show_save_dialog(&self.file_name, &self.filter)")
+    );
+    assert!(
+        designer_file
+            .conteudo
+            .contains("crawrad_runtime_slint::show_message_dialog(&self.message, \"\")")
+    );
+    assert!(
+        designer_file
+            .conteudo
+            .contains("pub state: crawrad_runtime_slint::TimerState,")
+    );
+    assert!(
+        designer_file
+            .conteudo
+            .contains("let _initial_window_state = FormWindowState::Normal;")
+    );
 }
 
 #[test]
