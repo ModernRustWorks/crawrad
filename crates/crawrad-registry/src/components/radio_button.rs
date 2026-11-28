@@ -14,6 +14,7 @@ pub fn radio_button() -> ComponentDesc {
         props: [
             Props::caption("RadioButton"),
             Props::checked(false),
+            Props::slint_border_radius(8),
         ],
         events: [Events::MOUSE_CLICK, Events::CHANGE],
     );

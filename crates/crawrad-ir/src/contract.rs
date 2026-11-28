@@ -14,7 +14,11 @@ use crawrad_note::note;
 use std::fmt;
 
 #[note("contract-targets")]
-pub const TARGETS: &[&str] = &["win32", "egui", "makepad"];
+/// `"slint"` joined on 28/11/2026, because a property key is checked against
+/// this list before it is anything else: `PropKey::parse("slint.border-radius")`
+/// was rejected as an unknown target, so the Object Inspector could never be
+/// handed a Slint-only property no matter what the registry declared.
+pub const TARGETS: &[&str] = &["win32", "egui", "makepad", "slint"];
 
 #[note("contract-known-targets")]
 fn known_targets() -> String {

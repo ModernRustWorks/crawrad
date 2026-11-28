@@ -15,6 +15,7 @@ pub fn multi_select() -> ComponentDesc {
             Props::selected_items(),
             Props::text_hint("Select…"),
             Props::drop_down_count(6),
+            Props::slint_border_radius(4),
         ],
         events: [
             Events::CHANGE,

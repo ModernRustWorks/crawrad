@@ -13,6 +13,7 @@ pub fn check_list_box() -> ComponentDesc {
         props: [
             Props::flat_items_sample(&["Rust", "egui", "Makepad"]),
             Props::checked_items(),
+            Props::slint_border_radius(4),
         ],
         events: [
             Events::CHANGE,

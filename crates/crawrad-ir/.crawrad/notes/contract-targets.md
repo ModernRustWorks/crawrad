@@ -7,7 +7,7 @@ author:
 created: 
 title: "TARGETS"
 tags: []
-signature: "pub const TARGETS : & [& str] = & [\"win32\" , \"egui\" , \"makepad\"]"
+signature: "pub const TARGETS : & [& str] = & [\"win32\" , \"egui\" , \"makepad\" , \"slint\"]"
 ---
 
 Known runtime targets. A property prefix must be one of them.

@@ -15,6 +15,7 @@ pub fn pagination() -> ComponentDesc {
             Props::page_index(0),
             Props::max_buttons(7),
             Props::show_arrows(true),
+            Props::slint_border_radius(4),
         ],
         events: [
             Events::CHANGE,
