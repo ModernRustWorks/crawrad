@@ -406,6 +406,23 @@ fn migrar_rename(raiz: &Path, arquivos: &[Arquivo]) -> Result<Vec<(PathBuf, Path
         return Ok(Vec::new());
     }
     let velho = velhos.pop().unwrap_or_default();
+    // A RENAME AND AN ADDITION LOOK IDENTICAL FROM THE FILES BEING WRITTEN, and
+    // telling them apart is the whole correctness of this function. Generation runs
+    // from ONE document, so writing `form_1` into a project that holds `form_main`
+    // produces exactly the shape a rename produces: one new base, one old base.
+    //
+    // The fact that separates them is on disk. A renamed form's `.crawform` is GONE
+    // -- it became the new one. An ADDED form leaves the old `.crawform` in place
+    // beside it. So if the old form's document still exists, nothing was renamed and
+    // nothing may move.
+    //
+    // Measured on the beta report of 28/11/2026: creating a second form moved
+    // `form_main.designer.rs` and `form_main.rs` onto `form_1`, leaving
+    // `form_main.crawform` with no code at all. The Explorer read it as
+    // `2 not generated yet - 1 stale`.
+    if src.join(format!("{velho}.crawform")).exists() {
+        return Ok(Vec::new());
+    }
     let de = src.join(format!("{velho}.rs"));
     let para = src.join(format!("{novo}.rs"));
     if !de.exists() || para.exists() {
@@ -501,6 +518,23 @@ fn varrer_orfaos(raiz: &Path, arquivos: &[Arquivo]) -> Result<Vec<PathBuf>, Erro
         }
         let relativo = PathBuf::from("src").join(nome);
         if nossos.contains(&relativo.as_path()) {
+            continue;
+        }
+        // AN ORPHAN IS A GENERATED FILE WITH NO FORM, NOT ONE OUTSIDE THIS WRITE.
+        //
+        // Generation runs from a SINGLE document, so every other form's
+        // `.designer.rs` is absent from `arquivos` and used to look like an orphan
+        // here. Creating a second form therefore deleted the first form's generated
+        // code -- the beta report of 28/11/2026, which the Explorer showed as
+        // `2 not generated yet - 1 stale`.
+        //
+        // The form's own document is the authority: while `<base>.crawform` is on
+        // disk the generated file has a form and is not an orphan, however few
+        // documents this particular write covered. A form that is really deleted
+        // takes its `.crawform` with it, and the sweep still removes its code.
+        if base_do_designer(std::iter::once(caminho.as_path()))
+            .is_some_and(|base| src.join(format!("{base}.crawform")).exists())
+        {
             continue;
         }
         std::fs::remove_file(&caminho).map_err(|e| Erro::Io {
