@@ -117,4 +117,8 @@ impl SlintComponentCodegen for MaskEditCodegen {
         }
         cbs
     }
+
+    fn std_widgets(&self) -> &'static [&'static str] {
+        &["LineEdit"]
+    }
 }

@@ -94,16 +94,15 @@ impl SlintComponentCodegen for ToolBarCodegen {
         // tool_bar id
         let name = identificador(node.name())?;
         let vis = layout::is_visible(node);
-        let en = layout::is_enabled(node);
+        let _en = layout::is_enabled(node);
         // tool_bar child nodes
         let children = super::emit_children(doc, reg, node, "    ")?;
 
         let mut out = util::emit_rectangle_header(node, x, y, w, h)?;
         out.push_str("            background: #2d3139;\n");
-        out.push_str("            border-bottom-width: 1px;\n");
+        out.push_str("            border-width: 1px;\n");
         out.push_str("            border-color: #1e1e24;\n");
         out.push_str(&format!("            visible: {vis};\n"));
-        out.push_str(&format!("            enabled: {en};\n"));
         if layout::event_handler(node, "on_click").is_some() {
             out.push_str(&util::emit_touch_area_click(&name));
         }

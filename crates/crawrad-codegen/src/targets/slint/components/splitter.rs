@@ -95,8 +95,10 @@ impl SlintComponentCodegen for SplitterCodegen {
         let mut out = util::emit_rectangle_header(node, x, y, w, h)?;
         out.push_str("            background: #252538;\n");
         out.push_str(&format!("            visible: {vis};\n"));
-        out.push_str(&format!("            enabled: {en};\n"));
         out.push_str("            TouchArea {\n");
+        if !en {
+            out.push_str("                enabled: false;\n");
+        }
         out.push_str(&format!("                mouse-cursor: {cursor};\n"));
         out.push_str(&format!(
             "                moved => {{ root.{name}_moved(); }}\n"

@@ -266,3 +266,11 @@ pub fn slint_properties(node: &Node) -> Vec<String> {
         Vec::new()
     }
 }
+
+pub fn std_widgets(class: &str) -> &'static [&'static str] {
+    if let Some(c) = for_class(class) {
+        c.std_widgets()
+    } else {
+        &[]
+    }
+}

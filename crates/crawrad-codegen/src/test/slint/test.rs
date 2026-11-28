@@ -5,7 +5,7 @@ use crate::targets::slint::main_app::main_rs;
 use crawrad_ir::{Document, Node, Rect, Value};
 
 #[test]
-fn slint_generator_emits_four_files() {
+fn slint_generator_emits_three_files() {
     let mut doc = Document::new("Form1", "Form");
     {
         let form = doc.node_mut("Form1").unwrap();
@@ -26,11 +26,11 @@ fn slint_generator_emits_four_files() {
         .gerar(&doc, "my_app", &crawrad_registry::Registry::builtin())
         .expect("must generate successfully");
 
-    assert_eq!(files.len(), 4);
+    assert_eq!(files.len(), 3);
     let paths: Vec<_> = files.iter().map(|a| a.caminho.to_str().unwrap()).collect();
     assert!(paths.contains(&"src/main.rs"));
     assert!(paths.contains(&"src/Form1.designer.rs"));
-    assert!(paths.contains(&"src/Form1.slint"));
+    assert!(!paths.contains(&"src/Form1.slint"));
     assert!(paths.contains(&"src/Form1.rs"));
 
     let main_rs_file = files
@@ -43,34 +43,38 @@ fn slint_generator_emits_four_files() {
             .contains("Form1_designer::app_main();")
     );
 
-    let slint_file = files
+    let designer_file = files
         .iter()
-        .find(|a| a.caminho.to_str().unwrap() == "src/Form1.slint")
+        .find(|a| a.caminho.to_str().unwrap() == "src/Form1.designer.rs")
         .unwrap();
     assert!(
-        slint_file
+        designer_file
             .conteudo
             .contains("export component Form1Window inherits Window")
     );
-    assert!(slint_file.conteudo.contains("title: \"My Slint Form\";"));
-    assert!(slint_file.conteudo.contains("width: 640.0px;"));
-    assert!(slint_file.conteudo.contains("height: 480.0px;"));
-    assert!(slint_file.conteudo.contains("btn_ok := Button"));
+    assert!(designer_file.conteudo.contains("title: \"My Slint Form\";"));
+    assert!(designer_file.conteudo.contains("width: 640.0px;"));
+    assert!(designer_file.conteudo.contains("height: 480.0px;"));
+    assert!(designer_file.conteudo.contains("btn_ok := Button"));
     // THE CAPTION AND THE WIRING, which the audit found unasserted on 27/11/2026:
     // the generator emitted both, and changing `text:` to a typo or `clicked` to
     // `pressed` left every test passing. A button with no label and no reaction
     // would have shipped.
     assert!(
-        slint_file.conteudo.contains("text: \"Confirm\";"),
+        designer_file.conteudo.contains("text: \"Confirm\";"),
         "the button lost its caption"
     );
     assert!(
-        slint_file
+        designer_file
             .conteudo
             .contains("clicked => { root.btn_ok_clicked(); }"),
         "the button's click no longer reaches the callback it declares"
     );
-    assert!(slint_file.conteudo.contains("callback btn_ok_clicked();"));
+    assert!(
+        designer_file
+            .conteudo
+            .contains("callback btn_ok_clicked();")
+    );
 
     let designer_rs = files
         .iter()
@@ -159,7 +163,7 @@ fn test_slint_generator_emits_inputs_and_toggles() {
 
     let slint_file = files
         .iter()
-        .find(|a| a.caminho.to_str().unwrap() == "src/FormMain.slint")
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormMain.designer.rs")
         .unwrap();
     assert!(slint_file.conteudo.contains("txt_username := LineEdit"));
     // The CONTENT, not only the hint: the audit on 27/11/2026 found the hint
@@ -333,7 +337,7 @@ fn test_slint_generator_emits_lists_and_numerical_controls() {
 
     let slint_file = files
         .iter()
-        .find(|a| a.caminho.to_str().unwrap() == "src/FormLists.slint")
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormLists.designer.rs")
         .unwrap();
     assert!(slint_file.conteudo.contains("cbo_theme := ComboBox"));
     assert!(
@@ -478,7 +482,7 @@ fn test_slint_generator_emits_containers_and_options() {
 
     let slint_file = files
         .iter()
-        .find(|a| a.caminho.to_str().unwrap() == "src/FormContainers.slint")
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormContainers.designer.rs")
         .unwrap();
 
     assert!(slint_file.conteudo.contains("pnl_header := Rectangle"));
@@ -553,7 +557,7 @@ fn test_slint_generator_emits_page_control_and_tabs() {
 
     let slint_file = files
         .iter()
-        .find(|a| a.caminho.to_str().unwrap() == "src/FormTabs.slint")
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormTabs.designer.rs")
         .unwrap();
 
     assert!(slint_file.conteudo.contains("pgc_main := Rectangle"));
@@ -636,7 +640,7 @@ fn test_slint_generator_emits_button_variants_and_link_label() {
 
     let slint_file = files
         .iter()
-        .find(|a| a.caminho.to_str().unwrap() == "src/FormButtons.slint")
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormButtons.designer.rs")
         .unwrap();
 
     assert!(slint_file.conteudo.contains("sbtn_play := Button"));
@@ -718,7 +722,7 @@ fn test_slint_generator_emits_graphic_components() {
 
     let slint_file = files
         .iter()
-        .find(|a| a.caminho.to_str().unwrap() == "src/FormGraphics.slint")
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormGraphics.designer.rs")
         .unwrap();
 
     assert!(slint_file.conteudo.contains("img_logo := Image"));
@@ -795,6 +799,84 @@ fn test_slint_generator_emits_timer_and_dialogs() {
     assert!(designer_file.conteudo.contains("pub struct SaveDialog"));
     assert!(designer_file.conteudo.contains("pub struct MessageDialog"));
     assert!(designer_file.conteudo.contains("f.form.tmr_tick_timer();"));
+    assert!(
+        designer_file
+            .conteudo
+            .contains("use crawrad_runtime_slint::*;")
+    );
+    assert!(
+        designer_file
+            .conteudo
+            .contains("crawrad_runtime_slint::show_open_dialog(&self.file_name, &self.filter)")
+    );
+    assert!(
+        designer_file
+            .conteudo
+            .contains("crawrad_runtime_slint::show_save_dialog(&self.file_name, &self.filter)")
+    );
+    assert!(
+        designer_file
+            .conteudo
+            .contains("crawrad_runtime_slint::show_message_dialog(&self.message, \"\")")
+    );
+    assert!(
+        designer_file
+            .conteudo
+            .contains("pub state: crawrad_runtime_slint::TimerState,")
+    );
+    assert!(
+        designer_file
+            .conteudo
+            .contains("let initial_window_state = FormWindowState::Normal;")
+    );
+    assert!(
+        designer_file
+            .conteudo
+            .contains("FormWindowState::Maximized => window.window().set_maximized(true),")
+    );
+}
+
+#[test]
+fn test_slint_window_state_application() {
+    use crawrad_ir::Value;
+
+    let reg = crawrad_registry::Registry::builtin();
+    let generator = crate::targets::slint::GeradorSlint;
+
+    for (prop_val, expected_ident) in [
+        ("wsMaximized", "Maximized"),
+        ("wsMinimized", "Minimized"),
+        ("wsFullScreen", "FullScreen"),
+        ("wsNormal", "Normal"),
+    ] {
+        let mut doc = valid_form_doc();
+        {
+            let root = doc.node_mut("Form1").unwrap();
+            root.props.insert(
+                "window_state".to_string(),
+                Value::Enum(prop_val.to_string()),
+            );
+        }
+        let files = generator
+            .generate_with_bases(&doc, "demo", &reg, &[], false)
+            .expect("generate_with_bases");
+        let designer = files
+            .iter()
+            .find(|f| f.caminho.display().to_string().ends_with("designer.rs"))
+            .expect("designer.rs");
+        let expected_line =
+            format!("let initial_window_state = FormWindowState::{expected_ident};");
+        assert!(
+            designer.conteudo.contains(&expected_line),
+            "Expected '{expected_line}' for window_state = {prop_val}, got:\n{}",
+            designer.conteudo
+        );
+        assert!(
+            designer
+                .conteudo
+                .contains("FormWindowState::Maximized => window.window().set_maximized(true),")
+        );
+    }
 }
 
 #[test]
@@ -816,8 +898,8 @@ fn test_slint_target_manifest_and_dependencies() {
     // 2. Cargo.toml generation check: includes slint, excludes makepad-widgets and eframe
     let toml = gerar_cargo_toml("slint_sample_app", AlvoGerador::Slint, true, false, &[]);
     assert!(
-        toml.contains("slint = \"1.9\""),
-        "Generated Cargo.toml must contain slint = \"1.9\" dependency:\n{toml}"
+        toml.contains("slint = \"=1.9.2\""),
+        "Generated Cargo.toml must contain slint = \"=1.9.2\" dependency:\n{toml}"
     );
     assert!(
         !toml.contains("makepad-widgets"),
@@ -826,6 +908,68 @@ fn test_slint_target_manifest_and_dependencies() {
     assert!(
         !toml.contains("eframe"),
         "Generated Cargo.toml must NOT contain eframe:\n{toml}"
+    );
+}
+
+#[test]
+fn slint_version_is_mechanically_consistent_across_all_sources() {
+    use crate::AlvoGerador;
+    use crate::dependencies::{Dependencia, dependencias_do_projeto};
+
+    // 1. Version pinned for the compiler proof in crawrad-codegen/Cargo.toml
+    let codegen_manifest = include_str!("../../../Cargo.toml");
+    let proof_version_line = codegen_manifest
+        .lines()
+        .find(|l| l.contains("slint-interpreter") && l.contains("version"))
+        .expect("slint-interpreter dependency line in Cargo.toml");
+    let proof_version = proof_version_line
+        .split("version = \"")
+        .nth(1)
+        .and_then(|s| s.split('"').next())
+        .expect("extracted slint-interpreter version");
+
+    // 2. Version emitted into generated projects by dependencies.rs
+    let deps = dependencias_do_projeto(AlvoGerador::Slint, true, false);
+    let slint_dep = deps
+        .iter()
+        .find(|d| d.nome() == "slint")
+        .expect("slint dependency in dependencias_do_projeto");
+    let product_version = match slint_dep {
+        Dependencia::Registro { versao, .. } => versao.as_str(),
+        _ => panic!("slint dependency must be Dependencia::Registro"),
+    };
+
+    // 3. Version registered in crawrad-project/src/workspace.rs
+    let workspace_rs = include_str!("../../../../crawrad-project/src/workspace.rs");
+    let workspace_arm = workspace_rs
+        .lines()
+        .find(|l| l.contains("AlvoGerador::Slint") && l.contains("slint@"))
+        .expect("Slint arm in workspace.rs");
+    let workspace_version = workspace_arm
+        .split("slint@")
+        .nth(1)
+        .and_then(|s| s.split('"').next())
+        .expect("extracted slint version in workspace.rs");
+
+    assert_eq!(
+        proof_version, "=1.9.2",
+        "Proof version in crawrad-codegen/Cargo.toml must be =1.9.2"
+    );
+    assert_eq!(
+        product_version, "=1.9.2",
+        "Product dependency version in dependencies.rs must be =1.9.2"
+    );
+    assert_eq!(
+        workspace_version, "=1.9.2",
+        "Workspace registration version in workspace.rs must be =1.9.2"
+    );
+    assert_eq!(
+        proof_version, product_version,
+        "Proof version and product version in dependencies.rs must be identical"
+    );
+    assert_eq!(
+        product_version, workspace_version,
+        "Product version in dependencies.rs and workspace.rs must be identical"
     );
 }
 
@@ -942,7 +1086,7 @@ fn test_slint_slice1_components() {
 
     let slint_file = files
         .iter()
-        .find(|a| a.caminho.to_str().unwrap() == "src/FormSlice1.slint")
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormSlice1.designer.rs")
         .unwrap();
     let sc = &slint_file.conteudo;
 
@@ -1250,7 +1394,7 @@ fn test_slint_slice2_components() {
 
     let slint_file = files
         .iter()
-        .find(|a| a.caminho.to_str().unwrap() == "src/FormSlice2.slint")
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormSlice2.designer.rs")
         .unwrap();
     let sc = &slint_file.conteudo;
 
@@ -1520,7 +1664,7 @@ fn test_slint_slice3_components() {
 
     let slint_file = files
         .iter()
-        .find(|a| a.caminho.to_str().unwrap() == "src/FormSlice3.slint")
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormSlice3.designer.rs")
         .unwrap();
     let sc = &slint_file.conteudo;
 
@@ -1542,8 +1686,8 @@ fn test_slint_slice3_components() {
         "ToolBar background missing"
     );
     assert!(
-        sc.contains("border-bottom-width: 1px;"),
-        "ToolBar border-bottom-width missing"
+        sc.contains("border-width: 1px;"),
+        "ToolBar border-width missing"
     );
     assert!(
         sc.contains("border-color: #1e1e24;"),
@@ -1843,7 +1987,7 @@ fn test_slint_slice4_components() {
 
     let slint_file = files
         .iter()
-        .find(|a| a.caminho.to_str().unwrap() == "src/FormInputs.slint")
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormInputs.designer.rs")
         .unwrap();
     let sc = &slint_file.conteudo;
 
@@ -2269,7 +2413,7 @@ fn test_slint_slice5_components() {
 
     let slint_file = files
         .iter()
-        .find(|a| a.caminho.to_str().unwrap() == "src/FormDataBound.slint")
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormDataBound.designer.rs")
         .unwrap();
     let sc = &slint_file.conteudo;
 
@@ -2382,17 +2526,22 @@ fn test_slint_slice5_components() {
     assert!(sc.contains("width: 320.0px;"), "Grid width missing");
     assert!(sc.contains("height: 110.0px;"), "Grid height missing");
     assert!(
-        sc.contains("grd_data_row_0 := Rectangle"),
-        "Grid row missing"
+        sc.contains("in property <[[string]]> grd_data_cells;"),
+        "Grid cells property missing"
+    );
+    assert!(
+        sc.contains("for row[r] in root.grd_data_cells: Rectangle {"),
+        "Grid row repeater missing"
     );
     assert!(sc.contains("height: 26px;"), "Grid row height missing");
     assert!(
-        sc.contains("grd_data_cell_0_0 := Rectangle"),
-        "Grid cell missing"
+        sc.contains("for cell[c] in row: Rectangle {"),
+        "Grid cell repeater missing"
     );
     assert!(sc.contains("width: 80px;"), "Grid cell width missing");
+    assert!(sc.contains("text: cell;"), "Grid cell text element missing");
     assert!(
-        sc.contains("clicked => { root.grd_data_cell_selected(0, 0); }"),
+        sc.contains("clicked => { root.grd_data_cell_selected(c, r); }"),
         "Grid cell selected wiring missing"
     );
     assert!(
@@ -2530,6 +2679,10 @@ fn test_slint_slice5_components() {
         "Grid on_cell_selected wiring missing"
     );
     assert!(
+        dc.contains("window.set_grd_data_cells"),
+        "Grid data setter invocation missing"
+    );
+    assert!(
         dc.contains("f.form.grd_click();"),
         "Grid on_click action invocation missing"
     );
@@ -2563,7 +2716,7 @@ fn test_slint_border_radius_property() {
 
     let slint_file = files
         .iter()
-        .find(|a| a.caminho.to_str().unwrap() == "src/FormRadius.slint")
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormRadius.designer.rs")
         .unwrap();
     let sc = &slint_file.conteudo;
 
@@ -2575,4 +2728,314 @@ fn test_slint_border_radius_property() {
         sc.contains("border-radius: 4px;"),
         "Default node without slint.border-radius must fallback to border-radius: 4px;"
     );
+}
+
+use crate::targets::slint::CLASSES;
+use slint_interpreter::Compiler;
+use std::future::Future;
+use std::path::PathBuf;
+use std::pin::pin;
+use std::sync::Arc;
+use std::task::{Context, Poll, Wake, Waker};
+
+struct NoopWake;
+
+impl Wake for NoopWake {
+    fn wake(self: Arc<Self>) {}
+}
+
+fn block_on<F: Future>(future: F) -> F::Output {
+    let waker = Waker::from(Arc::new(NoopWake));
+    let mut cx = Context::from_waker(&waker);
+    let mut future = pin!(future);
+    loop {
+        if let Poll::Ready(value) = future.as_mut().poll(&mut cx) {
+            return value;
+        }
+    }
+}
+
+fn diagnostics(source: &str) -> Vec<String> {
+    let compiler = Compiler::default();
+    let result =
+        block_on(compiler.build_from_source(source.to_string(), PathBuf::from("form.slint")));
+    result.diagnostics().map(|d| format!("{d}")).collect()
+}
+
+fn valid_form_doc() -> Document {
+    let mut doc = Document::new("Form1", "Form");
+    let form = doc.node_mut("Form1").unwrap();
+    form.set_rect(Rect::new(0.0, 0.0, 800.0, 600.0));
+    form.set_name("Form1");
+    form.set_text("Form");
+    doc
+}
+
+fn add_valid_node(doc: &mut Document, class: &str, index: usize) {
+    let id = format!("c{index}");
+    let mut node = Node::new(&id, class);
+    node.set_name(&id);
+    let reg = crawrad_registry::Registry::builtin();
+    if let Some(desc) = reg.get(class)
+        && desc.props.iter().any(|p| p.key == "text")
+    {
+        node.set_text(class);
+    }
+    node.set_rect(Rect::new(10.0, 10.0 + 30.0 * index as f32, 120.0, 24.0));
+    let _ = doc.add_child("Form1", node);
+}
+
+fn valid_markup(doc: &Document) -> String {
+    let reg = crawrad_registry::Registry::builtin();
+    let root = doc.node(&doc.root).unwrap();
+    let emitted: Vec<&Node> = doc
+        .in_paint_order()
+        .iter()
+        .filter_map(|id| doc.node(id))
+        .collect();
+    crate::targets::slint::form::form_slint(doc, &reg, root, "Form1", &emitted).expect("form_slint")
+}
+
+#[test]
+fn every_class_generates_markup_the_slint_compiler_accepts() {
+    let mut failures = Vec::new();
+    for (i, class) in CLASSES.iter().enumerate() {
+        let mut doc = valid_form_doc();
+        add_valid_node(&mut doc, class, i);
+        let source = valid_markup(&doc);
+        let diags = diagnostics(&source);
+        if !diags.is_empty() {
+            failures.push(format!(
+                "== {class} ==\n{}\n-- markup --\n{source}",
+                diags.join("\n")
+            ));
+        }
+    }
+    assert!(failures.is_empty(), "{}", failures.join("\n\n"));
+}
+
+#[test]
+fn a_form_carrying_every_class_compiles_together() {
+    let mut doc = valid_form_doc();
+    for (i, class) in CLASSES.iter().enumerate() {
+        add_valid_node(&mut doc, class, i);
+    }
+    let source = valid_markup(&doc);
+    let diags = diagnostics(&source);
+    assert!(
+        diags.is_empty(),
+        "{}\n-- markup --\n{source}",
+        diags.join("\n")
+    );
+}
+
+#[test]
+fn special_characters_in_captions_compile_cleanly() {
+    for (name, caption) in [
+        ("newline", "Line1\nLine2"),
+        ("tab", "Col1\tCol2"),
+        ("cr", "Carriage\rReturn"),
+        ("crlf", "Windows\r\nNewline"),
+        ("brace", "Contains {brace}"),
+        ("quote", "Contains \"quoted\" text"),
+        ("backslash", "Contains \\ backslash"),
+    ] {
+        let mut doc = valid_form_doc();
+        let mut btn = Node::new(name, "Button");
+        btn.set_name(name);
+        btn.set_text(caption);
+        btn.set_rect(Rect::new(10.0, 10.0, 120.0, 24.0));
+        let _ = doc.add_child("Form1", btn);
+        let source = valid_markup(&doc);
+        let diags = diagnostics(&source);
+        assert!(
+            diags.is_empty(),
+            "Failed for {name}: {}\n-- markup --\n{source}",
+            diags.join("\n")
+        );
+    }
+}
+
+fn assert_generated_rust_parses(files: &[crate::Arquivo], context: &str) {
+    for file in files {
+        let path_str = file.caminho.display().to_string();
+        if path_str.ends_with(".rs")
+            && let Err(err) = syn::parse_file(&file.conteudo)
+        {
+            panic!(
+                "Generated Rust syntax error in '{path_str}' ({context}): {err}\n-- Source --\n{}",
+                file.conteudo
+            );
+        }
+    }
+}
+
+#[test]
+fn every_class_generates_rust_the_parser_accepts() {
+    let reg = crawrad_registry::Registry::builtin();
+    let generator = crate::targets::slint::GeradorSlint;
+    for (i, class) in CLASSES.iter().enumerate() {
+        let mut doc = valid_form_doc();
+        add_valid_node(&mut doc, class, i);
+        let files = generator
+            .generate_with_bases(&doc, "demo", &reg, &[], false)
+            .expect("generate_with_bases");
+        assert_generated_rust_parses(&files, class);
+    }
+}
+
+#[test]
+fn a_form_carrying_every_class_generates_rust_the_parser_accepts() {
+    let reg = crawrad_registry::Registry::builtin();
+    let generator = crate::targets::slint::GeradorSlint;
+    let mut doc = valid_form_doc();
+    for (i, class) in CLASSES.iter().enumerate() {
+        add_valid_node(&mut doc, class, i);
+    }
+    let files = generator
+        .generate_with_bases(&doc, "demo", &reg, &[], false)
+        .expect("generate_with_bases");
+    assert_generated_rust_parses(&files, "all classes");
+}
+
+#[test]
+fn test_auditor_scenario_real_compilation() {
+    let reg = crawrad_registry::Registry::builtin();
+    let generator = crate::targets::slint::GeradorSlint;
+    let mut doc = Document::new("FormMain", "Form");
+    {
+        let root = doc.node_mut("FormMain").unwrap();
+        root.set_name("FormMain");
+        root.set_text("Demo Slint");
+        root.set_rect(Rect::new(0.0, 0.0, 800.0, 600.0));
+    }
+    for (i, class) in ["Label", "Edit", "Button", "CheckBox", "Grid"]
+        .iter()
+        .enumerate()
+    {
+        let mut node = Node::new(format!("c{i}"), *class);
+        node.set_name(format!("c{i}"));
+        if let Some(desc) = reg.get(class)
+            && desc.props.iter().any(|p| p.key == "text")
+        {
+            node.set_text(*class);
+        }
+        if *class == "Grid" {
+            let table = "Nome\tCidade\tStatus\nAna Lima\tRecife\tAtivo\nBruno Sa\tOlinda\tAtivo\nCarlos Melo\tPaulista\tInativo";
+            node.props.insert(
+                "cell_text".to_string(),
+                crawrad_ir::Value::Str(table.to_string()),
+            );
+            node.props
+                .insert("fixed_rows".to_string(), crawrad_ir::Value::Int(1));
+            node.props
+                .insert("col_count".to_string(), crawrad_ir::Value::Int(3));
+            node.props
+                .insert("row_count".to_string(), crawrad_ir::Value::Int(4));
+        }
+        node.set_rect(Rect::new(10.0, 10.0 + 40.0 * i as f32, 120.0, 30.0));
+        let _ = doc.add_child("FormMain", node);
+    }
+    let files = generator
+        .generate_with_bases(&doc, "scratch_slint", &reg, &[], false)
+        .expect("generate_with_bases");
+    assert_generated_rust_parses(&files, "auditor scenario");
+
+    let designer_file = files
+        .iter()
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormMain.designer.rs")
+        .expect("FormMain.designer.rs must exist");
+    let content = &designer_file.conteudo;
+
+    // Assert that the generated markup actually binds the data:
+    // 1. Slint property declaration for cell model
+    assert!(
+        content.contains("in property <[[string]]> c4_cells;"),
+        "Grid cells property declaration missing"
+    );
+    // 2. Repeater for rows and columns
+    assert!(
+        content.contains("for row[r] in root.c4_cells: Rectangle {"),
+        "Grid row repeater missing"
+    );
+    assert!(
+        content.contains("for cell[c] in row: Rectangle {"),
+        "Grid cell repeater missing"
+    );
+    // 3. Cell text binding inside repeater
+    assert!(
+        content.contains("text: cell;"),
+        "Grid cell text binding missing"
+    );
+    // 4. Header row is distinguishable (background & font-weight)
+    assert!(
+        content.contains("background: r < 1 ? #f0f0f0 : #ffffff;"),
+        "Grid header row distinction missing"
+    );
+    assert!(
+        content.contains("font-weight: r < 1 ? 700 : 400;"),
+        "Grid header font-weight distinction missing"
+    );
+    // 5. Per-cell click callback keeps column and row indices
+    assert!(
+        content.contains("clicked => { root.c4_cell_selected(c, r); }"),
+        "Grid cell click wiring with column and row indices missing"
+    );
+    assert!(
+        content.contains("callback c4_cell_selected(int, int);"),
+        "Grid callback declaration missing"
+    );
+    assert!(
+        content.contains("window.on_c4_cell_selected(move |col, row| {"),
+        "Grid window callback handler missing"
+    );
+    // 6. Data reaches the markup via setter push before run()
+    assert!(
+        content.contains("window.set_c4_cells("),
+        "Grid data push setter invocation missing"
+    );
+    assert!(
+        content.contains("crawrad_runtime::string_grid::Cells::from_text("),
+        "Grid initial cells data from text missing"
+    );
+    assert!(
+        content.contains("Ana Lima"),
+        "Table data content missing in generated code"
+    );
+
+    let scratch_dir = std::env::temp_dir().join("crawrad_scratch_slint");
+    let src_dir = scratch_dir.join("src");
+    let _ = std::fs::remove_dir_all(&scratch_dir);
+    std::fs::create_dir_all(&src_dir).unwrap();
+
+    let mut toml_content = crate::dependencies::gerar_cargo_toml(
+        "scratch_slint",
+        crate::AlvoGerador::Slint,
+        true,
+        false,
+        &[],
+    );
+    toml_content.push_str("\n[workspace]\n");
+    std::fs::write(scratch_dir.join("Cargo.toml"), toml_content).unwrap();
+
+    for file in &files {
+        let dest = scratch_dir.join(&file.caminho);
+        std::fs::write(dest, &file.conteudo).unwrap();
+    }
+
+    let output = std::process::Command::new("cargo")
+        .arg("check")
+        .arg("--manifest-path")
+        .arg(scratch_dir.join("Cargo.toml"))
+        .output()
+        .expect("execute cargo check");
+
+    if !output.status.success() {
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        panic!(
+            "Real compilation check failed (exit code {:?}):\nSTDOUT:\n{stdout}\nSTDERR:\n{stderr}",
+            output.status.code()
+        );
+    }
 }

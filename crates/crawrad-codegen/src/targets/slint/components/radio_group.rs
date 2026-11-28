@@ -58,6 +58,10 @@ impl SlintComponentCodegen for RadioGroupCodegen {
         let name = identificador(node.name()).unwrap_or_else(|_| node.name().to_string());
         vec![format!("callback {name}_selected(int);")]
     }
+
+    fn std_widgets(&self) -> &'static [&'static str] {
+        &["GroupBox"]
+    }
 }
 
 pub fn struct_definition() -> String {

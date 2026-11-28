@@ -58,6 +58,10 @@ impl SlintComponentCodegen for ListBoxCodegen {
         let name = identificador(node.name()).unwrap_or_else(|_| node.name().to_string());
         vec![format!("callback {name}_current_item_changed(int);")]
     }
+
+    fn std_widgets(&self) -> &'static [&'static str] {
+        &["StandardListView"]
+    }
 }
 
 pub fn struct_definition() -> String {

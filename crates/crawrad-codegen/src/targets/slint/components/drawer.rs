@@ -113,7 +113,7 @@ impl SlintComponentCodegen for DrawerCodegen {
         // drawer id
         let name = identificador(node.name())?;
         let vis = layout::is_visible(node);
-        let en = layout::is_enabled(node);
+        let _en = layout::is_enabled(node);
         // drawer title text
         let caption = layout::text(node);
         let caption_esc = util::escape_slint_string(&caption);
@@ -128,7 +128,6 @@ impl SlintComponentCodegen for DrawerCodegen {
         out.push_str("            border-color: #6e7290;\n");
         out.push_str("            clip: true;\n");
         out.push_str(&format!("            visible: {vis} && {opened};\n"));
-        out.push_str(&format!("            enabled: {en};\n"));
         if show_header {
             out.push_str("            Rectangle {\n");
             out.push_str("                x: 0px;\n");

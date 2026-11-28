@@ -89,7 +89,7 @@ impl SlintComponentCodegen for CategoryPanelCodegen {
         let name = identificador(node.name())?;
         let pos = layout::position(x, y);
         let vis = layout::is_visible(node);
-        let en = layout::is_enabled(node);
+        let _en = layout::is_enabled(node);
         // category_panel title text
         let caption = layout::text(node);
         let caption_esc = util::escape_slint_string(&caption);
@@ -111,7 +111,6 @@ impl SlintComponentCodegen for CategoryPanelCodegen {
         out.push_str("            border-color: #3e3e56;\n");
         out.push_str("            clip: true;\n");
         out.push_str(&format!("            visible: {vis};\n"));
-        out.push_str(&format!("            enabled: {en};\n"));
         out.push_str("            Rectangle {\n");
         out.push_str("                x: 0px;\n");
         out.push_str("                y: 0px;\n");

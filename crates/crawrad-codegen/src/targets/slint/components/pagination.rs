@@ -133,7 +133,6 @@ impl SlintComponentCodegen for PaginationCodegen {
         out.push_str("            spacing: 4px;\n");
         out.push_str("            alignment: center;\n");
         out.push_str(&format!("            visible: {vis};\n"));
-        out.push_str(&format!("            enabled: {en};\n"));
 
         let prev_page = (page_index - 1).max(0);
         let next_page = (page_index + 1).min(page_count - 1);
@@ -148,6 +147,9 @@ impl SlintComponentCodegen for PaginationCodegen {
             out.push_str("                border-color: #d0d0d0;\n");
             out.push_str("                Text { text: \"‹\"; font-size: 14px; horizontal-alignment: center; vertical-alignment: center; }\n");
             out.push_str("                TouchArea {\n");
+            if !en {
+                out.push_str("                    enabled: false;\n");
+            }
             out.push_str(&format!(
                 "                    clicked => {{ root.{name}_page_changed({prev_page}); }}\n"
             ));
@@ -172,6 +174,9 @@ impl SlintComponentCodegen for PaginationCodegen {
                 "                Text {{ text: \"{label}\"; color: {fg}; font-size: 12px; horizontal-alignment: center; vertical-alignment: center; }}\n"
             ));
             out.push_str("                TouchArea {\n");
+            if !en {
+                out.push_str("                    enabled: false;\n");
+            }
             out.push_str(&format!(
                 "                    clicked => {{ root.{name}_page_changed({p}); }}\n"
             ));
@@ -189,6 +194,9 @@ impl SlintComponentCodegen for PaginationCodegen {
             out.push_str("                border-color: #d0d0d0;\n");
             out.push_str("                Text { text: \"›\"; font-size: 14px; horizontal-alignment: center; vertical-alignment: center; }\n");
             out.push_str("                TouchArea {\n");
+            if !en {
+                out.push_str("                    enabled: false;\n");
+            }
             out.push_str(&format!(
                 "                    clicked => {{ root.{name}_page_changed({next_page}); }}\n"
             ));

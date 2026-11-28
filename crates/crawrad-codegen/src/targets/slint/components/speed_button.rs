@@ -68,4 +68,8 @@ impl SlintComponentCodegen for SpeedButtonCodegen {
     fn slint_callbacks(&self, node: &Node) -> Vec<String> {
         util::click_callbacks(node)
     }
+
+    fn std_widgets(&self) -> &'static [&'static str] {
+        &["Button"]
+    }
 }

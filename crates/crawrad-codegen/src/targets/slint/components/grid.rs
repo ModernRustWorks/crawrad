@@ -22,7 +22,7 @@ impl SlintComponentCodegen for GridCodegen {
         fields.push("    pub default_row_height: i64,".to_string());
         fields.push("    pub grid_lines: bool,".to_string());
         fields.push("    pub editing: bool,".to_string());
-        fields.push("    pub cells: crawrad_runtime::string_grid::GridCells,".to_string());
+        fields.push("    pub cells: crawrad_runtime::string_grid::Cells,".to_string());
         fields.push("    pub selected: Option<(usize, usize)>,".to_string());
         fields.extend(util::catalogue_fields(
             &desc,
@@ -45,13 +45,25 @@ impl SlintComponentCodegen for GridCodegen {
 
     fn emit_default(&self, node: &Node) -> String {
         let mut inits = util::common_control_inits(node);
+        let text_rows = match node.props.get("cell_text") {
+            Some(Value::Str(s)) if !s.is_empty() => s.split('\n').count() as i64,
+            _ => 0,
+        };
+        let text_cols = match node.props.get("cell_text") {
+            Some(Value::Str(s)) if !s.is_empty() => s
+                .lines()
+                .map(|l| l.split('\t').count() as i64)
+                .max()
+                .unwrap_or(0),
+            _ => 0,
+        };
         let col_count = match node.props.get("col_count") {
-            Some(Value::Int(i)) => *i,
-            _ => 5,
+            Some(Value::Int(i)) => (*i).max(text_cols),
+            _ => 5.max(text_cols),
         };
         let row_count = match node.props.get("row_count") {
-            Some(Value::Int(i)) => *i,
-            _ => 5,
+            Some(Value::Int(i)) => (*i).max(text_rows),
+            _ => 5.max(text_rows),
         };
         let fixed_cols = match node.props.get("fixed_cols") {
             Some(Value::Int(i)) => *i,
@@ -105,8 +117,22 @@ impl SlintComponentCodegen for GridCodegen {
         format!("Grid {{ {body} }}")
     }
 
-    fn emit_sync(&self, _doc: &Document, _node: &Node, _field: &str) -> String {
-        String::new()
+    fn emit_sync(&self, _doc: &Document, _node: &Node, field: &str) -> String {
+        format!(
+            "        {{\n\
+             \x20           if let Ok(app_guard) = app.lock() {{\n\
+             \x20               let mut row_models = Vec::with_capacity(app_guard.form.{field}.row_count as usize);\n\
+             \x20               for r in 0..app_guard.form.{field}.row_count as usize {{\n\
+             \x20                   let mut col_strings = Vec::with_capacity(app_guard.form.{field}.col_count as usize);\n\
+             \x20                   for c in 0..app_guard.form.{field}.col_count as usize {{\n\
+             \x20                       col_strings.push(slint::SharedString::from(app_guard.form.{field}.cells.get(c, r)));\n\
+             \x20                   }}\n\
+             \x20                   row_models.push(slint::ModelRc::from(std::rc::Rc::new(slint::VecModel::from(col_strings))));\n\
+             \x20               }}\n\
+             \x20               window.set_{field}_cells(slint::ModelRc::from(std::rc::Rc::new(slint::VecModel::from(row_models))));\n\
+             \x20           }}\n\
+             \x20       }}\n"
+        )
     }
 
     fn emit_actions(
@@ -145,13 +171,9 @@ impl SlintComponentCodegen for GridCodegen {
     ) -> Result<String, crate::Erro> {
         // grid component name
         let name = identificador(node.name())?;
-        let col_count = match node.props.get("col_count") {
+        let fixed_rows = match node.props.get("fixed_rows") {
             Some(Value::Int(i)) => *i,
-            _ => 5,
-        };
-        let row_count = match node.props.get("row_count") {
-            Some(Value::Int(i)) => *i,
-            _ => 5,
+            _ => 1,
         };
         let default_col_w = match node.props.get("default_col_width") {
             Some(Value::Int(i)) => *i,
@@ -165,44 +187,53 @@ impl SlintComponentCodegen for GridCodegen {
 
         let mut out = util::emit_container_header(node, x, y, w, h, 4.0, true)?;
         out.push_str("            VerticalLayout {\n");
-        out.push_str("            VerticalLayout {\n");
-
-        for r in 0..row_count.min(8) {
-            let bg = if r == 0 { "#f0f0f0" } else { "#ffffff" };
-            out.push_str(&format!("                {name}_row_{r} := Rectangle {{\n"));
-            out.push_str(&format!("                    height: {default_row_h}px;\n"));
-            out.push_str(&format!("                    background: {bg};\n"));
-            out.push_str("                    HorizontalLayout {\n");
-            for c in 0..col_count.min(8) {
-                out.push_str(&format!(
-                    "                        {name}_cell_{r}_{c} := Rectangle {{\n"
-                ));
-                out.push_str(&format!(
-                    "                            width: {default_col_w}px;\n"
-                ));
-                out.push_str("                            border-width: 1px;\n");
-                out.push_str("                            border-color: #e0e0e0;\n");
-                out.push_str("                            TouchArea {\n");
-                if !en {
-                    out.push_str("                                enabled: false;\n");
-                }
-                out.push_str(&format!(
-                    "                                clicked => {{ root.{name}_cell_selected({c}, {r}); }}\n"
-                ));
-                out.push_str("                            }\n");
-                out.push_str("                        }\n");
-            }
-            out.push_str("                    }\n");
-            out.push_str("                }\n");
+        out.push_str("                alignment: start;\n");
+        out.push_str("                spacing: 0px;\n");
+        out.push_str("                padding: 0px;\n");
+        out.push_str(&format!(
+            "                for row[r] in root.{name}_cells: Rectangle {{\n\
+             \x20                   height: {default_row_h}px;\n\
+             \x20                   background: r < {fixed_rows} ? #f0f0f0 : #ffffff;\n\
+             \x20                   HorizontalLayout {{\n\
+             \x20                       alignment: start;\n\
+             \x20                       spacing: 0px;\n\
+             \x20                       padding: 0px;\n\
+             \x20                       for cell[c] in row: Rectangle {{\n\
+             \x20                           width: {default_col_w}px;\n\
+             \x20                           border-width: 1px;\n\
+             \x20                           border-color: #e0e0e0;\n\
+             \x20                           Text {{\n\
+             \x20                               text: cell;\n\
+             \x20                               color: #000000;\n\
+             \x20                               font-weight: r < {fixed_rows} ? 700 : 400;\n\
+             \x20                               vertical-alignment: center;\n\
+             \x20                               horizontal-alignment: center;\n\
+             \x20                               overflow: elide;\n\
+             \x20                           }}\n\
+             \x20                           TouchArea {{\n"
+        ));
+        if !en {
+            out.push_str("                                enabled: false;\n");
         }
-
-        out.push_str("            }\n");
-        out.push_str("        }\n");
+        out.push_str(&format!(
+            "                                clicked => {{ root.{name}_cell_selected(c, r); }}\n\
+             \x20                           }}\n\
+             \x20                       }}\n\
+             \x20                   }}\n\
+             \x20               }}\n\
+             \x20           }}\n\
+             \x20       }}\n"
+        ));
         Ok(out)
     }
 
     fn slint_callbacks(&self, node: &Node) -> Vec<String> {
         let name = identificador(node.name()).unwrap_or_else(|_| node.name().to_string());
         vec![format!("callback {name}_cell_selected(int, int);")]
+    }
+
+    fn slint_properties(&self, node: &Node) -> Vec<String> {
+        let name = identificador(node.name()).unwrap_or_else(|_| node.name().to_string());
+        vec![format!("in property <[[string]]> {name}_cells;")]
     }
 }
