@@ -44,9 +44,14 @@
 //!
 
 use crawrad_note::note;
+// Above the per-area test modules on purpose: they share this one lock because
+// they share one process-wide waker. See its own documentation.
 #[cfg(test)]
 #[path = "test/capture/test.rs"]
 mod capture_test;
+#[cfg(test)]
+#[path = "test/serial/test.rs"]
+mod serial_lock;
 #[cfg(test)]
 #[path = "test/work_area/test.rs"]
 mod work_area_test;
