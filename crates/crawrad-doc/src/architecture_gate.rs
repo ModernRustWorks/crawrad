@@ -122,7 +122,17 @@ pub const ALLOWED_SHELL_ROOT_FILES: &[&str] = &["ide_app.rs", "main.rs"];
 /// `rev_salva` and `form_anterior`, which only `clippy` noticed. Counting this
 /// tree reports 33,480, and 33,454 + 26 is the same number. What a strip of
 /// forms IS lives in `crawrad-host`; the shell holds the wiring.
-pub const MAX_SHELL_SOURCE_LINES: usize = 33_480;
+/// Raised on 27/11/2026 from 33,480 to 33,524, measured on this tree and
+/// cross-checked: 33,480 + 44 is the same number. The strip of tabs is DRAWN now,
+/// one tab per form with the loose files after them.
+///
+/// The 44 lines are the drawing and the click, and only that. WHAT THE STRIP IS
+/// went to `crawrad-host` instead - the order, the boundary between the two kinds,
+/// which row is lit, and each tab's unsaved mark are `strip`, `strip_front` and
+/// `strip_target` there, proved by four mutations. The shell hands over the loose
+/// files it owns and draws the answer; it no longer subtracts an offset of its
+/// own, which is the kind of arithmetic that drifts from what it describes.
+pub const MAX_SHELL_SOURCE_LINES: usize = 33_524;
 
 /// Maximum allowed lines for any individual `.rs` file in `crates/crawrad-ide/src/` (outside `test/`).
 ///

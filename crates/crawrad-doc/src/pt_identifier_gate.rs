@@ -12,7 +12,11 @@ use std::path::Path;
 /// test modules arrived with 75 Portuguese definitions (31 test names and 44
 /// locals) and were written in English instead, so the ratchet falls by exactly
 /// that many.
-pub const MAX_PT_IDENTIFIERS: usize = 2_061;
+/// LOWERED on 27/11/2026 from 2,061 to 2,060. The strip's new names are English,
+/// as the rule requires, and `rotulos_das_abas` became `tab_labels` on its way
+/// past - so the count went DOWN by one and the gate, which demands equality,
+/// refused the old number. The grandfathered names were left alone.
+pub const MAX_PT_IDENTIFIERS: usize = 2_060;
 
 /// Maximum allowed Portuguese directory and file paths across `crates/` and `components/`.
 pub const MAX_PT_PATHS: usize = 10;
