@@ -169,7 +169,23 @@ pub const ALLOWED_SHELL_ROOT_FILES: &[&str] = &["ide_app.rs", "main.rs"];
 /// Measured by the gate itself rather than counted by hand: it reported
 /// "Current lines (excluding test/): 33589" against the old limit, which is
 /// 33_585 + 4.
-pub const MAX_SHELL_SOURCE_LINES: usize = 33_589;
+/// Raised to 33_695 on 28/11/2026 by the centred build dialog that Run now
+/// shows: 69 lines in `dialogs/build_run.rs`, 22 of markup in the dialogs DSL,
+/// and the wiring in `build.rs` and `ide_app.rs`. This one is genuinely shell,
+/// and the split was checked before the number moved: `build_run.rs` is almost
+/// entirely `set_text` reading a `BuildDialogContent`, while the decision of
+/// WHAT the dialog says -- its title, the counter, the fraction, the elided
+/// output path, the elapsed time, and whether it should still be open at all --
+/// lives in `crawrad-project/src/build_dialog.rs` (149 lines) with its 192 lines
+/// of tests, where no window is needed to run them. A new dialog cannot be
+/// drawn from the domain crate; only what it says can come from there, and it
+/// does.
+/// Measured by the gate itself on the merged tree, not hand-counted and not
+/// taken from either side: 33_695, which is the 33_691 this branch reached plus
+/// the four `main.rs` registration lines that came in with the MCP description
+/// lock. A hand count was wrong twice before; the gate's own number is the one
+/// that goes in.
+pub const MAX_SHELL_SOURCE_LINES: usize = 33_695;
 
 /// Maximum allowed lines for any individual `.rs` file in `crates/crawrad-ide/src/` (outside `test/`).
 ///
