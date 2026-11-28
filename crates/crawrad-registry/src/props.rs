@@ -2101,6 +2101,26 @@ impl Props {
         )
     }
 
+    /// Slint's own corner rounding, offered only when Slint is the active target.
+    ///
+    /// The `slint.` prefix is not decoration: `PropKey::parse` reads a dotted key
+    /// as belonging to that one target, so `props_for` hands this row to the
+    /// Object Inspector when Slint is generating and withholds it from Makepad
+    /// and egui, which express rounding differently or not at all.
+    ///
+    /// The default is whatever the Slint target emits for that component today,
+    /// so registering the property changes nothing until somebody turns it.
+    #[note("props-props-slint-border-radius")]
+    pub fn slint_border_radius(default: i64) -> PropDesc {
+        PropDesc::new_typed(
+            "slint.border-radius",
+            "BorderRadius",
+            Value::Int(default),
+            Category::Appearance,
+            PropKind::Int { min: 0, max: 512 },
+        )
+    }
+
     #[note("props-props-associate")]
     pub fn associate() -> PropDesc {
         PropDesc::new_typed(
