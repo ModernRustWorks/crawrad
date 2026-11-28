@@ -228,13 +228,18 @@ impl IdeApp {
                     .into_iter()
                     .cloned()
                     .collect::<Vec<_>>();
-                menu::rows_with_scheme_and_contributions(
+                let mut rows = menu::rows_with_scheme_and_contributions(
                     m,
                     ctx,
                     self.esquema_teclado,
                     Some(&self.capabilities),
                     &contributed_menus,
-                )
+                );
+                // Recents are data, not catalogue commands: see `menu::recent_rows`.
+                if m == menu::Menu::File {
+                    menu::insert_recent_header(&mut rows);
+                }
+                rows
             }
             Aberto::Painel { painel, .. } => menu::panel_rows(painel, ctx),
             Aberto::SettingsRail => menu::settings_rail_rows(ctx),
@@ -313,6 +318,9 @@ impl IdeApp {
         else {
             return Vec::new();
         };
+        if m == menu::Menu::File && name == menu::RECENT {
+            return menu::recent_rows(&crawrad_project::workspace::recent_menu_items());
+        }
         self.with_menu_context(|ctx| menu::submenu_rows(m, name, ctx, self.esquema_teclado))
     }
 

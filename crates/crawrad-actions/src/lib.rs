@@ -6730,6 +6730,9 @@ mod capability_matrix_test;
 #[cfg(test)]
 #[path = "test/collection/test.rs"]
 mod collection_test;
+#[cfg(test)]
+#[path = "test/recent_menu/test.rs"]
+mod recent_menu_test;
 
 #[cfg(test)]
 #[path = "test/coerce/test.rs"]

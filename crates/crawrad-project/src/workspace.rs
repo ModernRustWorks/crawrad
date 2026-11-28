@@ -251,6 +251,22 @@ pub fn config_folder() -> Option<PathBuf> {
     Some(ours)
 }
 
+/// The recent projects as a menu wants them: a label and the folder it opens.
+///
+/// It is built from `welcome_rows` on purpose. The project the Welcome page calls
+/// `crawrad` must be called `crawrad` in the File menu too, and a second notion
+/// of a project's name is how two places start disagreeing about one thing.
+///
+/// It lives here, beside the list it reads, rather than in the shell: the shell
+/// is under a downward line ratchet and this is data work, not drawing.
+#[note("workspace-recent-menu-items")]
+pub fn recent_menu_items() -> Vec<(String, PathBuf)> {
+    welcome_rows()
+        .into_iter()
+        .map(|r| (format!("{}  \u{2014}  {}", r.name, r.place), r.folder))
+        .collect()
+}
+
 #[note("workspace-recent-folders-file")]
 fn recent_folders_file() -> Option<PathBuf> {
     Some(config_folder()?.join("recent-folders.txt"))
