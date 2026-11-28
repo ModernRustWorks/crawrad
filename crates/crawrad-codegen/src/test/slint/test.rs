@@ -2526,17 +2526,22 @@ fn test_slint_slice5_components() {
     assert!(sc.contains("width: 320.0px;"), "Grid width missing");
     assert!(sc.contains("height: 110.0px;"), "Grid height missing");
     assert!(
-        sc.contains("grd_data_row_0 := Rectangle"),
-        "Grid row missing"
+        sc.contains("in property <[[string]]> grd_data_cells;"),
+        "Grid cells property missing"
+    );
+    assert!(
+        sc.contains("for row[r] in root.grd_data_cells: Rectangle {"),
+        "Grid row repeater missing"
     );
     assert!(sc.contains("height: 26px;"), "Grid row height missing");
     assert!(
-        sc.contains("grd_data_cell_0_0 := Rectangle"),
-        "Grid cell missing"
+        sc.contains("for cell[c] in row: Rectangle {"),
+        "Grid cell repeater missing"
     );
     assert!(sc.contains("width: 80px;"), "Grid cell width missing");
+    assert!(sc.contains("text: cell;"), "Grid cell text element missing");
     assert!(
-        sc.contains("clicked => { root.grd_data_cell_selected(0, 0); }"),
+        sc.contains("clicked => { root.grd_data_cell_selected(c, r); }"),
         "Grid cell selected wiring missing"
     );
     assert!(
@@ -2672,6 +2677,10 @@ fn test_slint_slice5_components() {
     assert!(
         dc.contains("window.on_grd_data_cell_selected"),
         "Grid on_cell_selected wiring missing"
+    );
+    assert!(
+        dc.contains("window.set_grd_data_cells"),
+        "Grid data setter invocation missing"
     );
     assert!(
         dc.contains("f.form.grd_click();"),
@@ -2911,6 +2920,19 @@ fn test_auditor_scenario_real_compilation() {
         {
             node.set_text(*class);
         }
+        if *class == "Grid" {
+            let table = "Nome\tCidade\tStatus\nAna Lima\tRecife\tAtivo\nBruno Sa\tOlinda\tAtivo\nCarlos Melo\tPaulista\tInativo";
+            node.props.insert(
+                "cell_text".to_string(),
+                crawrad_ir::Value::Str(table.to_string()),
+            );
+            node.props
+                .insert("fixed_rows".to_string(), crawrad_ir::Value::Int(1));
+            node.props
+                .insert("col_count".to_string(), crawrad_ir::Value::Int(3));
+            node.props
+                .insert("row_count".to_string(), crawrad_ir::Value::Int(4));
+        }
         node.set_rect(Rect::new(10.0, 10.0 + 40.0 * i as f32, 120.0, 30.0));
         let _ = doc.add_child("FormMain", node);
     }
@@ -2918,6 +2940,68 @@ fn test_auditor_scenario_real_compilation() {
         .generate_with_bases(&doc, "scratch_slint", &reg, &[], false)
         .expect("generate_with_bases");
     assert_generated_rust_parses(&files, "auditor scenario");
+
+    let designer_file = files
+        .iter()
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormMain.designer.rs")
+        .expect("FormMain.designer.rs must exist");
+    let content = &designer_file.conteudo;
+
+    // Assert that the generated markup actually binds the data:
+    // 1. Slint property declaration for cell model
+    assert!(
+        content.contains("in property <[[string]]> c4_cells;"),
+        "Grid cells property declaration missing"
+    );
+    // 2. Repeater for rows and columns
+    assert!(
+        content.contains("for row[r] in root.c4_cells: Rectangle {"),
+        "Grid row repeater missing"
+    );
+    assert!(
+        content.contains("for cell[c] in row: Rectangle {"),
+        "Grid cell repeater missing"
+    );
+    // 3. Cell text binding inside repeater
+    assert!(
+        content.contains("text: cell;"),
+        "Grid cell text binding missing"
+    );
+    // 4. Header row is distinguishable (background & font-weight)
+    assert!(
+        content.contains("background: r < 1 ? #f0f0f0 : #ffffff;"),
+        "Grid header row distinction missing"
+    );
+    assert!(
+        content.contains("font-weight: r < 1 ? 700 : 400;"),
+        "Grid header font-weight distinction missing"
+    );
+    // 5. Per-cell click callback keeps column and row indices
+    assert!(
+        content.contains("clicked => { root.c4_cell_selected(c, r); }"),
+        "Grid cell click wiring with column and row indices missing"
+    );
+    assert!(
+        content.contains("callback c4_cell_selected(int, int);"),
+        "Grid callback declaration missing"
+    );
+    assert!(
+        content.contains("window.on_c4_cell_selected(move |col, row| {"),
+        "Grid window callback handler missing"
+    );
+    // 6. Data reaches the markup via setter push before run()
+    assert!(
+        content.contains("window.set_c4_cells("),
+        "Grid data push setter invocation missing"
+    );
+    assert!(
+        content.contains("crawrad_runtime::string_grid::Cells::from_text("),
+        "Grid initial cells data from text missing"
+    );
+    assert!(
+        content.contains("Ana Lima"),
+        "Table data content missing in generated code"
+    );
 
     let scratch_dir = std::env::temp_dir().join("crawrad_scratch_slint");
     let src_dir = scratch_dir.join("src");

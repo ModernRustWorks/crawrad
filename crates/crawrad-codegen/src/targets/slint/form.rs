@@ -204,6 +204,7 @@ pub(crate) fn form_designer_rs_with_base(
          \x20           form: {form_type}::default(),\n\
          \x20       }}));\n\
          \n\
+         {sync_lines}\
          {actions}\
          \n\
          \x20       let _ = window.run();\n\
