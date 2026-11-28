@@ -1190,3 +1190,247 @@ fn test_slint_slice1_components() {
         "Pagination action invocation missing"
     );
 }
+
+#[test]
+fn test_slint_slice2_components() {
+    use crawrad_ir::Value;
+
+    let mut doc = Document::new("FormSlice2", "Form");
+    {
+        let form = doc.node_mut("FormSlice2").unwrap();
+        form.set_rect(Rect::new(0.0, 0.0, 800.0, 600.0));
+        form.set_name("FormSlice2");
+        form.set_text("Slice 2 Form");
+    }
+
+    // 1. ScrollBar
+    let mut sb = Node::new("sb_pos", "ScrollBar");
+    sb.set_name("sb_pos");
+    sb.set_rect(Rect::new(10.0, 20.0, 120.0, 16.0));
+    sb.props.insert("min".to_string(), Value::Float(0.0));
+    sb.props.insert("max".to_string(), Value::Float(100.0));
+    sb.props.insert("position".to_string(), Value::Float(25.0));
+    sb.events
+        .insert("on_change".to_string(), "sb_change".to_string());
+    sb.events
+        .insert("on_scroll".to_string(), "sb_scroll".to_string());
+    let _ = doc.add_child("FormSlice2", sb);
+
+    // 2. ScrollBox
+    let mut sbx = Node::new("sbx_view", "ScrollBox");
+    sbx.set_name("sbx_view");
+    sbx.set_rect(Rect::new(10.0, 50.0, 200.0, 150.0));
+    sbx.props.insert("border_width".to_string(), Value::Int(2));
+    let _ = doc.add_child("FormSlice2", sbx);
+
+    // 3. Splitter
+    let mut spl = Node::new("spl_pane", "Splitter");
+    spl.set_name("spl_pane");
+    spl.set_rect(Rect::new(10.0, 210.0, 5.0, 100.0));
+    spl.events
+        .insert("on_moved".to_string(), "spl_moved".to_string());
+    let _ = doc.add_child("FormSlice2", spl);
+
+    // 4. Drawer
+    let mut drw = Node::new("drw_menu", "Drawer");
+    drw.set_name("drw_menu");
+    drw.set_rect(Rect::new(0.0, 0.0, 240.0, 320.0));
+    drw.set_text("Navigation");
+    drw.props.insert("opened".to_string(), Value::Bool(true));
+    drw.props
+        .insert("show_header".to_string(), Value::Bool(true));
+    drw.events
+        .insert("on_close".to_string(), "drw_close".to_string());
+    let _ = doc.add_child("FormSlice2", drw);
+
+    let generator = GeradorSlint;
+    let files = generator
+        .gerar(&doc, "slice2_app", &crawrad_registry::Registry::builtin())
+        .expect("must generate slice 2 successfully");
+
+    let slint_file = files
+        .iter()
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormSlice2.slint")
+        .unwrap();
+    let sc = &slint_file.conteudo;
+
+    // === Assertions for ScrollBar ===
+    assert!(
+        sc.contains("sb_pos := Slider {"),
+        "ScrollBar element missing"
+    );
+    assert!(sc.contains("x: 10.0px;"), "ScrollBar x missing");
+    assert!(sc.contains("y: 20.0px;"), "ScrollBar y missing");
+    assert!(sc.contains("width: 120.0px;"), "ScrollBar width missing");
+    assert!(sc.contains("height: 16.0px;"), "ScrollBar height missing");
+    assert!(sc.contains("minimum: 0.0;"), "ScrollBar minimum missing");
+    assert!(sc.contains("maximum: 100.0;"), "ScrollBar maximum missing");
+    assert!(sc.contains("value: 25.0;"), "ScrollBar value missing");
+    assert!(
+        sc.contains("changed(val) => { root.sb_pos_changed(val); }"),
+        "ScrollBar change wiring missing"
+    );
+    assert!(
+        sc.contains("callback sb_pos_changed(float);"),
+        "ScrollBar callback declaration missing"
+    );
+
+    // === Assertions for ScrollBox ===
+    assert!(
+        sc.contains("sbx_view := Rectangle {"),
+        "ScrollBox element missing"
+    );
+    assert!(sc.contains("x: 10.0px;"), "ScrollBox x missing");
+    assert!(sc.contains("y: 50.0px;"), "ScrollBox y missing");
+    assert!(sc.contains("width: 200.0px;"), "ScrollBox width missing");
+    assert!(sc.contains("height: 150.0px;"), "ScrollBox height missing");
+    assert!(
+        sc.contains("background: #1e1e2e;"),
+        "ScrollBox background missing"
+    );
+    assert!(
+        sc.contains("border-width: 2px;"),
+        "ScrollBox border-width missing"
+    );
+    assert!(
+        sc.contains("border-color: #45475a;"),
+        "ScrollBox border-color missing"
+    );
+    assert!(sc.contains("clip: true;"), "ScrollBox clip missing");
+
+    // === Assertions for Splitter ===
+    assert!(
+        sc.contains("spl_pane := Rectangle {"),
+        "Splitter element missing"
+    );
+    assert!(sc.contains("x: 10.0px;"), "Splitter x missing");
+    assert!(sc.contains("y: 210.0px;"), "Splitter y missing");
+    assert!(sc.contains("width: 5.0px;"), "Splitter width missing");
+    assert!(sc.contains("height: 100.0px;"), "Splitter height missing");
+    assert!(
+        sc.contains("background: #252538;"),
+        "Splitter background missing"
+    );
+    assert!(
+        sc.contains("mouse-cursor: col-resize;"),
+        "Splitter mouse-cursor missing"
+    );
+    assert!(
+        sc.contains("moved => { root.spl_pane_moved(); }"),
+        "Splitter moved wiring missing"
+    );
+    assert!(
+        sc.contains("callback spl_pane_moved();"),
+        "Splitter callback declaration missing"
+    );
+
+    // === Assertions for Drawer ===
+    assert!(
+        sc.contains("drw_menu := Rectangle {"),
+        "Drawer element missing"
+    );
+    assert!(sc.contains("x: 0.0px;"), "Drawer x missing");
+    assert!(sc.contains("y: 0.0px;"), "Drawer y missing");
+    assert!(sc.contains("width: 240.0px;"), "Drawer width missing");
+    assert!(sc.contains("height: 320.0px;"), "Drawer height missing");
+    assert!(
+        sc.contains("background: #2f2f45;"),
+        "Drawer background missing"
+    );
+    assert!(
+        sc.contains("border-color: #6e7290;"),
+        "Drawer border-color missing"
+    );
+    assert!(
+        sc.contains("visible: true && true;"),
+        "Drawer visible binding missing"
+    );
+    assert!(sc.contains("height: 32px;"), "Drawer header height missing");
+    assert!(sc.contains("text: \"Navigation\";"), "Drawer title missing");
+    assert!(
+        sc.contains("text: \"×\";"),
+        "Drawer close button glyph missing"
+    );
+    assert!(
+        sc.contains("clicked => { root.drw_menu_close_clicked(); }"),
+        "Drawer close click wiring missing"
+    );
+    assert!(
+        sc.contains("callback drw_menu_close_clicked();"),
+        "Drawer callback declaration missing"
+    );
+
+    let designer_file = files
+        .iter()
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormSlice2.designer.rs")
+        .unwrap();
+    let dc = &designer_file.conteudo;
+
+    // Designer struct and field checks
+    assert!(
+        dc.contains("pub sb_pos: ScrollBar,"),
+        "ScrollBar field missing in designer struct"
+    );
+    assert!(
+        dc.contains("pub sbx_view: ScrollBox,"),
+        "ScrollBox field missing in designer struct"
+    );
+    assert!(
+        dc.contains("pub spl_pane: Splitter,"),
+        "Splitter field missing in designer struct"
+    );
+    assert!(
+        dc.contains("pub drw_menu: Drawer,"),
+        "Drawer field missing in designer struct"
+    );
+    assert!(
+        dc.contains("pub struct ScrollBar"),
+        "ScrollBar struct definition missing"
+    );
+    assert!(
+        dc.contains("pub struct ScrollBox"),
+        "ScrollBox struct definition missing"
+    );
+    assert!(
+        dc.contains("pub struct Splitter"),
+        "Splitter struct definition missing"
+    );
+    assert!(
+        dc.contains("pub struct Drawer"),
+        "Drawer struct definition missing"
+    );
+
+    // Action wiring in designer
+    assert!(
+        dc.contains("window.on_sb_pos_changed"),
+        "ScrollBar on_changed wiring missing"
+    );
+    assert!(
+        dc.contains("f.form.sb_change();"),
+        "ScrollBar on_change action missing"
+    );
+    assert!(
+        dc.contains("f.form.sb_scroll();"),
+        "ScrollBar on_scroll action missing"
+    );
+    assert!(
+        dc.contains("window.on_spl_pane_moved"),
+        "Splitter on_moved wiring missing"
+    );
+    assert!(
+        dc.contains("f.form.spl_moved();"),
+        "Splitter on_moved action missing"
+    );
+    assert!(
+        dc.contains("window.on_drw_menu_close_clicked"),
+        "Drawer on_close wiring missing"
+    );
+    assert!(
+        dc.contains("f.form.drw_close();"),
+        "Drawer on_close action missing"
+    );
+    assert!(
+        dc.contains("f.form.drw_menu.opened = false;"),
+        "Drawer state close missing"
+    );
+}

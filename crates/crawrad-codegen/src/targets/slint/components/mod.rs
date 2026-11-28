@@ -17,6 +17,7 @@ pub mod checkbox;
 pub mod chips;
 pub mod codegen;
 pub mod combobox;
+pub mod drawer;
 pub mod edit;
 pub mod group_box;
 pub mod image;
@@ -34,9 +35,12 @@ pub mod progress_bar;
 pub mod radio_button;
 pub mod radio_group;
 pub mod save_dialog;
+pub mod scroll_bar;
+pub mod scroll_box;
 pub mod shape;
 pub mod speed_button;
 pub mod spin_edit;
+pub mod splitter;
 pub mod timer;
 pub mod toggle;
 pub mod track_bar;
@@ -80,6 +84,10 @@ static REGISTRY: &[&'static dyn SlintComponentCodegen] = &[
     &chips::ChipsCodegen,
     &breadcrumb::BreadcrumbCodegen,
     &pagination::PaginationCodegen,
+    &scroll_bar::ScrollBarCodegen,
+    &scroll_box::ScrollBoxCodegen,
+    &splitter::SplitterCodegen,
+    &drawer::DrawerCodegen,
 ];
 
 pub fn for_class(class: &str) -> Option<&'static dyn SlintComponentCodegen> {
