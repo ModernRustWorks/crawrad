@@ -262,6 +262,28 @@ live_design! {
                 }
             }
 
+            pub CrawradBuildRunDialog = <CrawradDialogVeil> {
+                dlg = <CrawradDialog> {
+                    width: 440.0, height: Fit,
+                    <CrawradDialogTitleBar> { run_title = <CrawradDialogTitle> { text: "Building" } }
+                    <CrawradDialogBody> {
+                        height: Fit, flow: Down, spacing: (CRAWRAD_ESPACO_M),
+                        run_action = <CrawradLabel> { width: Fill, height: Fit, text: "" }
+                        <View> {
+                            width: Fill, height: Fit, flow: Down, spacing: (CRAWRAD_ESPACO_S),
+                            <View> { width: Fill, height: Fit, flow: Right, align: { y: 0.5 }, <CrawradFiller> {} run_counter = <CrawradLabelMuted> { width: Fit, height: Fit, text: "" } }
+                            run_bar = <View> { width: Fill, height: 6.0, show_bg: true, draw_bg: { color: (CRAWRAD_BORDA_CONTROLE) } bar = <View> { width: 0.0, height: Fill, show_bg: true, draw_bg: { color: (CRAWRAD_ACENTO) } } }
+                        }
+                        <View> {
+                            width: Fill, height: Fit, flow: Down, spacing: 4.0,
+                            <View> { width: Fill, height: Fit, flow: Right, spacing: (CRAWRAD_ESPACO_M), <CrawradLabelMuted> { width: 56.0, height: Fit, text: "Output" } run_output = <CrawradLabel> { width: Fill, height: Fit, text: "" } }
+                            <View> { width: Fill, height: Fit, flow: Right, spacing: (CRAWRAD_ESPACO_M), <CrawradLabelMuted> { width: 56.0, height: Fit, text: "Elapsed" } run_elapsed = <CrawradLabel> { width: Fill, height: Fit, text: "" } }
+                        }
+                    }
+                    <CrawradDialogFooter> { <CrawradFiller> {} run_cancel = <CrawradDialogButton> { text: "Cancel" } }
+                }
+            }
+
             pub CrawradBuildDialog = <CrawradDialogVeil> {
                 dlg = <CrawradDialog> {
                     width: (CRAWRAD_BUILD_DLG_L), height: Fit,

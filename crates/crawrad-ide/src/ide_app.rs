@@ -51,9 +51,12 @@ live_design! {
     use link::theme::*;
     use link::crawrad_theme::*;
     use link::crawrad_dsl_main::*;
+    use link::crawrad_dialogs::*;
 
     IdeApp = {{IdeApp}} {
-        ui: <CrawradMainUi> {}
+        ui: <CrawradMainUi> {
+            build_run_dialog = <CrawradBuildRunDialog> {}
+        }
         measure: { text_style: <CRAWRAD_FONT_CODE_ICONS> { font_size: (CRAWRAD_FONTE_PEQUENO) } }
     }
 }
@@ -1091,7 +1094,12 @@ impl IdeApp {
     /// The veil of the open dialog.
     pub(crate) fn open_veil(&self) -> Option<WidgetRef> {
         let mut veils = crawrad_mcp::dialogs::veil_roots();
-        veils.find_map(|id| Some(self.ui.widget(&[LiveId::from_str(id)])).filter(|v| v.visible()))
+        veils
+            .find_map(|id| Some(self.ui.widget(&[LiveId::from_str(id)])).filter(|v| v.visible()))
+            .or_else(|| {
+                let v = self.ui.widget(id!(build_run_dialog));
+                v.visible().then_some(v)
+            })
     }
 
     /// A press or a wheel outside the open dialog's frame: it must not reach

@@ -9,6 +9,7 @@ use crawrad_note::note;
 impl IdeApp {
     #[note("ide-app-build-ideapp-bombear")]
     pub(super) fn bombear(&mut self, cx: &mut Cx) {
+        self.check_build_run_cancel(cx);
         let canvas = self.canvas();
         let eventos = {
             let Some(mut c) = canvas.borrow_mut::<DesignCanvas>() else {
@@ -31,21 +32,21 @@ impl IdeApp {
                     self.colocar(cx, &classe, x, y);
                     continue;
                 }
-                let aba = self
+                if let Some(acao) = self
                     .host
                     .doc()
-                    .and_then(|d| self.designer.hit_tab(d.ir(), x, y));
-                if let Some(acao) = aba {
+                    .and_then(|d| self.designer.hit_tab(d.ir(), x, y))
+                {
                     self.acao_de_aba(cx, acao);
                     continue;
                 }
             }
             if let RuntimeEvent::PointerDblClick { x, y } = ev {
-                let alvo = self
+                if let Some(id) = self
                     .host
                     .doc()
-                    .and_then(|d| self.designer.hit(d.ir(), x, y));
-                if let Some(id) = alvo {
+                    .and_then(|d| self.designer.hit(d.ir(), x, y))
+                {
                     self.abrir_handler_do_no(cx, &id);
                 }
                 continue;
@@ -417,6 +418,7 @@ impl IdeApp {
         self.build_clock = cx.start_timeout(0.1);
         self.status = Some("building… (first time takes a minute)".into());
         self.draw_build(cx);
+        self.draw_build_run(cx);
     }
 
     fn finish_build_mode(&mut self, cx: &mut Cx, mode: crate::ide_app::dialogos::build::BuildMode) {
@@ -450,6 +452,7 @@ impl IdeApp {
                             run.feed(pipe, line);
                         }
                         self.draw_build(cx);
+                        self.draw_build_run(cx);
                     }
                 }
                 crawrad_os::tasks::TaskEvent::Done(outcome) => {
@@ -472,10 +475,10 @@ impl IdeApp {
                     }
                     self.finish_build_mode(cx, mode);
 
-                    let (raiz_opt, pacote) = match self.alvo_do_cargo() {
-                        Some((r, p)) => (Some(r), p),
-                        None => (self.raiz(), "project".into()),
-                    };
+                    let (raiz_opt, pacote) = self
+                        .alvo_do_cargo()
+                        .map(|(r, p)| (Some(r), p))
+                        .unwrap_or_else(|| (self.raiz(), "project".into()));
                     let artefatos =
                         crawrad_project::diagnostics_model::extract_artifacts(&outcome.stdout);
                     let manifest = crawrad_project::build_report::manifest_path(
@@ -546,6 +549,7 @@ impl IdeApp {
                     }
 
                     self.draw_build(cx);
+                    self.draw_build_run(cx);
                     self.apply_diagnostics_decorations(cx);
                     self.sincronizar(cx);
                 }
@@ -562,6 +566,7 @@ impl IdeApp {
                         self.show_panel(cx, Panel::Problems);
                     }
                     self.draw_build(cx);
+                    self.draw_build_run(cx);
                     self.sincronizar(cx);
                 }
             }
