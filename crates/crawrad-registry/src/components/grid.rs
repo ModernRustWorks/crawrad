@@ -25,6 +25,7 @@ pub fn grid() -> ComponentDesc {
             Props::data_source(),
             Props::table_name(""),
             Props::design_rows(),
+            Props::slint_border_radius(4),
         ],
         events: [
             Events::SELECT_CELL,

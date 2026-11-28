@@ -111,12 +111,47 @@ pub const ALLOWED_SHELL_ROOT_FILES: &[&str] = &["ide_app.rs", "main.rs"];
 /// diagnostic dialog is a new 296-line module, and the three screens account for
 /// the remaining 90. The ratchet normally only tightens; it rises here because the
 /// shell genuinely gained a surface, not because something was moved into it.
-/// Raised on 27/11/2026 from 33,180 to 33,413 on the tree that carries both the
-/// three screens and the MCP's rectangles: this branch adds 233 lines over its own
-/// base, and 33,180 + 233 is exactly what counting this tree reports. Measured two
-/// ways rather than taken from either side of the merge, because neither side
-/// describes the tree that results from it.
-pub const MAX_SHELL_SOURCE_LINES: usize = 33_413;
+/// Raised on 27/11/2026 from 33,454 to 33,480, measured on the tree this merge
+/// produces, not taken from either side of it: 26 lines wiring the shell to the
+/// strip of forms the host now holds. Opening a form calls `open_form` instead
+/// of `set_doc`, so it joins the strip rather than replacing what was there; the
+/// unsaved-work guard was narrowed to a RELOAD of the form in front, since a
+/// different form no longer costs the first one; and `reacomodar` reads the
+/// previous rectangle before it borrows the document, because that state moved
+/// onto the form itself. 28 lines were added and 2 went dead - the shell's old
+/// `rev_salva` and `form_anterior`, which only `clippy` noticed. Counting this
+/// tree reports 33,480, and 33,454 + 26 is the same number. What a strip of
+/// forms IS lives in `crawrad-host`; the shell holds the wiring.
+/// Raised on 27/11/2026 from 33,480 to 33,524, measured on this tree and
+/// cross-checked: 33,480 + 44 is the same number. The strip of tabs is DRAWN now,
+/// one tab per form with the loose files after them.
+///
+/// The 44 lines are the drawing and the click, and only that. WHAT THE STRIP IS
+/// went to `crawrad-host` instead - the order, the boundary between the two kinds,
+/// which row is lit, and each tab's unsaved mark are `strip`, `strip_front` and
+/// `strip_target` there, proved by four mutations. The shell hands over the loose
+/// files it owns and draws the answer; it no longer subtracts an offset of its
+/// own, which is the kind of arithmetic that drifts from what it describes.
+///
+/// 27/11/2026, +8: `File > Recent`, the submenu of recent projects. The shell
+/// gained TEN lines and no logic - two hooks: it asks `menu::insert_recent_header`
+/// where the row goes when it builds the File menu, and returns
+/// `menu::recent_rows` when that submenu opens. Everything the feature KNOWS
+/// lives elsewhere: the submenu's name, label, empty-state row and position are
+/// pure functions in `crawrad-actions::menu`, and reading the list belongs to
+/// `crawrad_project::workspace::recent_menu_items`, beside the `welcome_rows` it
+/// is built from - so the menu and the Welcome page cannot drift into two names
+/// for one project. A first draft had the reader and a five-line comment in the
+/// shell, which cost 25; moving the reader to its data and the comment to its
+/// note brought it to 8. Re-measured after the strip of tabs merged: this tree
+/// reports 33,532, and 33,524 + 8 is the same number.
+/// Raised to 33_536 on 28/11/2026 by FOUR lines, and they are not shell code: they
+/// are the `#[cfg(test)] #[path = ...] mod` declaration that attaches the app-icon
+/// tests to this crate. The tests themselves live under `test/`, which this count
+/// excludes; a test in the shell crate cannot be reached without those four lines.
+/// Measured both ways: 33_532 + 4 = 33_536, and `main.rs` went from 76 to 80 lines
+/// while no other non-test file in the crate changed.
+pub const MAX_SHELL_SOURCE_LINES: usize = 33_536;
 
 /// Maximum allowed lines for any individual `.rs` file in `crates/crawrad-ide/src/` (outside `test/`).
 ///

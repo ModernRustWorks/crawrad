@@ -110,6 +110,7 @@ impl Template {
 
 pub const NP_SEM_MODELO: &str = "the default template is not in the catalog";
 pub const CRIANDO_JA: &str = "already creating a project — wait for it to finish";
+pub const NP_SEM_PASTA: &str = "choose a folder for the project — the field is empty";
 
 #[cfg(test)]
 #[path = "test/templates/test.rs"]

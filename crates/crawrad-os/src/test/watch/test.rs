@@ -4,6 +4,7 @@ use std::fs;
 use std::path::Path;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
+use crate::serial_lock;
 use crate::watch::{ProjectWatcher, ignored};
 
 #[test]
@@ -20,6 +21,10 @@ fn ignored_pure_decisions() {
 
 #[test]
 fn watcher_detects_changes_and_filters_target() {
+    // Held for the whole body: every file event this test provokes calls
+    // `tasks::wake()` from a `notify` thread, and `tasks/test.rs` counts those
+    // wakes. Without this the two tests overlapped and that count read high.
+    let _serial = serial_lock::serial();
     let now = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap()

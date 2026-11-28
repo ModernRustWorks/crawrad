@@ -73,14 +73,46 @@ impl IdeApp {
         if tira.any_items_with_actions(actions) {
             let mut abrir = None;
             let mut fechar = None;
+            // WHICH OF THE TWO THE CLICK LANDED ON IS A HOST FACT. The shell asks
+            // `strip_target` instead of subtracting, so the boundary is read from
+            // the same `forms()` the strip was drawn from and cannot drift.
+            let mut form_to_front = None;
+            let mut form_to_close = None;
             for (i, item) in tira.items_with_actions(actions) {
+                let i = match self.host.strip_target(i) {
+                    crawrad_host::StripClick::Form(f) => {
+                        if item.button(id!(tab_close)).clicked(actions) {
+                            form_to_close = Some(f);
+                        } else if item.button(id!(tab_label)).clicked(actions) {
+                            form_to_front = Some(f);
+                        }
+                        continue;
+                    }
+                    crawrad_host::StripClick::File(a) => a,
+                };
                 if item.button(id!(tab_close)).clicked(actions) {
                     fechar = Some(i);
                 } else if item.button(id!(tab_label)).clicked(actions) {
                     abrir = Some(i);
                 }
             }
-            if let Some(i) = fechar {
+            // A form click ends in Design, a file click in Code: the strip is the
+            // one place a person switches between the two, so each tab takes the
+            // centre its own kind belongs to.
+            if let Some(i) = form_to_close {
+                self.host.close_form(i);
+                if self.host.front().is_some() {
+                    self.show_center(cx, Center::Design);
+                } else {
+                    self.show_center(cx, self.centro_das_abas());
+                }
+                self.sincronizar(cx);
+            } else if let Some(i) = form_to_front {
+                if self.host.bring_to_front(i) {
+                    self.show_center(cx, Center::Design);
+                    self.sincronizar(cx);
+                }
+            } else if let Some(i) = fechar {
                 self.abas.close(i);
                 self.show_center(cx, self.centro_das_abas());
             } else if let Some(i) = abrir {

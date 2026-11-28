@@ -14,6 +14,7 @@ pub fn chips() -> ComponentDesc {
             Props::flat_items_sample(&["Rust", "egui", "Makepad"]),
             Props::item_index(-1),
             Props::removable(false),
+            Props::slint_border_radius(12),
         ],
         events: [
             Events::CHANGE,

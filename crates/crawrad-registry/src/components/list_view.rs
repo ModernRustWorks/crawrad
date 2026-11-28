@@ -20,6 +20,7 @@ pub fn list_view() -> ComponentDesc {
             Props::row_select(true),
             Props::grid_lines(false),
             Props::show_column_headers(true),
+            Props::slint_border_radius(4),
         ],
         events: [
             Events::CHANGE,

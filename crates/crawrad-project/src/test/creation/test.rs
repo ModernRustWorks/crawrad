@@ -97,10 +97,73 @@ fn create_form_file_creates_valid_form() {
     let dir = std::env::temp_dir().join("crawrad-test-create-form");
     let _ = std::fs::remove_dir_all(&dir);
     let reg = crawrad_registry::Registry::builtin();
-    let form = crate::creation::create_form_file(&dir, &reg).unwrap();
-    assert!(form.ends_with("form_main.crawform"));
-    assert!(form.exists());
+    let created = crate::creation::create_form_file(&dir, &reg).unwrap();
+    assert!(created.path.ends_with("form_main.crawform"));
+    assert!(created.path.exists());
+    // Not inside a crate's `src/`, so there is nowhere to generate into — and the
+    // phrase says so instead of leaving the missing code unexplained.
+    assert!(
+        created
+            .warning
+            .as_deref()
+            .is_some_and(|w| w.contains("not inside a crate")),
+        "a form with nowhere to generate said nothing about it: {:?}",
+        created.warning
+    );
     let _ = std::fs::remove_dir_all(&dir);
+}
+
+/// A new form is born with its `.rs`, exactly as a new project's form is.
+///
+/// Until 27/11/2026 this wrote the `.crawform` alone: `cargo` never saw the form,
+/// the Explorer had no unit to list, and the only way to make the form real was to
+/// find `Generate` — which nothing on screen said was needed. Found by creating a
+/// form in the Store build and watching it not appear in the tree.
+#[test]
+fn a_new_form_is_born_with_its_generated_code() {
+    let root = std::env::temp_dir().join(format!("crawrad-form-codegen-{}", std::process::id()));
+    let src = root.join("src");
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(&src).expect("the src folder");
+    std::fs::write(
+        root.join("Cargo.toml"),
+        "[package]
+name = \"my_app\"
+version = \"0.1.0\"
+edition = \"2021\"
+",
+    )
+    .expect("the manifest");
+
+    let reg = crawrad_registry::Registry::builtin();
+    let created = crate::creation::create_form_file(&src, &reg).expect("the form");
+    assert_eq!(created.warning, None, "generation reported a problem");
+
+    let stem = created
+        .path
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .expect("the form's name")
+        .to_string();
+    let unit = src.join(format!("{stem}.rs"));
+    let designer = src.join(format!("{stem}{}", crawrad_codegen::SUFIXO_GERADO));
+    assert!(
+        unit.exists(),
+        "the form has no `{stem}.rs`: cargo cannot see it and the Explorer has nothing to list"
+    );
+    assert!(
+        designer.exists(),
+        "the form has no `{stem}{}`",
+        crawrad_codegen::SUFIXO_GERADO
+    );
+    // The generated file is about THIS form, not an empty shell.
+    let drawn = std::fs::read_to_string(&designer).expect("the generated file");
+    assert!(
+        drawn.contains(&stem) || drawn.contains("Form"),
+        "the generated file does not mention the form it was generated from"
+    );
+
+    let _ = std::fs::remove_dir_all(&root);
 }
 
 /// Opening or running a project must not rewrite a path dependency the user
@@ -121,4 +184,98 @@ datagrid = { version = "0.1.0", path = "../../../components/datagrid" }
     let missing = missing_dependencies(manifest, deps);
     assert_eq!(missing.len(), 1);
     assert_eq!(missing[0].nome(), "datagrid-sql");
+}
+
+/// THE REPRODUCTION OF THE BETA REPORT, as a test.
+///
+/// The report was: creating `form_1.crawform` produced neither
+/// `form_1.designer.rs` nor `form_1.rs`, the Explorer read
+/// `2 not generated yet · 1 stale`, and `form_main.designer.rs` went stale with
+/// it. Nobody had covered this path: the one existing test creates a form with
+/// nowhere to generate into and asserts the explanation, so the REAL case — a
+/// form created inside a member's `src/`, which is what the Explorer does — ran
+/// in production without a single assertion over it.
+#[test]
+fn a_second_form_is_born_generated_and_leaves_the_first_alone() {
+    let base = std::env::temp_dir().join("crawrad-test-second-form");
+    let _ = std::fs::remove_dir_all(&base);
+    std::fs::create_dir_all(&base).expect("the temporary folder must be creatable");
+    let member = crate::project_template::create_or_add(
+        None,
+        &base,
+        "twoforms",
+        "gui_app",
+        false,
+        crawrad_codegen::AlvoGerador::Makepad,
+    )
+    .expect("a gui project must be producible");
+    let src = member.join("src");
+    let first_generated = src.join(format!("form_main{}", crawrad_codegen::SUFIXO_GERADO));
+    assert!(
+        first_generated.exists(),
+        "the project was born without its own generated form, so this test is \
+         measuring the wrong thing: {}",
+        first_generated.display()
+    );
+    let before_generated =
+        std::fs::read_to_string(&first_generated).expect("the first form's code must be readable");
+    // The USER's file matters more than the generated one: the generated file can
+    // be rebuilt from the document, and the hand-written one cannot.
+    let first_handwritten = src.join("form_main.rs");
+    let before_handwritten = std::fs::read_to_string(&first_handwritten).ok();
+    assert!(
+        before_handwritten.is_some(),
+        "the project was born without the first form's hand-written file: {}",
+        first_handwritten.display()
+    );
+
+    let reg = crawrad_registry::Registry::builtin();
+    let created = crate::creation::create_form_file(&src, &reg)
+        .expect("a form inside a member's src/ must be creatable");
+    assert_eq!(
+        created.warning, None,
+        "a form created inside a member's src/ has somewhere to generate into, \
+         so there is nothing to warn about"
+    );
+
+    // 1. THE NEW FORM'S OWN CODE MUST EXIST. This is the report's first half.
+    let stem = created
+        .path
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .expect("the created form has a name")
+        .to_string();
+    let generated = src.join(format!("{stem}{}", crawrad_codegen::SUFIXO_GERADO));
+    assert!(
+        generated.exists(),
+        "the form was created but its code was not: {}",
+        generated.display()
+    );
+
+    // 2. THE FIRST FORM'S CODE MUST SURVIVE. This is the report's second half:
+    // generation runs from the NEW document alone, so anything it writes for the
+    // whole project is written as though the project had one form.
+    assert!(
+        first_generated.exists(),
+        "generating the second form deleted the first form's code: {}",
+        first_generated.display()
+    );
+    assert_eq!(
+        std::fs::read_to_string(&first_generated).ok().as_deref(),
+        Some(before_generated.as_str()),
+        "generating the second form rewrote the first form's code, which is how it \
+         went stale in the beta report"
+    );
+
+    // 3. THE FIRST FORM'S HAND-WRITTEN FILE MUST SURVIVE TOO. The rename migration
+    // reads one new base plus one old base as a rename and moves this file onto the
+    // new name, which loses the person's own code with no way back.
+    assert_eq!(
+        std::fs::read_to_string(&first_handwritten).ok(),
+        before_handwritten,
+        "creating a second form moved or rewrote the first form's hand-written file: {}",
+        first_handwritten.display()
+    );
+
+    let _ = std::fs::remove_dir_all(&base);
 }

@@ -78,7 +78,11 @@ impl IdeApp {
             .portal_list(id!(editor_tabs_bar.editor_tabs));
         let alheios = crawrad_host::navigation::foreign_roots();
         let gerado = crawrad_codegen::SUFIXO_GERADO;
-        let rotulos_das_abas: Vec<String> = self
+        // The strip holds the forms and the loose files, and WHAT IT HOLDS IS A
+        // HOST FACT: the order, the boundary and which row is lit all come from
+        // `host.strip*`, tested there by mutation. The shell only hands over the
+        // loose files it owns and draws the answer.
+        let loose_files: Vec<(String, bool)> = self
             .abas
             .labels()
             .iter()
@@ -86,14 +90,22 @@ impl IdeApp {
             .map(|(rotulo, arquivo)| {
                 let icone = crawrad_host::navigation::tab_icon(arquivo, &alheios, gerado);
                 let deleted = if !arquivo.exists() { "  deleted" } else { "" };
-                format!("{icone}{}{deleted}", rotulo.one_line())
+                (
+                    format!("{icone}{}{deleted}", rotulo.one_line()),
+                    // Unsaved work shows where the X is, as a modern editor does.
+                    self.host.buffer(arquivo).is_some(),
+                )
             })
             .collect();
-        // Unsaved work shows where the X is (the tab's `dirty`), as a modern editor does.
-        let dirty_tabs: Vec<bool> = (self.abas.files().iter())
-            .map(|arquivo| self.host.buffer(arquivo).is_some())
-            .collect();
-        let aba_a_frente = self.abas.active_index();
+        let faixa = self.host.strip(&loose_files);
+        let tab_labels: Vec<String> = faixa.iter().map(|l| l.label.clone()).collect();
+        let dirty_tabs: Vec<bool> = faixa.iter().map(|l| l.dirty).collect();
+        // Born `visible: false` in the DSL: it shows once the strip holds anything,
+        // so an empty IDE has no empty bar across it.
+        self.painel(Panel::Design)
+            .view(id!(editor_tabs_bar))
+            .set_visible(cx, !faixa.is_empty());
+        let aba_a_frente = self.host.strip_front(self.abas.active_index());
         let items_lista = self
             .ui
             .view(id!(items_dialog.dlg))
@@ -235,7 +247,7 @@ impl IdeApp {
             } then {
                 rail_rects.push((painel, item.area().rect(cx)));
             } }
-            draw_rows! { cx, proximo, abas_do_editor, rotulos_das_abas, live_id!(EditorTab), |item, i, rotulo| {
+            draw_rows! { cx, proximo, abas_do_editor, tab_labels, live_id!(EditorTab), |item, i, rotulo| {
                 item.button(id!(tab_label)).set_text(cx, rotulo);
                 let dirty = f64::from(u8::from(dirty_tabs.get(i) == Some(&true)));
                 let close = item.button(id!(tab_close));

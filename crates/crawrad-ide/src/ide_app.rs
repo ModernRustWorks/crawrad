@@ -407,7 +407,6 @@ pub struct IdeApp {
     /// The revision at which the document was last saved — determines the
     /// `saved` / `modified` badge.
     #[rust]
-    rev_salva: u64,
     /// The (Save, Save All) lit state last applied to the toolbar.
     #[rust]
     save_buttons_drawn: Option<(bool, bool)>,
@@ -634,7 +633,6 @@ pub struct IdeApp {
     pad_pos: Option<DVec2>,
     /// The previous form rectangle, for the anchors and alignment pass.
     #[rust]
-    form_anterior: Option<crawrad_ir::Rect>,
     /// The open **Items Editor**, if any.
     #[rust]
     items: Option<ItemsEditorState>,

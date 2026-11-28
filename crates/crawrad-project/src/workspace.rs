@@ -251,6 +251,22 @@ pub fn config_folder() -> Option<PathBuf> {
     Some(ours)
 }
 
+/// The recent projects as a menu wants them: a label and the folder it opens.
+///
+/// It is built from `welcome_rows` on purpose. The project the Welcome page calls
+/// `crawrad` must be called `crawrad` in the File menu too, and a second notion
+/// of a project's name is how two places start disagreeing about one thing.
+///
+/// It lives here, beside the list it reads, rather than in the shell: the shell
+/// is under a downward line ratchet and this is data work, not drawing.
+#[note("workspace-recent-menu-items")]
+pub fn recent_menu_items() -> Vec<(String, PathBuf)> {
+    welcome_rows()
+        .into_iter()
+        .map(|r| (format!("{}  \u{2014}  {}", r.name, r.place), r.folder))
+        .collect()
+}
+
 #[note("workspace-recent-folders-file")]
 fn recent_folders_file() -> Option<PathBuf> {
     Some(config_folder()?.join("recent-folders.txt"))
@@ -348,7 +364,17 @@ pub fn last_project_form(
     if p.welcome_on_startup {
         return None;
     }
-    documents(recent.first()?).into_iter().next()
+    let root = recent.first()?;
+    // The form that WAS open, when it is still there and still belongs to that
+    // project. Taking the first document the folder lists meant reopening whichever
+    // form sorted first — a newly added, empty one wins over the one being worked on.
+    if let Some(f) = p.last_form.as_ref()
+        && f.starts_with(root)
+        && f.is_file()
+    {
+        return Some(f.clone());
+    }
+    documents(root).into_iter().next()
 }
 
 #[note("workspace-forget-recent")]
@@ -1027,6 +1053,8 @@ pub struct Preferences {
     pub color_recent: Vec<String>,
     /// Default directory for opening and creating projects.
     pub default_projects_dir: Option<PathBuf>,
+    /// The form that was open, so reopening brings back THAT one.
+    pub last_form: Option<PathBuf>,
     /// Whether local file history snapshots are recorded (default: true).
     pub history_enabled: bool,
     /// Maximum number of local history revisions kept per file (default: 10, range: 1..=100).
@@ -1069,7 +1097,11 @@ pub struct Preferences {
 impl Default for Preferences {
     fn default() -> Self {
         Self {
-            welcome_on_startup: false,
+            // The recent list, not the last project. Reopening was the default and
+            // nobody asked for it: the IDE decided, on a machine it had never run on,
+            // that a person wanted to be dropped straight into a file. Options still
+            // offers the other behaviour to whoever wants it.
+            welcome_on_startup: true,
             keymap_scheme: crawrad_actions::KeymapScheme::Modern,
             editor_font_size: 11,
             editor_tab_size: 4,
@@ -1083,6 +1115,7 @@ impl Default for Preferences {
             editor_diagnostic_colors: EditorDiagnosticColors::default(),
             color_recent: Vec::new(),
             default_projects_dir: None,
+            last_form: None,
             history_enabled: true,
             history_limit: 10,
             recent_limit: DEFAULT_RECENT_LIMIT,
@@ -1183,6 +1216,7 @@ pub const KEY_EDITOR_COLOR_SCHEME: &str = "editor-color-scheme";
 pub const KEY_EDITOR_COLOR_BASE: &str = "editor-color-base";
 pub const KEY_COLOR_RECENT: &str = "color-recent";
 pub const KEY_DEFAULT_PROJECTS_DIR: &str = "default-projects-dir";
+pub const KEY_LAST_FORM: &str = "last-form";
 pub const KEY_HISTORY_ENABLED: &str = "history-enabled";
 pub const KEY_HISTORY_LIMIT: &str = "history-limit";
 pub const KEY_RECENT_LIMIT: &str = "recent-limit";
@@ -1366,6 +1400,8 @@ pub fn preferences_from_text(text: &str) -> Preferences {
         } else if c == "editor-color-bg" && !v.is_empty() {
             p.editor_custom_colors.bg = v.to_string();
         } else if p.editor_diagnostic_colors.set_by_key(c, v) {
+        } else if c == KEY_LAST_FORM && !v.is_empty() {
+            p.last_form = Some(PathBuf::from(v));
         } else if c == KEY_DEFAULT_PROJECTS_DIR && !v.is_empty() {
             p.default_projects_dir = Some(PathBuf::from(v));
         } else if c == KEY_HISTORY_ENABLED {
@@ -1496,6 +1532,19 @@ pub fn preferences_to_text(p: Preferences) -> String {
     {
         text.push_str(&format!(
             "{key}={value}
+"
+        ));
+    }
+    // The form that was open, written only when there is one: an empty value
+    // would be read back as a path and reopened as a missing file.
+    if let Some(f) = p
+        .last_form
+        .as_ref()
+        .map(|f| f.to_string_lossy().to_string())
+        && !f.is_empty()
+    {
+        text.push_str(&format!(
+            "{KEY_LAST_FORM}={f}
 "
         ));
     }
@@ -1896,6 +1945,102 @@ pub fn refusal_occupied_folder(parent: &Path, name: &str) -> Option<Refusal> {
         },
         open_instead: has_project,
     })
+}
+
+// Where the New Project dialog should point when it opens.
+//
+// It must point somewhere a project can actually be written. The old default was
+// the process working directory, which is fine when the IDE was installed by an
+// ordinary installer and WRONG when it came from the Microsoft Store: there the
+// working directory IS `...\WindowsApps\<package>`, the package's own install
+// folder, which Windows keeps read-only with locked ACLs. The dialog opened
+// pointing at the one place a project can never live.
+//
+// The order is the useful one: the folder chosen in Options first, since a person
+// who set it said where their projects go; then beside the project last opened, since a person
+// keeps their projects together; then a `CrawRAD-Projects` folder under the home
+// folder; then the working directory, but only when it is not inside the install
+// folder. Every input is a parameter so the choice can be tested without touching
+// the real environment.
+#[note("workspace-default-project-parent")]
+pub fn default_project_parent(
+    configured: Option<&Path>,
+    recent: Option<&Path>,
+    home: Option<&Path>,
+    cwd: Option<&Path>,
+    app_dir: Option<&Path>,
+) -> Option<PathBuf> {
+    // What the person chose in Options wins: they said where their projects go,
+    // and nothing here knows better. It was being written and shown there, and
+    // never read by this dialog.
+    if let Some(c) = configured
+        && !is_inside(c, app_dir)
+    {
+        return Some(c.to_path_buf());
+    }
+    if let Some(r) = recent
+        && let Some(parent) = r.parent()
+        && parent.is_dir()
+        && !is_inside(parent, app_dir)
+    {
+        return Some(parent.to_path_buf());
+    }
+    if let Some(h) = home {
+        return Some(h.join("CrawRAD-Projects"));
+    }
+    if let Some(c) = cwd
+        && c.is_dir()
+        && !is_inside(c, app_dir)
+    {
+        return Some(c.to_path_buf());
+    }
+    None
+}
+
+// True when `path` is the install folder or sits under it.
+#[note("workspace-is-inside")]
+fn is_inside(path: &Path, outer: Option<&Path>) -> bool {
+    match outer {
+        Some(o) => path.starts_with(o),
+        None => false,
+    }
+}
+
+// Makes the folder a project is about to be written into, or says why it cannot.
+//
+// `Create` is a promise to create, so a folder that does not exist yet is created
+// here rather than answered with a file picker. The picker used to be the silent
+// fallback for a path that was not a directory, which is how editing the drive
+// letter of the default location — making the path point nowhere — turned the
+// Create button into a folder chooser, with nothing said about why.
+//
+// `app_dir` is CrawRAD's own install folder, when it is known: a path inside it
+// gets its own phrase, because no amount of retrying will make that folder
+// writable and the person deserves to be told that instead of an OS error code.
+#[note("workspace-make-project-parent")]
+pub fn make_project_parent(folder: &Path, app_dir: Option<&Path>) -> Result<(), Refusal> {
+    if folder.is_dir() {
+        return Ok(());
+    }
+    if folder.exists() {
+        return Err(Refusal::simple(format!(
+            "`{}` is a file, not a folder. Nothing was written.",
+            folder.display()
+        )));
+    }
+    if is_inside(folder, app_dir) {
+        return Err(Refusal::simple(format!(
+            "`{}` is inside CrawRAD's own installation folder, which Windows keeps              read-only — a project cannot be created there. Choose a folder under your              user folder instead. Nothing was written.",
+            folder.display()
+        )));
+    }
+    match std::fs::create_dir_all(folder) {
+        Ok(()) => Ok(()),
+        Err(e) => Err(Refusal::simple(format!(
+            "`{}` could not be created: {e}. Nothing was written.",
+            folder.display()
+        ))),
+    }
 }
 
 #[note("workspace-without-color")]

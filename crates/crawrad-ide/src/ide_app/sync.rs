@@ -413,7 +413,9 @@ impl IdeApp {
 
     #[note("ide-app-sync-ideapp-follow-save-buttons")]
     pub(super) fn follow_save_buttons(&mut self, cx: &mut Cx) {
-        let now = self.host.unsaved(self.editavel.as_deref(), self.rev_salva);
+        let now = self
+            .host
+            .unsaved(self.editavel.as_deref(), self.host.saved_revision());
         if self.save_buttons_drawn == Some(now) {
             return;
         }

@@ -34,7 +34,10 @@ pub const MIN_COPIES: usize = 3;
 /// Raised to 325 on 16/11/2026: `crawrad-runtime-makepad/src/theme_dark.rs` is makepad's
 /// published dark theme copied to swap its GPL code font, so its font blocks repeat the
 /// light copy's (upstream theme data, not logic).
-pub const MAX_DUPLICATED_WINDOWS: usize = 322;
+/// Lowered to 321 on 28/11/2026: three templates stopped repeating
+/// `crawrad_codegen::AlvoGerador::Makepad` ten times over and now pass the
+/// framework the person actually chose, which took one duplicated window with it.
+pub const MAX_DUPLICATED_WINDOWS: usize = 321;
 
 /// A code window duplicated at multiple locations within a crate.
 #[derive(Debug, PartialEq, Eq, Clone)]

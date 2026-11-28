@@ -266,6 +266,7 @@ Class `CheckListBox` · born as `check_list_box1` · targets: all
 | TabStop | true / false | true | Behavior |
 | Items (read-only) | collection | 3 items | Appearance |
 | CheckedItems | collection | (empty) | Appearance |
+| BorderRadius | whole number 0..512 | 4 | Appearance |
 | Font | font | (default) | Appearance |
 | ParentFont | true / false | true | Appearance |
 | Color | color | #00000000 | Appearance |
@@ -316,6 +317,7 @@ Class `Chips` · born as `chips1` · targets: all
 | Items (read-only) | collection | 3 items | Appearance |
 | ItemIndex | whole number -1..100000 | -1 | Behavior |
 | Removable | true / false | false | Behavior |
+| BorderRadius | whole number 0..512 | 12 | Appearance |
 | Font | font | (default) | Appearance |
 | ParentFont | true / false | true | Appearance |
 | Color | color | #00000000 | Appearance |
@@ -364,6 +366,7 @@ Class `ColorBox` · born as `color_box1` · targets: all
 | TabOrder | whole number 0..1000 | 0 | Behavior |
 | TabStop | true / false | true | Behavior |
 | Selected | color | #000000 | Behavior |
+| BorderRadius | whole number 0..512 | 4 | Appearance |
 | Font | font | (default) | Appearance |
 | ParentFont | true / false | true | Appearance |
 
@@ -458,6 +461,7 @@ Class `Grid` · born as `grid1` · targets: all
 | DataSource | reference to a DbRowSource | — | Data |
 | TableName | text | — | Data |
 | DesignRows | one of: Off, 8, 20, 50 | 8 | Data |
+| BorderRadius | whole number 0..512 | 4 | Appearance |
 
 #### Events
 
@@ -638,6 +642,7 @@ Class `MultiSelect` · born as `multi_select1` · targets: all
 | SelectedItems | collection | (empty) | Appearance |
 | TextHint | text | Select… | Appearance |
 | DropDownCount | whole number 1..100 | 6 | Appearance |
+| BorderRadius | whole number 0..512 | 4 | Appearance |
 | Font | font | (default) | Appearance |
 | ParentFont | true / false | true | Appearance |
 | Color | color | #00000000 | Appearance |
@@ -689,6 +694,7 @@ Class `Pagination` · born as `pagination1` · targets: all
 | PageIndex | whole number 0..2147483647 | 0 | Behavior |
 | MaxButtons | whole number 1..100 | 7 | Appearance |
 | ShowArrows | true / false | true | Appearance |
+| BorderRadius | whole number 0..512 | 4 | Appearance |
 | Font | font | (default) | Appearance |
 | ParentFont | true / false | true | Appearance |
 | Color | color | #00000000 | Appearance |
@@ -1036,6 +1042,7 @@ Class `TreeView` · born as `tree_view1` · targets: all
 | TabStop | true / false | true | Behavior |
 | Items (read-only) | collection | 4 items | Appearance |
 | Images | reference to a ImageList | — | Appearance |
+| BorderRadius | whole number 0..512 | 4 | Appearance |
 | Font | font | (default) | Appearance |
 | ParentFont | true / false | true | Appearance |
 | Color | color | #00000000 | Appearance |
@@ -1707,6 +1714,7 @@ Class `RadioButton` · born as `radio_button1` · targets: all
 | TabStop | true / false | true | Behavior |
 | Caption | text | RadioButton | Appearance |
 | Checked | true / false | false | Behavior |
+| BorderRadius | whole number 0..512 | 8 | Appearance |
 | Font | font | (default) | Appearance |
 | ParentFont | true / false | true | Appearance |
 
@@ -1878,6 +1886,7 @@ Class `DateTimePicker` · born as `date_time_picker1` · targets: all
 | DateTime | text | 2000-01-01 | Behavior |
 | MinDate | text | — | Behavior |
 | MaxDate | text | — | Behavior |
+| BorderRadius | whole number 0..512 | 4 | Appearance |
 | Font | font | (default) | Appearance |
 | ParentFont | true / false | true | Appearance |
 | Color | color | #00000000 | Appearance |
@@ -1930,6 +1939,7 @@ Class `ListView` · born as `list_view1` · targets: all
 | RowSelect | true / false | true | Behavior |
 | GridLines | true / false | false | Appearance |
 | ShowColumnHeaders | true / false | true | Appearance |
+| BorderRadius | whole number 0..512 | 4 | Appearance |
 | Font | font | (default) | Appearance |
 | ParentFont | true / false | true | Appearance |
 | Color | color | #00000000 | Appearance |
@@ -1985,6 +1995,7 @@ Class `ProgressBar` · born as `progress_bar1` · targets: all
 | Step | whole number 1..10000 | 10 | Behavior |
 | Orientation | one of: Horizontal, Vertical | Horizontal | Appearance |
 | Smooth | true / false | true | Appearance |
+| BorderRadius | whole number 0..512 | 3 | Appearance |
 
 #### Events
 

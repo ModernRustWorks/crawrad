@@ -190,6 +190,7 @@ pub fn create_project_template_with_options(
             workspace_root.display()
         ));
     }
+    refuse_a_platform_the_framework_cannot_reach(template_id, &options)?;
     refuse_old_toolchain(folder, template_id, &options)?;
     std::fs::create_dir_all(&workspace_root).map_err(|e| {
         format!(
@@ -221,10 +222,43 @@ fn template_floor(template_id: &str, options: &ProjectTemplateOptions) -> (u32, 
             crawrad_codegen::minimum_rustc(options.framework, false)
         }
         "wasm_app" | "mobile_app" | "multiwindow_app" => {
-            crawrad_codegen::minimum_rustc(crawrad_codegen::AlvoGerador::Makepad, true)
+            crawrad_codegen::minimum_rustc(options.framework, true)
         }
         _ => crawrad_codegen::minimum_rustc(options.framework, true),
     }
+}
+
+/// Refuses a template the chosen framework cannot build for, naming which.
+///
+/// Three templates used to hardcode `AlvoGerador::Makepad` and ignore
+/// `options.framework` entirely, so choosing **egui + WASM** quietly produced a
+/// MAKEPAD project - the dialog offered a combination it did not honour, and
+/// nothing said so. Handing the person another framework's project is worse than
+/// refusing: they find out when the code does not look like what they asked for.
+///
+/// The decision is the framework card's own `web` and `mobile`, not a name
+/// written here, so a framework added later is covered without touching this.
+///
+/// # Errors
+///
+/// A phrase naming the framework and the platform it cannot reach, for the
+/// dialog to show.
+#[note("project-template-refuse-a-platform-the-framework-cannot-reach")]
+fn refuse_a_platform_the_framework_cannot_reach(
+    template_id: &str,
+    options: &ProjectTemplateOptions,
+) -> Result<(), String> {
+    let card = crate::frameworks::of(options.framework);
+    let missing = match template_id {
+        "wasm_app" if !card.web => "the browser",
+        "mobile_app" if !card.mobile => "phones",
+        _ => return Ok(()),
+    };
+    Err(format!(
+        "{} cannot build for {missing}, so this template has nothing to produce. \
+         Pick another framework, or another template.",
+        card.name
+    ))
 }
 
 #[note("project-template-refuse-old-toolchain")]
@@ -316,28 +350,17 @@ fn write_package(
             write_file(folder, "src/lib.rs", lib_rs)?;
         }
         "wasm_app" => {
-            let mut toml = manifest(
-                crawrad_codegen::AlvoGerador::Makepad,
-                true,
-                options.use_binding,
-            );
+            let mut toml = manifest(options.framework, true, options.use_binding);
             toml.push_str("\n[package.metadata.crawrad]\nplatform = \"web\"\n");
             write_file(folder, "Cargo.toml", toml)?;
-            let main_rs = crawrad_codegen::scaffold::scaffold_main_rs(
-                crawrad_codegen::AlvoGerador::Makepad,
-                name,
-                template_id,
-            );
+            let main_rs =
+                crawrad_codegen::scaffold::scaffold_main_rs(options.framework, name, template_id);
             write_file(folder, "src/main.rs", main_rs)?;
             // A form, like the desktop app: the generated main shows it in the browser.
-            write_starter_form(folder, crawrad_codegen::AlvoGerador::Makepad)?;
+            write_starter_form(folder, options.framework)?;
         }
         "mobile_app" => {
-            let toml = manifest(
-                crawrad_codegen::AlvoGerador::Makepad,
-                true,
-                options.use_binding,
-            );
+            let toml = manifest(options.framework, true, options.use_binding);
             write_file(folder, "Cargo.toml", toml)?;
             let res_dir = folder.join("res");
             let _ = std::fs::create_dir_all(&res_dir);
@@ -345,26 +368,17 @@ fn write_package(
                 res_dir.join("icon.png"),
                 [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A],
             );
-            let main_rs = crawrad_codegen::scaffold::scaffold_main_rs(
-                crawrad_codegen::AlvoGerador::Makepad,
-                name,
-                template_id,
-            );
+            let main_rs =
+                crawrad_codegen::scaffold::scaffold_main_rs(options.framework, name, template_id);
             write_file(folder, "src/main.rs", main_rs)?;
-            if let Some(app_rs) = crawrad_codegen::scaffold::scaffold_app_rs(
-                crawrad_codegen::AlvoGerador::Makepad,
-                name,
-                template_id,
-            ) {
+            if let Some(app_rs) =
+                crawrad_codegen::scaffold::scaffold_app_rs(options.framework, name, template_id)
+            {
                 write_file(folder, "src/app.rs", app_rs)?;
             }
         }
         "multiwindow_app" => {
-            let toml = manifest(
-                crawrad_codegen::AlvoGerador::Makepad,
-                true,
-                options.use_binding,
-            );
+            let toml = manifest(options.framework, true, options.use_binding);
             write_file(folder, "Cargo.toml", toml)?;
             let forms_dir = folder.join("forms");
             let _ = std::fs::create_dir_all(&forms_dir);
@@ -372,17 +386,12 @@ fn write_package(
                 forms_dir.join("main.crawform"),
                 "{\n  \"name\": \"main\",\n  \"components\": []\n}\n",
             );
-            let main_rs = crawrad_codegen::scaffold::scaffold_main_rs(
-                crawrad_codegen::AlvoGerador::Makepad,
-                name,
-                template_id,
-            );
+            let main_rs =
+                crawrad_codegen::scaffold::scaffold_main_rs(options.framework, name, template_id);
             write_file(folder, "src/main.rs", main_rs)?;
-            if let Some(app_rs) = crawrad_codegen::scaffold::scaffold_app_rs(
-                crawrad_codegen::AlvoGerador::Makepad,
-                name,
-                template_id,
-            ) {
+            if let Some(app_rs) =
+                crawrad_codegen::scaffold::scaffold_app_rs(options.framework, name, template_id)
+            {
                 write_file(folder, "src/app.rs", app_rs)?;
             }
         }

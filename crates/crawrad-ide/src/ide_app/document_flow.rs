@@ -25,7 +25,7 @@ impl IdeApp {
             }
             Ok(Some(aberto)) => {
                 let doc = crawrad_project::form_file::design_doc(&aberto.caminho, aberto.doc);
-                self.rev_salva = doc.revision();
+                self.host.set_saved_revision(doc.revision());
                 self.host.set_doc(Some(doc));
                 self.host.set_active_file(Some(aberto.caminho));
                 self.falha = None;
@@ -125,15 +125,19 @@ impl IdeApp {
 
     #[note("ide-app-document-flow-ideapp-reacomodar")]
     pub(crate) fn reacomodar(&mut self, _cx: &mut Cx) {
+        // Read before the document is borrowed: the previous rectangle lives on
+        // the form itself now, so the host cannot be asked while a mutable borrow
+        // of it is alive. It is written back once that borrow has ended.
+        let antes_do_passe = self.host.previous_rect();
+        let gesto = self.designer.current_gesture();
+
         let Some(doc) = self.host.doc_mut() else {
             return;
         };
         let atual = doc.ir().node(&doc.ir().root).and_then(|n| n.rect());
         let Some(atual) = atual else { return };
 
-        let gesto = self.designer.current_gesture();
-
-        if let Some(antes) = self.form_anterior {
+        if let Some(antes) = antes_do_passe {
             let (dw, dh) = (atual.w - antes.w, atual.h - antes.h);
             if (dw != 0.0 || dh != 0.0)
                 && let Some(mut tx) = crawrad_designer::layout::apply_anchors(doc.ir(), dw, dh)
@@ -142,12 +146,15 @@ impl IdeApp {
                 let _ = doc.apply(tx);
             }
         }
-        self.form_anterior = Some(atual);
-
         if let Some(mut tx) = crawrad_designer::layout::apply(doc.ir()) {
             tx = tx.no_gesto(gesto);
             let _ = doc.apply(tx);
         }
+
+        // The borrow of the document has ended, so the form can be told what its
+        // rectangle was for the next pass. It is recorded per form: resizing one
+        // must not make the other believe it was resized too.
+        self.host.set_previous_rect(Some(atual));
     }
 
     #[note("ide-app-document-flow-ideapp-bombear-mcp")]

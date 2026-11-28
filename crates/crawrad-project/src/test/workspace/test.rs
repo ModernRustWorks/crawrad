@@ -1093,6 +1093,8 @@ fn open_preference_survives_text_round_trip() {
             for &color_scheme in EditorColorScheme::ALL {
                 let p = Preferences {
                     welcome_on_startup: on,
+                    last_form: on
+                        .then(|| PathBuf::from("C:/projects/my_app/src/form_main.crawform")),
                     keymap_scheme: scheme,
                     editor_font_size: 14,
                     editor_tab_size: 2,
@@ -1251,13 +1253,24 @@ fn the_old_target_key_is_read_and_ignored() {
 }
 
 #[test]
-fn without_file_ide_opens_as_always() {
-    // Default IS today's behavior, and that is not a detail: existing IDE
-    // users must not see startup screen change behavior because of a checkbox
-    // they never checked.
+fn without_a_saved_preference_the_recent_list_opens() {
+    // This test asserted the opposite until 27/11/2026, for a reason worth keeping
+    // in view: an existing user should not have startup change under them because
+    // of a box they never ticked. What it missed is that reopening was ALSO never
+    // asked for — the IDE decided, on a machine it had never run on, to drop a
+    // person straight into a file. Someone who did tick the box keeps reopening:
+    // their preference is saved, and this default only answers an empty file.
     assert!(
-        !preferences_from_text("").welcome_on_startup,
-        "without saved preference, IDE reopens last folder"
+        preferences_from_text("").welcome_on_startup,
+        "with no saved preference the IDE reopened a project nobody asked it to"
+    );
+    assert!(
+        !preferences_from_text(
+            "welcome-on-startup=false
+"
+        )
+        .welcome_on_startup,
+        "a saved choice to reopen must still be honoured"
     );
     // And unknown key — from a future version, or manual file editing — does
     // not break reading the others.
@@ -1390,8 +1403,9 @@ fn the_color_page_updates_syntax_and_diagnostics_apart() {
     assert_eq!(p.color_fields(), Preferences::default().color_fields());
 }
 
-/// The start form: the first form of the most recent project — and
-/// nothing when the box is off, there is no recent, or the recent has no form.
+/// The start form: the one that WAS open, falling back to the first form of the
+/// most recent project — and nothing when the recent list opens instead, there is
+/// no recent, or the recent has no form.
 #[test]
 fn the_last_project_form_comes_from_the_first_recent() {
     let recent = vec![PathBuf::from("/p/latest"), PathBuf::from("/p/older")];
@@ -1405,15 +1419,17 @@ fn the_last_project_form_comes_from_the_first_recent() {
             vec![root.join("src/x.crawform")]
         }
     };
-    let on = Preferences::default();
+    // Reopening is now opt-in, so the test states it instead of leaning on the default.
+    let on = Preferences {
+        welcome_on_startup: false,
+        ..Preferences::default()
+    };
     assert_eq!(
         last_project_form(&on, &recent, docs),
         Some(PathBuf::from("/p/latest").join("src/main.crawform"))
     );
-    let off = Preferences {
-        welcome_on_startup: true,
-        ..Preferences::default()
-    };
+    let off = Preferences::default();
+    assert!(off.welcome_on_startup, "the recent list is the default");
     assert_eq!(last_project_form(&off, &recent, docs), None);
     assert_eq!(last_project_form(&on, &[], docs), None);
     assert_eq!(last_project_form(&on, &recent, |_| Vec::new()), None);
@@ -1665,4 +1681,211 @@ fn shorten_middle_keeps_both_ends_within_max() {
         super::shorten_middle("C:/crawrad-wt", super::PLACE_MAX_CHARS),
         "C:/crawrad-wt"
     );
+}
+
+/// The New Project dialog must not open pointing at a folder nobody can write to.
+///
+/// Installed from the Microsoft Store, the process working directory IS the
+/// package's own `WindowsApps` folder, which Windows keeps read-only. The dialog
+/// used to take the working directory unconditionally, so it opened pointing at
+/// the one place a project can never live.
+#[test]
+fn the_default_location_is_never_inside_the_install_folder() {
+    let root = std::env::temp_dir().join(format!("crawrad-default-{}", std::process::id()));
+    let install = root.join("WindowsApps").join("GUARANA.CrawRAD_0.1.1.0");
+    let home = root.join("home");
+    std::fs::create_dir_all(&install).expect("install folder");
+    std::fs::create_dir_all(&home).expect("home folder");
+
+    // The working directory is inside the install folder: it is refused, and the
+    // home folder answers instead.
+    let chosen = default_project_parent(None, None, Some(&home), Some(&install), Some(&install))
+        .expect("a default is found");
+    assert_eq!(
+        chosen,
+        home.join("CrawRAD-Projects"),
+        "the default fell back to the install folder, which is read-only"
+    );
+
+    // With no home to fall back to, it answers nothing rather than a folder that
+    // cannot be written: an empty field is honest, a doomed path is not.
+    assert_eq!(
+        default_project_parent(None, None, None, Some(&install), Some(&install)),
+        None,
+        "with nowhere writable it still offered the install folder"
+    );
+
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+/// Beside the last project opened, because a person keeps their projects together.
+#[test]
+fn the_default_location_prefers_where_the_last_project_lives() {
+    let root = std::env::temp_dir().join(format!("crawrad-default-recent-{}", std::process::id()));
+    let projects = root.join("CrawRAD-Projects");
+    let last = projects.join("my_app");
+    let home = root.join("home");
+    std::fs::create_dir_all(&last).expect("recent project");
+    std::fs::create_dir_all(&home).expect("home folder");
+
+    assert_eq!(
+        default_project_parent(None, Some(&last), Some(&home), None, None),
+        Some(projects),
+        "the folder holding the last project is the one a person expects"
+    );
+
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+/// `Create` creates. A folder that does not exist yet is made, not answered with
+/// a file picker — the picker is what the folder button beside the field is for.
+#[test]
+fn create_makes_the_folder_instead_of_asking_where() {
+    let root = std::env::temp_dir().join(format!("crawrad-make-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    let target = root.join("CrawRAD-Projects");
+    assert!(!target.exists());
+
+    make_project_parent(&target, None).expect("a missing folder is created, not refused");
+    assert!(target.is_dir(), "Create did not create");
+
+    // Running again on the folder it just made is not an error.
+    make_project_parent(&target, None).expect("an existing folder is accepted");
+
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+/// A path inside the install folder gets its own phrase, because no amount of
+/// retrying will make that folder writable.
+#[test]
+fn a_path_inside_the_install_folder_is_refused_by_name() {
+    let root = std::env::temp_dir().join(format!("crawrad-refuse-{}", std::process::id()));
+    let install = root.join("WindowsApps").join("GUARANA.CrawRAD_0.1.1.0");
+    std::fs::create_dir_all(&install).expect("install folder");
+
+    let refusal = make_project_parent(&install.join("my_app"), Some(&install))
+        .expect_err("a project inside the install folder must be refused");
+    assert!(
+        refusal.phrase.contains("read-only"),
+        "the phrase does not say why it cannot be written: {}",
+        refusal.phrase
+    );
+    assert!(
+        refusal.phrase.contains("Nothing was written"),
+        "the phrase does not say the project was not half-created: {}",
+        refusal.phrase
+    );
+    assert!(
+        !install.join("my_app").exists(),
+        "it refused and created the folder anyway"
+    );
+
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+/// A file where a folder was asked for is refused, not silently replaced.
+#[test]
+fn a_file_in_the_folders_place_is_refused() {
+    let root = std::env::temp_dir().join(format!("crawrad-file-{}", std::process::id()));
+    std::fs::create_dir_all(&root).expect("test root");
+    let file_in_the_way = root.join("not_a_folder");
+    std::fs::write(&file_in_the_way, b"x").expect("the file");
+
+    let refusal = make_project_parent(&file_in_the_way, None).expect_err("a file is not a folder");
+    assert!(
+        refusal.phrase.contains("is a file"),
+        "the phrase does not name what is wrong: {}",
+        refusal.phrase
+    );
+
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+/// The folder chosen in Options wins over everything this function could infer.
+///
+/// `default_projects_dir` was already a preference, written and shown in Options —
+/// and the New Project dialog never read it. A person could set where their
+/// projects go and watch the dialog ignore it.
+#[test]
+fn the_folder_chosen_in_options_wins() {
+    let root = std::env::temp_dir().join(format!("crawrad-options-{}", std::process::id()));
+    let chosen_by_hand = root.join("Meus Projetos");
+    let last = root.join("CrawRAD-Projects").join("my_app");
+    let home = root.join("home");
+    std::fs::create_dir_all(&chosen_by_hand).expect("chosen folder");
+    std::fs::create_dir_all(&last).expect("recent project");
+    std::fs::create_dir_all(&home).expect("home folder");
+
+    assert_eq!(
+        default_project_parent(Some(&chosen_by_hand), Some(&last), Some(&home), None, None),
+        Some(chosen_by_hand.clone()),
+        "the dialog ignored the folder the person chose in Options"
+    );
+
+    // Even a chosen folder is refused when it points inside the install folder:
+    // the preference says where projects go, not that Windows will allow it.
+    let install = root.join("WindowsApps").join("GUARANA.CrawRAD_0.1.1.0");
+    std::fs::create_dir_all(&install).expect("install folder");
+    assert_eq!(
+        default_project_parent(Some(&install), None, Some(&home), None, Some(&install)),
+        Some(home.join("CrawRAD-Projects")),
+        "a chosen folder inside the install folder was offered anyway"
+    );
+
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+/// Reopening brings back the form that WAS open, not whichever form sorts first.
+///
+/// Taking `documents(root).next()` meant the folder's listing order decided: add a
+/// form and the newly added, empty one wins over the one being worked on. That is
+/// what happened on the Store build — a fresh `form_1` reopened instead of the
+/// project's real form.
+#[test]
+fn reopening_brings_back_the_form_that_was_open() {
+    let root = std::env::temp_dir().join(format!("crawrad-lastform-{}", std::process::id()));
+    let project = root.join("my_app");
+    let src = project.join("src");
+    std::fs::create_dir_all(&src).expect("project src");
+    let first_listed = src.join("form_1.crawform");
+    let was_open = src.join("form_main.crawform");
+    std::fs::write(&first_listed, "").expect("first form");
+    std::fs::write(&was_open, "").expect("open form");
+
+    let recent = vec![project.clone()];
+    let docs = |_: &Path| -> Vec<PathBuf> { vec![first_listed.clone(), was_open.clone()] };
+    let reopening = |last: Option<PathBuf>| Preferences {
+        welcome_on_startup: false,
+        last_form: last,
+        ..Preferences::default()
+    };
+
+    assert_eq!(
+        last_project_form(&reopening(Some(was_open.clone())), &recent, docs),
+        Some(was_open.clone()),
+        "it reopened the first form the folder listed, not the one that was open"
+    );
+
+    // A form that was deleted, or that belongs to another project, must not be
+    // reopened: the fallback is the project's own first document, never a stale path.
+    assert_eq!(
+        last_project_form(
+            &reopening(Some(src.join("deleted.crawform"))),
+            &recent,
+            docs
+        ),
+        Some(first_listed.clone()),
+        "a form that no longer exists was reopened"
+    );
+    assert_eq!(
+        last_project_form(
+            &reopening(Some(root.join("other_app/src/form_main.crawform"))),
+            &recent,
+            docs
+        ),
+        Some(first_listed.clone()),
+        "a form from another project was reopened"
+    );
+
+    let _ = std::fs::remove_dir_all(&root);
 }

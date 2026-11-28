@@ -755,7 +755,7 @@ impl McpServer {
         if app
             .host
             .doc()
-            .is_some_and(|d| d.revision() != app.rev_salva)
+            .is_some_and(|d| d.revision() != app.host.saved_revision())
         {
             return self.audited(
                 "project.create",

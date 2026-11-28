@@ -3,7 +3,8 @@
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-  IgnorableNamespaces="uap rescap">
+  xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
+  IgnorableNamespaces="uap uap3 rescap">
 
   <Identity
     Name="@IDENTITY_NAME@"
@@ -36,6 +37,40 @@
         Square44x44Logo="Assets\Square44x44Logo.png">
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
       </uap:VisualElements>
+    </Application>
+
+    <!--
+      THE MCP BRIDGE NEEDS AN EXECUTION ALIAS, OR NOTHING OUTSIDE THE PACKAGE CAN
+      RUN IT.
+
+      An installed Store app lives under `C:\Program Files\WindowsApps\`, which
+      Windows locks down: the package reads its own folder, and every other process
+      is refused. The IDE wrote that physical path into the project's `.mcp.json`,
+      and the agent's CLI - a separate process - got `Access is denied` on
+      fork/exec and started with no MCP server at all.
+
+      An execution alias is the supported way out: Windows places a small stub at
+      `%LOCALAPPDATA%\Microsoft\WindowsApps\crawrad-mcp-bridge.exe`, a folder that
+      is on PATH and that anyone may execute, and it launches the real binary with
+      the package's identity. The alias belongs to an Application, so the bridge
+      gets its own entry here; `AppListEntry="none"` keeps it out of the Start menu,
+      since it is a bridge and not something a person launches.
+    -->
+    <Application Id="McpBridge" Executable="crawrad-mcp-bridge.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        AppListEntry="none"
+        DisplayName="CrawRAD MCP Bridge"
+        Description="Connects an AI agent's CLI to a running CrawRAD instance."
+        BackgroundColor="transparent"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png" />
+      <Extensions>
+        <uap3:Extension Category="windows.appExecutionAlias" Executable="crawrad-mcp-bridge.exe" EntryPoint="Windows.FullTrustApplication">
+          <uap3:AppExecutionAlias>
+            <desktop:ExecutionAlias xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10" Alias="crawrad-mcp-bridge.exe" />
+          </uap3:AppExecutionAlias>
+        </uap3:Extension>
+      </Extensions>
     </Application>
   </Applications>
 

@@ -12,6 +12,7 @@ pub fn color_box() -> ComponentDesc {
         size: (145.0, 24.0),
         props: [
             Props::selected_color(crawrad_ir::Color::rgb(0, 0, 0)),
+            Props::slint_border_radius(4),
         ],
         events: [
             Events::CHANGE,

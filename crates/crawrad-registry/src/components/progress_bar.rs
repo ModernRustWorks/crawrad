@@ -17,6 +17,7 @@ pub fn progress_bar() -> ComponentDesc {
             Props::step(10),
             Props::orientation("Horizontal"),
             Props::smooth(true),
+            Props::slint_border_radius(3),
         ],
         events: [
             Events::MOUSE_CLICK,

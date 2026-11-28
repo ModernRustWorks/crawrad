@@ -37,7 +37,7 @@ impl IdeApp {
         if self
             .host
             .doc()
-            .is_some_and(|d| d.revision() != self.rev_salva)
+            .is_some_and(|d| d.revision() != self.host.saved_revision())
         {
             self.status = Some(Self::TRABALHO_NAO_SALVO.into());
             return self.sincronizar(cx);

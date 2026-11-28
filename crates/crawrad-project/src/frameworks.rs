@@ -28,6 +28,14 @@ pub struct Framework {
     /// The crate the project's manifest gets.
     pub crate_dep: &'static str,
     pub availability: Availability,
+    /// Whether a project of this framework can be built for the browser.
+    ///
+    /// The `platforms` line above is for a person to read; these two are for the
+    /// code to decide with. They were added on 27/11/2026 because three templates
+    /// hardcoded Makepad and silently ignored the framework the person chose.
+    pub web: bool,
+    /// Whether a project of this framework can be built for phones.
+    pub mobile: bool,
 }
 
 #[note("frameworks-rows")]
@@ -42,6 +50,8 @@ pub const CATALOGUE: &[Framework] = &[
         platforms: "⊞ Windows   🐧 Linux   🍎 macOS   🌐 Web   📱 Mobile",
         crate_dep: "makepad-widgets",
         availability: Availability::Ready,
+        web: true,
+        mobile: true,
     },
     Framework {
         name: "egui",
@@ -50,6 +60,26 @@ pub const CATALOGUE: &[Framework] = &[
         platforms: "⊞ Windows   🐧 Linux   🍎 macOS   🌐 Web",
         crate_dep: "eframe",
         availability: Availability::Ready,
+        web: true,
+        // The card above never claimed phones, and the templates must not either.
+        mobile: false,
+    },
+    Framework {
+        name: "Slint",
+        target: Some(AlvoGerador::Slint),
+        summary: "Declarative markup, one description of the form, native look.",
+        platforms: "⊞ Windows   🐧 Linux   🍎 macOS",
+        crate_dep: "slint",
+        availability: Availability::Ready,
+        // Slint itself reaches the browser and phones. CrawRAD's SCAFFOLD does not
+        // reach them for Slint: `scaffold_main_rs` falls through to `mod app;` and
+        // `scaffold_app_rs` answers with makepad_widgets `live_design!` for
+        // everything that is not egui. Claiming the browser here would hand someone
+        // who picked Slint a MAKEPAD project - the exact defect closed on 28/11/2026
+        // for egui + WASM. These two stay false until the scaffold speaks Slint, so
+        // the dialog refuses those two templates by name instead of lying.
+        web: false,
+        mobile: false,
     },
 ];
 
