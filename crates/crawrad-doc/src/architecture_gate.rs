@@ -122,10 +122,6 @@ pub const ALLOWED_SHELL_ROOT_FILES: &[&str] = &["ide_app.rs", "main.rs"];
 /// `rev_salva` and `form_anterior`, which only `clippy` noticed. Counting this
 /// tree reports 33,480, and 33,454 + 26 is the same number. What a strip of
 /// forms IS lives in `crawrad-host`; the shell holds the wiring.
-/// Raised on 27/11/2026 from 33,480 to 33,524, measured on this tree and
-/// cross-checked: 33,480 + 44 is the same number. The strip of tabs is DRAWN now,
-/// one tab per form with the loose files after them.
-///
 /// The 44 lines are the drawing and the click, and only that. WHAT THE STRIP IS
 /// went to `crawrad-host` instead - the order, the boundary between the two kinds,
 /// which row is lit, and each tab's unsaved mark are `strip`, `strip_front` and
@@ -151,7 +147,19 @@ pub const ALLOWED_SHELL_ROOT_FILES: &[&str] = &["ide_app.rs", "main.rs"];
 /// excludes; a test in the shell crate cannot be reached without those four lines.
 /// Measured both ways: 33_532 + 4 = 33_536, and `main.rs` went from 76 to 80 lines
 /// while no other non-test file in the crate changed.
-pub const MAX_SHELL_SOURCE_LINES: usize = 33_536;
+/// Raised to 33_585 on 28/11/2026 by 49 more lines in `dialogs/new_project.rs`,
+/// and they are not shell code either: they are the one line under the Location
+/// field becoming a FUNCTION (`location_phrase`), plus the field that remembers
+/// why the chosen folder cannot take a project. That decision used to live inside
+/// the draw, which is exactly why deleting the folder warning from it left the
+/// whole suite green -- found by mutation, not by reading. The writability check
+/// itself is in `crawrad-project`, which this count does not reach, and the new
+/// tests are under `test/`, which it excludes.
+/// Measured on the tree this merge produces, not taken from either side of it:
+/// 33_536 + 49 = 33_585, and `git diff --stat` on the crate reports 67 insertions
+/// against 18 deletions in that one non-test file, with nothing else outside
+/// `test/` changed.
+pub const MAX_SHELL_SOURCE_LINES: usize = 33_585;
 
 /// Maximum allowed lines for any individual `.rs` file in `crates/crawrad-ide/src/` (outside `test/`).
 ///
