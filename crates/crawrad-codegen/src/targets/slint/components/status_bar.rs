@@ -49,26 +49,30 @@ impl SlintComponentCodegen for StatusBarCodegen {
 
     fn emit_actions(
         &self,
+        // status_bar action doc
         _doc: &Document,
         node: &Node,
         field: &str,
         _emitted: &[&Node],
     ) -> Result<String, crate::Erro> {
+        // status_bar action call
         util::emit_click_action(node, field)
     }
 
     fn emit_slint(
         &self,
+        // status_bar doc
         _doc: &Document,
         _reg: &crawrad_registry::Registry,
         node: &Node,
+        // status_bar bounds
         x: f32,
         y: f32,
         w: f32,
         h: f32,
     ) -> Result<String, crate::Erro> {
+        // status_bar id
         let name = identificador(node.name())?;
-        let pos = layout::position(x, y);
         let vis = layout::is_visible(node);
         let en = layout::is_enabled(node);
         let txt = match node.props.get("simple_text") {
@@ -77,11 +81,7 @@ impl SlintComponentCodegen for StatusBarCodegen {
         };
         let txt_esc = util::escape_slint_string(txt);
 
-        let mut out = String::new();
-        out.push_str(&format!("        {name} := Rectangle {{\n"));
-        out.push_str(&format!("            {pos}\n"));
-        out.push_str(&format!("            width: {w:.1}px;\n"));
-        out.push_str(&format!("            height: {h:.1}px;\n"));
+        let mut out = util::emit_rectangle_header(node, x, y, w, h)?;
         out.push_str("            background: #252526;\n");
         out.push_str(&format!("            visible: {vis};\n"));
         out.push_str(&format!("            enabled: {en};\n"));
@@ -93,11 +93,7 @@ impl SlintComponentCodegen for StatusBarCodegen {
         out.push_str("                vertical-alignment: center;\n");
         out.push_str("            }\n");
         if layout::event_handler(node, "on_click").is_some() {
-            out.push_str("            TouchArea {\n");
-            out.push_str(&format!(
-                "                clicked => {{ root.{name}_clicked(); }}\n"
-            ));
-            out.push_str("            }\n");
+            out.push_str(&util::emit_touch_area_click(&name));
         }
         out.push_str("        }\n");
         Ok(out)
@@ -121,8 +117,10 @@ impl SlintComponentCodegen for StatusPanelCodegen {
         fields.push(util::FIELD_TEXT.to_string());
         fields.push("    pub width: i64,".to_string());
         fields.push("    pub alignment: String,".to_string());
+        // status_bar text catalogue fields
         fields.extend(util::catalogue_fields(
             &desc,
+            // status_bar fields
             &[
                 "visible",
                 "enabled",
@@ -157,6 +155,7 @@ impl SlintComponentCodegen for StatusPanelCodegen {
         inits.extend(util::catalogue_inits(
             node,
             &desc,
+            // status_bar inits
             &[
                 "visible",
                 "enabled",

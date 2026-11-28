@@ -1,7 +1,7 @@
 //! Slint component implementation for `ScrollBox`.
 
 use super::{codegen::SlintComponentCodegen, util};
-use crate::{identificador, targets::slint::layout};
+use crate::targets::slint::layout;
 use crawrad_ir::{Document, Node, Value};
 
 pub struct ScrollBoxCodegen;
@@ -24,6 +24,7 @@ impl SlintComponentCodegen for ScrollBoxCodegen {
                 "visible",
                 "enabled",
                 "auto_scroll",
+                // bar settings
                 "horz_scroll_bar",
                 "vert_scroll_bar",
                 "border_width",
@@ -50,10 +51,12 @@ impl SlintComponentCodegen for ScrollBoxCodegen {
         inits.extend(util::catalogue_inits(
             node,
             &desc,
+            // scroll_box inits
             &[
                 "visible",
                 "enabled",
                 "auto_scroll",
+                // bar settings
                 "horz_scroll_bar",
                 "vert_scroll_bar",
                 "border_width",
@@ -75,29 +78,27 @@ impl SlintComponentCodegen for ScrollBoxCodegen {
 
     fn emit_slint(
         &self,
+        // scroll_box doc
         doc: &Document,
         reg: &crawrad_registry::Registry,
         node: &Node,
+        // scroll_box bounds
         x: f32,
         y: f32,
         w: f32,
         h: f32,
     ) -> Result<String, crate::Erro> {
-        let name = identificador(node.name())?;
-        let pos = layout::position(x, y);
+        // scroll_box id
         let vis = layout::is_visible(node);
         let en = layout::is_enabled(node);
         let bw = match node.props.get("border_width") {
             Some(Value::Int(i)) => (*i).max(0),
             _ => 1,
         };
+        // scroll_box nested children
         let children = super::emit_children(doc, reg, node, "    ")?;
 
-        let mut out = String::new();
-        out.push_str(&format!("        {name} := Rectangle {{\n"));
-        out.push_str(&format!("            {pos}\n"));
-        out.push_str(&format!("            width: {w:.1}px;\n"));
-        out.push_str(&format!("            height: {h:.1}px;\n"));
+        let mut out = util::emit_rectangle_header(node, x, y, w, h)?;
         out.push_str("            background: #1e1e2e;\n");
         out.push_str(&format!("            border-width: {bw}px;\n"));
         out.push_str("            border-color: #45475a;\n");

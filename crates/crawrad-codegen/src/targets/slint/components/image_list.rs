@@ -35,12 +35,12 @@ impl SlintComponentCodegen for ImageListCodegen {
             Some(Value::Int(i)) => *i,
             _ => 16,
         };
-        let icones = extrair_icones(node);
-        let images_str = if icones.is_empty() {
+        let icons = extract_icons(node);
+        let images_str = if icons.is_empty() {
             "Vec::new()".to_string()
         } else {
             let mut s = String::from("vec![");
-            for (i, (name, symbol)) in icones.iter().enumerate() {
+            for (i, (name, symbol)) in icons.iter().enumerate() {
                 if i > 0 {
                     s.push_str(", ");
                 }
@@ -74,9 +74,11 @@ impl SlintComponentCodegen for ImageListCodegen {
 
     fn emit_slint(
         &self,
+        // image_list slint doc
         _doc: &Document,
         _reg: &crawrad_registry::Registry,
         _node: &Node,
+        // image_list slint stub
         _x: f32,
         _y: f32,
         _w: f32,
@@ -90,26 +92,26 @@ impl SlintComponentCodegen for ImageListCodegen {
     }
 }
 
-pub fn extrair_icones(n: &Node) -> Vec<(String, String)> {
-    match n.props.get("images_data") {
-        Some(Value::List(itens)) => itens
-            .iter()
-            .filter_map(|item| {
-                if let Value::Map(m) = item {
-                    let nome = match m.get("name") {
-                        Some(Value::Str(s)) => s.clone(),
-                        _ => String::new(),
-                    };
-                    let symbol = match m.get("symbol") {
-                        Some(Value::Str(s)) => s.clone(),
-                        _ => String::new(),
-                    };
-                    Some((nome, symbol))
-                } else {
-                    None
-                }
-            })
-            .collect(),
-        _ => Vec::new(),
-    }
+/// Extracts images from `images_data` prop.
+pub fn extract_icons(node: &Node) -> Vec<(String, String)> {
+    let Some(Value::List(entries)) = node.props.get("images_data") else {
+        return Vec::new();
+    };
+    entries
+        .iter()
+        .filter_map(|entry| match entry {
+            Value::Map(map) => {
+                let key = match map.get("name") {
+                    Some(Value::Str(val)) => val.clone(),
+                    _ => String::new(),
+                };
+                let glyph = match map.get("symbol") {
+                    Some(Value::Str(val)) => val.clone(),
+                    _ => String::new(),
+                };
+                Some((key, glyph))
+            }
+            _ => None,
+        })
+        .collect()
 }

@@ -19,8 +19,10 @@ impl SlintComponentCodegen for CardCodegen {
         fields.push("    pub corner_radius: i64,".to_string());
         fields.push("    pub elevation: i64,".to_string());
         fields.push("    pub show_header: bool,".to_string());
+        // card text catalogue fields
         fields.extend(util::catalogue_fields(
             &desc,
+            // card fields
             &[
                 "visible",
                 "enabled",
@@ -64,6 +66,7 @@ impl SlintComponentCodegen for CardCodegen {
         inits.extend(util::catalogue_inits(
             node,
             &desc,
+            // card inits
             &[
                 "visible",
                 "enabled",
@@ -81,28 +84,33 @@ impl SlintComponentCodegen for CardCodegen {
 
     fn emit_actions(
         &self,
+        // card action doc
         _doc: &Document,
         node: &Node,
         field: &str,
         _emitted: &[&Node],
     ) -> Result<String, crate::Erro> {
+        // card action call
         util::emit_click_action(node, field)
     }
 
     fn emit_slint(
         &self,
+        // card doc
         doc: &Document,
         reg: &crawrad_registry::Registry,
         node: &Node,
+        // card bounds
         x: f32,
         y: f32,
         w: f32,
         h: f32,
     ) -> Result<String, crate::Erro> {
+        // card id
         let name = identificador(node.name())?;
-        let pos = layout::position(x, y);
         let vis = layout::is_visible(node);
         let en = layout::is_enabled(node);
+        // card title text
         let caption = layout::text(node);
         let caption_esc = util::escape_slint_string(&caption);
         let subtitle = match node.props.get("subtitle") {
@@ -116,14 +124,12 @@ impl SlintComponentCodegen for CardCodegen {
         };
         let show_header = !matches!(node.props.get("show_header"), Some(Value::Bool(false)));
         let header_h = if subtitle.is_empty() { 28.0 } else { 42.0 };
+        // card child nodes
         let children = super::emit_children(doc, reg, node, "    ")?;
 
-        let mut out = String::new();
-        out.push_str(&format!("        {name} := Rectangle {{\n"));
-        out.push_str(&format!("            {pos}\n"));
-        out.push_str(&format!("            width: {w:.1}px;\n"));
-        out.push_str(&format!("            height: {h:.1}px;\n"));
-        out.push_str(&format!("            border-radius: {corner_radius}px;\n"));
+        let mut out = util::emit_rectangle_header(node, x, y, w, h)?;
+        let cr_str = util::border_radius_px(node, corner_radius as f32);
+        out.push_str(&format!("            border-radius: {cr_str};\n"));
         out.push_str("            background: #252538;\n");
         out.push_str("            border-width: 1px;\n");
         out.push_str("            border-color: #3e3e56;\n");
@@ -159,11 +165,7 @@ impl SlintComponentCodegen for CardCodegen {
             out.push_str("            }\n");
         }
         if layout::event_handler(node, "on_click").is_some() {
-            out.push_str("            TouchArea {\n");
-            out.push_str(&format!(
-                "                clicked => {{ root.{name}_clicked(); }}\n"
-            ));
-            out.push_str("            }\n");
+            out.push_str(&util::emit_touch_area_click(&name));
         }
         if !children.is_empty() {
             out.push_str(&children);

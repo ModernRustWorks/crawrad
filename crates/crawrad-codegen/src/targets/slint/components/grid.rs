@@ -87,6 +87,7 @@ impl SlintComponentCodegen for GridCodegen {
         inits.extend(util::catalogue_inits(
             node,
             &desc,
+            // grid inits
             &[
                 "visible",
                 "enabled",
@@ -110,21 +111,14 @@ impl SlintComponentCodegen for GridCodegen {
 
     fn emit_actions(
         &self,
+        // grid action target
         _doc: &Document,
         node: &Node,
         field: &str,
         _emitted: &[&Node],
     ) -> Result<String, crate::Erro> {
-        let mut code = String::new();
-        let on_click_call = match layout::event_handler(node, "on_click") {
-            Some(h) => {
-                let h_name = identificador(&h)?;
-                format!("                    f.form.{h_name}();\n")
-            }
-            None => String::new(),
-        };
-
-        code.push_str(&format!(
+        let on_click_call = util::format_handler_call(node, "on_click")?;
+        Ok(format!(
             "        {{\n\
              \x20           let form = app.clone();\n\
              \x20           window.on_{field}_cell_selected(move |col, row| {{\n\
@@ -134,21 +128,22 @@ impl SlintComponentCodegen for GridCodegen {
              \x20               }}\n\
              \x20           }});\n\
              \x20       }}\n"
-        ));
-
-        Ok(code)
+        ))
     }
 
     fn emit_slint(
         &self,
+        // grid document reference
         _doc: &Document,
         _reg: &crawrad_registry::Registry,
         node: &Node,
+        // grid layout bounds
         x: f32,
         y: f32,
         w: f32,
         h: f32,
     ) -> Result<String, crate::Erro> {
+        // grid component name
         let name = identificador(node.name())?;
         let col_count = match node.props.get("col_count") {
             Some(Value::Int(i)) => *i,
@@ -166,23 +161,10 @@ impl SlintComponentCodegen for GridCodegen {
             Some(Value::Int(i)) => *i,
             _ => 24,
         };
-        let pos = layout::position(x, y);
-        let vis = layout::is_visible(node);
         let en = layout::is_enabled(node);
 
-        let mut out = String::new();
-        out.push_str(&format!("        {name} := Rectangle {{\n"));
-        out.push_str(&format!("            {pos}\n"));
-        out.push_str(&format!("            width: {w:.1}px;\n"));
-        out.push_str(&format!("            height: {h:.1}px;\n"));
-        out.push_str("            border-width: 1px;\n");
-        out.push_str("            border-color: #cccccc;\n");
-        out.push_str("            border-radius: 4px;\n");
-        out.push_str("            background: #ffffff;\n");
-        out.push_str("            clip: true;\n");
-        if !vis {
-            out.push_str("            visible: false;\n");
-        }
+        let mut out = util::emit_container_header(node, x, y, w, h, 4.0, true)?;
+        out.push_str("            VerticalLayout {\n");
         out.push_str("            VerticalLayout {\n");
 
         for r in 0..row_count.min(8) {

@@ -66,33 +66,16 @@ impl SlintComponentCodegen for ListViewCodegen {
 
     fn emit_actions(
         &self,
+        // list_view action target
         _doc: &Document,
         node: &Node,
         field: &str,
         _emitted: &[&Node],
     ) -> Result<String, crate::Erro> {
         let mut code = String::new();
-        let on_click_call = match layout::event_handler(node, "on_click") {
-            Some(h) => {
-                let h_name = identificador(&h)?;
-                format!("                    f.form.{h_name}();\n")
-            }
-            None => String::new(),
-        };
-        let on_change_call = match layout::event_handler(node, "on_change") {
-            Some(h) => {
-                let h_name = identificador(&h)?;
-                format!("                    f.form.{h_name}();\n")
-            }
-            None => String::new(),
-        };
-        let on_dbl_click_call = match layout::event_handler(node, "on_dbl_click") {
-            Some(h) => {
-                let h_name = identificador(&h)?;
-                format!("                    f.form.{h_name}();\n")
-            }
-            None => String::new(),
-        };
+        let on_click_call = util::format_handler_call(node, "on_click")?;
+        let on_change_call = util::format_handler_call(node, "on_change")?;
+        let on_dbl_click_call = util::format_handler_call(node, "on_dbl_click")?;
 
         code.push_str(&format!(
             "        {{\n\
@@ -126,41 +109,30 @@ impl SlintComponentCodegen for ListViewCodegen {
 
     fn emit_slint(
         &self,
+        // list_view document reference
         doc: &Document,
         _reg: &crawrad_registry::Registry,
         node: &Node,
+        // list_view layout bounds
         x: f32,
         y: f32,
         w: f32,
         h: f32,
     ) -> Result<String, crate::Erro> {
+        // list_view component name
         let name = identificador(node.name())?;
         let columns = columns_of(doc, node);
         let items = match node.props.get("items") {
             Some(v) => Item::list_from(v),
             None => Vec::new(),
         };
-        let pos = layout::position(x, y);
-        let vis = layout::is_visible(node);
         let en = layout::is_enabled(node);
         let show_headers = matches!(
             node.props.get("show_column_headers"),
             None | Some(Value::Bool(true))
         );
 
-        let mut out = String::new();
-        out.push_str(&format!("        {name} := Rectangle {{\n"));
-        out.push_str(&format!("            {pos}\n"));
-        out.push_str(&format!("            width: {w:.1}px;\n"));
-        out.push_str(&format!("            height: {h:.1}px;\n"));
-        out.push_str("            border-width: 1px;\n");
-        out.push_str("            border-color: #cccccc;\n");
-        out.push_str("            border-radius: 4px;\n");
-        out.push_str("            background: #ffffff;\n");
-        out.push_str("            clip: true;\n");
-        if !vis {
-            out.push_str("            visible: false;\n");
-        }
+        let mut out = util::emit_container_header(node, x, y, w, h, 4.0, true)?;
         out.push_str("            VerticalLayout {\n");
 
         // Column headers
@@ -317,9 +289,11 @@ impl SlintComponentCodegen for ListColumnCodegen {
 
     fn emit_slint(
         &self,
+        // list_view slint doc
         _doc: &Document,
         _reg: &crawrad_registry::Registry,
         _node: &Node,
+        // list_view slint stub
         _x: f32,
         _y: f32,
         _w: f32,
@@ -354,23 +328,24 @@ pub fn columns_of(doc: &Document, node: &Node) -> Vec<ColumnInfo> {
         .collect()
 }
 
-pub fn emit_items_init(itens: &[Item]) -> String {
-    if itens.is_empty() {
+pub fn emit_items_init(items: &[Item]) -> String {
+    if items.is_empty() {
         return "Vec::new()".to_string();
     }
-    let mut out = String::from("vec![\n");
-    for i in itens {
-        let subs: Vec<String> = i
-            .children
-            .iter()
-            .map(|c| format!("{}.to_string()", crate::literal(&c.text)))
-            .collect();
-        out.push_str(&format!(
-            "                ListViewItem {{ text: {}.to_string(), sub_items: vec![{}] }},\n",
-            crate::literal(&i.text),
-            subs.join(", ")
-        ));
-    }
-    out.push_str("            ]");
-    out
+    let rows: Vec<String> = items
+        .iter()
+        .map(|entry| {
+            let subs: Vec<String> = entry
+                .children
+                .iter()
+                .map(|child| format!("{}.to_string()", crate::literal(&child.text)))
+                .collect();
+            format!(
+                "                ListViewItem {{ text: {}.to_string(), sub_items: vec![{}] }}",
+                crate::literal(&entry.text),
+                subs.join(", ")
+            )
+        })
+        .collect();
+    format!("vec![\n{},\n            ]", rows.join(",\n"))
 }

@@ -54,18 +54,14 @@ impl SlintComponentCodegen for ColorBoxCodegen {
 
     fn emit_actions(
         &self,
+        // color_box action target
         _doc: &Document,
         node: &Node,
         field: &str,
         _emitted: &[&Node],
     ) -> Result<String, crate::Erro> {
-        let on_change_call = match layout::event_handler(node, "on_change") {
-            Some(h) => {
-                let h_name = identificador(&h)?;
-                format!("                    f.form.{h_name}();\n")
-            }
-            None => String::new(),
-        };
+        // color_box on_change handler
+        let on_change_call = util::format_handler_call(node, "on_change")?;
         Ok(format!(
             "        {{\n\
              \x20           let form = app.clone();\n\
@@ -83,14 +79,17 @@ impl SlintComponentCodegen for ColorBoxCodegen {
 
     fn emit_slint(
         &self,
+        // color_box document reference
         _doc: &Document,
         _reg: &crawrad_registry::Registry,
         node: &Node,
+        // color_box layout bounds
         x: f32,
         y: f32,
         w: f32,
         h: f32,
     ) -> Result<String, crate::Erro> {
+        // color_box component name
         let name = identificador(node.name())?;
         let selected_color = match node.props.get("selected") {
             Some(Value::Color(c)) => *c,
@@ -107,22 +106,9 @@ impl SlintComponentCodegen for ColorBoxCodegen {
             .map(|(n, _)| format!("\"{}\"", n))
             .collect();
         let labels_slice = labels.join(", ");
-        let pos = layout::position(x, y);
-        let vis = layout::is_visible(node);
         let en = layout::is_enabled(node);
 
-        let mut out = String::new();
-        out.push_str(&format!("        {name} := Rectangle {{\n"));
-        out.push_str(&format!("            {pos}\n"));
-        out.push_str(&format!("            width: {w:.1}px;\n"));
-        out.push_str(&format!("            height: {h:.1}px;\n"));
-        out.push_str("            border-width: 1px;\n");
-        out.push_str("            border-color: #cccccc;\n");
-        out.push_str("            border-radius: 4px;\n");
-        out.push_str("            background: #ffffff;\n");
-        if !vis {
-            out.push_str("            visible: false;\n");
-        }
+        let mut out = util::emit_container_header(node, x, y, w, h, 4.0, false)?;
         out.push_str("            HorizontalLayout {\n");
         out.push_str("                padding-left: 4px;\n");
         out.push_str("                padding-right: 4px;\n");

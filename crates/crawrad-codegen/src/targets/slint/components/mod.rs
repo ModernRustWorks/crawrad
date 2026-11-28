@@ -8,56 +8,68 @@ pub mod prelude {
     pub use crawrad_ir::{Document, Node, Value};
 }
 
+// Actions and indicators
 pub mod action_list;
 pub mod badge;
 pub mod bevel;
 pub mod bit_btn;
 pub mod breadcrumb;
+// Buttons and cards
 pub mod button;
 pub mod card;
 pub mod category_panel;
 pub mod check_list_box;
+// Inputs and selectors
 pub mod checkbox;
 pub mod chips;
 pub mod codegen;
 pub mod color_box;
 pub mod combobox;
+// Date and layout
 pub mod date_time_picker;
 pub mod drawer;
 pub mod edit;
 pub mod grid;
 pub mod group_box;
+// Display and lists
 pub mod image;
 pub mod image_list;
+// Labels and text
 pub mod label;
 pub mod link_label;
 pub mod list_box;
 pub mod list_view;
+// Menus and text
 pub mod main_menu;
 pub mod mask_edit;
 pub mod memo;
 pub mod message_dialog;
 pub mod multi_select;
+// Navigation and dialogs
 pub mod open_dialog;
 pub mod page_control;
 pub mod pagination;
 pub mod paint_box;
 pub mod panel;
+// Menus and bars
 pub mod popup_menu;
 pub mod progress_bar;
 pub mod radio_button;
 pub mod radio_group;
 pub mod save_dialog;
+// Scroll and shapes
 pub mod scroll_bar;
 pub mod scroll_box;
 pub mod shape;
 pub mod speed_button;
 pub mod spin_edit;
+// Splitter and status
 pub mod splitter;
 pub mod status_bar;
 pub mod timer;
 pub mod toggle;
 pub mod tool_bar;
+// Advanced components and utilities
 pub mod track_bar;
 pub mod tree_view;
 pub mod util;

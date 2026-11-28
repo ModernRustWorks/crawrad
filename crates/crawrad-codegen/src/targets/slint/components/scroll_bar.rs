@@ -25,6 +25,7 @@ impl SlintComponentCodegen for ScrollBarCodegen {
                 "visible",
                 "enabled",
                 "position",
+                // range limits
                 "min",
                 "max",
                 "small_change",
@@ -43,16 +44,8 @@ impl SlintComponentCodegen for ScrollBarCodegen {
             Some(Value::Float(f)) => *f as f32,
             _ => 0.0,
         };
-        let min = match node.props.get("min") {
-            Some(Value::Int(i)) => *i as f32,
-            Some(Value::Float(f)) => *f as f32,
-            _ => 0.0,
-        };
-        let max = match node.props.get("max") {
-            Some(Value::Int(i)) => *i as f32,
-            Some(Value::Float(f)) => *f as f32,
-            _ => 100.0,
-        };
+        // resolve scroll range min and max
+        let (min, max) = util::extract_min_max_f32(node, 0.0, 100.0);
         let sc = match node.props.get("small_change") {
             Some(Value::Int(i)) => *i as f32,
             Some(Value::Float(f)) => *f as f32,
@@ -72,10 +65,12 @@ impl SlintComponentCodegen for ScrollBarCodegen {
         inits.extend(util::catalogue_inits(
             node,
             &desc,
+            // scroll_bar inits
             &[
                 "visible",
                 "enabled",
                 "position",
+                // range limits
                 "min",
                 "max",
                 "small_change",
@@ -89,11 +84,13 @@ impl SlintComponentCodegen for ScrollBarCodegen {
 
     fn emit_actions(
         &self,
+        // scroll_bar action doc
         _doc: &Document,
         node: &Node,
         field: &str,
         _emitted: &[&Node],
     ) -> Result<String, crate::Erro> {
+        // scroll_bar action call
         let mut calls = String::new();
         for ev in ["on_change", "on_scroll"] {
             if let Some(h) = layout::event_handler(node, ev) {
@@ -116,28 +113,23 @@ impl SlintComponentCodegen for ScrollBarCodegen {
 
     fn emit_slint(
         &self,
+        // scroll_bar doc
         _doc: &Document,
         _reg: &crawrad_registry::Registry,
         node: &Node,
+        // scroll_bar bounds
         x: f32,
         y: f32,
         w: f32,
         h: f32,
     ) -> Result<String, crate::Erro> {
+        // scroll_bar id
         let name = identificador(node.name())?;
         let pos = layout::position(x, y);
         let vis = layout::is_visible(node);
         let en = layout::is_enabled(node);
-        let min = match node.props.get("min") {
-            Some(Value::Int(i)) => *i as f32,
-            Some(Value::Float(f)) => *f as f32,
-            _ => 0.0,
-        };
-        let max = match node.props.get("max") {
-            Some(Value::Int(i)) => *i as f32,
-            Some(Value::Float(f)) => *f as f32,
-            _ => 100.0,
-        };
+        // resolve scroll range min and max
+        let (min, max) = util::extract_min_max_f32(node, 0.0, 100.0);
         let cur_pos = match node.props.get("position") {
             Some(Value::Int(i)) => *i as f32,
             Some(Value::Float(f)) => *f as f32,

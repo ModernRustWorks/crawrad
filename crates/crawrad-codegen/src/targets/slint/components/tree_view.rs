@@ -96,26 +96,15 @@ impl SlintComponentCodegen for TreeViewCodegen {
 
     fn emit_actions(
         &self,
+        // tree_view action target
         _doc: &Document,
         node: &Node,
         field: &str,
         _emitted: &[&Node],
     ) -> Result<String, crate::Erro> {
         let mut code = String::new();
-        let on_click_call = match layout::event_handler(node, "on_click") {
-            Some(h) => {
-                let h_name = identificador(&h)?;
-                format!("                    f.form.{h_name}();\n")
-            }
-            None => String::new(),
-        };
-        let on_change_call = match layout::event_handler(node, "on_change") {
-            Some(h) => {
-                let h_name = identificador(&h)?;
-                format!("                    f.form.{h_name}();\n")
-            }
-            None => String::new(),
-        };
+        let on_click_call = util::format_handler_call(node, "on_click")?;
+        let on_change_call = util::format_handler_call(node, "on_change")?;
 
         code.push_str(&format!(
             "        {{\n\
@@ -136,36 +125,25 @@ impl SlintComponentCodegen for TreeViewCodegen {
 
     fn emit_slint(
         &self,
+        // tree_view document reference
         _doc: &Document,
         _reg: &crawrad_registry::Registry,
         node: &Node,
+        // tree_view layout bounds
         x: f32,
         y: f32,
         w: f32,
         h: f32,
     ) -> Result<String, crate::Erro> {
+        // tree_view component name
         let name = identificador(node.name())?;
         let items = match node.props.get("items") {
             Some(v) => Item::list_from(v),
             None => Vec::new(),
         };
-        let pos = layout::position(x, y);
-        let vis = layout::is_visible(node);
         let en = layout::is_enabled(node);
 
-        let mut out = String::new();
-        out.push_str(&format!("        {name} := Rectangle {{\n"));
-        out.push_str(&format!("            {pos}\n"));
-        out.push_str(&format!("            width: {w:.1}px;\n"));
-        out.push_str(&format!("            height: {h:.1}px;\n"));
-        out.push_str("            border-width: 1px;\n");
-        out.push_str("            border-color: #cccccc;\n");
-        out.push_str("            border-radius: 4px;\n");
-        out.push_str("            background: #ffffff;\n");
-        out.push_str("            clip: true;\n");
-        if !vis {
-            out.push_str("            visible: false;\n");
-        }
+        let mut out = util::emit_container_header(node, x, y, w, h, 4.0, true)?;
         out.push_str("            VerticalLayout {\n");
         out.push_str("                padding: 4px;\n");
         out.push_str("                spacing: 2px;\n");

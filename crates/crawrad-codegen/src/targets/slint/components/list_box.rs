@@ -98,6 +98,7 @@ pub fn emit_default(node: &Node) -> String {
 pub fn emit_actions(node: &Node, field: &str) -> Result<String, crate::Erro> {
     let mut code = String::new();
     let mut calls = String::new();
+    // list_box click & change
     for ev in ["on_click", "on_change"] {
         if let Some(h) = layout::event_handler(node, ev) {
             let h_name = identificador(&h)?;

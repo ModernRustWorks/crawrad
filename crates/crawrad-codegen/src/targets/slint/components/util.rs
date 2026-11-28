@@ -331,3 +331,157 @@ pub fn emit_toggle_action(
         "        {{\n            let form = app.clone();\n            window.on_{field}_{cb_name}(move |val| {{\n                if let Ok(mut f) = form.lock() {{\n                    f.form.{field}.{state_field} = val;\n{calls}                }}\n            }});\n        }}\n"
     ))
 }
+
+/// Reads `slint.border-radius` from node props, falling back to `fallback`.
+pub fn border_radius_px(node: &Node, fallback: f32) -> String {
+    if let Some(v) = node.props.get("slint.border-radius") {
+        let val = match v {
+            Value::Int(i) => *i as f32,
+            Value::Float(f) => *f as f32,
+            _ => fallback,
+        };
+        format!("{val:.1}px")
+    } else if fallback.fract() == 0.0 {
+        format!("{}px", fallback as i64)
+    } else {
+        format!("{fallback:.1}px")
+    }
+}
+
+/// Helper that formats an optional single event handler call inside an action block.
+pub fn format_handler_call(node: &Node, event: &str) -> Result<String, crate::Erro> {
+    if let Some(h) = layout::event_handler(node, event) {
+        let h_name = crate::identificador(&h)?;
+        Ok(format!("                    f.form.{h_name}();\n"))
+    } else {
+        Ok(String::new())
+    }
+}
+
+/// Helper that emits standard text edit event wiring (on_edited and optional on_change).
+pub fn emit_text_edited_action(node: &Node, field: &str) -> Result<String, crate::Erro> {
+    let on_change_call = format_handler_call(node, "on_change")?;
+    Ok(format!(
+        "        {{\n\
+         \x20           let form = app.clone();\n\
+         \x20           window.on_{field}_edited(move |val| {{\n\
+         \x20               if let Ok(mut f) = form.lock() {{\n\
+         \x20                   f.form.{field}.text = val.to_string();\n\
+         {on_change_call}\
+         \x20               }}\n\
+         \x20           }});\n\
+         \x20       }}\n"
+    ))
+}
+
+/// Helper that emits the opening Rectangle of a container with standard layout, styling and borders.
+pub fn emit_container_header(
+    node: &Node,
+    x: f32,
+    y: f32,
+    w: f32,
+    h: f32,
+    border_radius_fallback: f32,
+    clip: bool,
+) -> Result<String, crate::Erro> {
+    let name = crate::identificador(node.name())?;
+    let pos = layout::position(x, y);
+    let vis = layout::is_visible(node);
+    let br = border_radius_px(node, border_radius_fallback);
+    let mut s = format!(
+        "        {name} := Rectangle {{\n\
+         \x20           {pos}\n\
+         \x20           width: {w:.1}px;\n\
+         \x20           height: {h:.1}px;\n\
+         \x20           border-width: 1px;\n\
+         \x20           border-color: #cccccc;\n\
+         \x20           border-radius: {br};\n\
+         \x20           background: #ffffff;\n"
+    );
+    if clip {
+        s.push_str("            clip: true;\n");
+    }
+    if !vis {
+        s.push_str("            visible: false;\n");
+    }
+    Ok(s)
+}
+
+/// Helper that extracts min and max float values from a node's props.
+pub fn extract_min_max_f32(node: &Node, def_min: f32, def_max: f32) -> (f32, f32) {
+    let min = match node.props.get("min") {
+        Some(Value::Int(i)) => *i as f32,
+        Some(Value::Float(f)) => *f as f32,
+        _ => def_min,
+    };
+    let max = match node.props.get("max") {
+        Some(Value::Int(i)) => *i as f32,
+        Some(Value::Float(f)) => *f as f32,
+        _ => def_max,
+    };
+    (min, max)
+}
+
+/// Helper that emits window return/accepted handler wiring.
+pub fn emit_return_action(node: &Node, field: &str) -> Result<String, crate::Erro> {
+    if let Some(h) = layout::event_handler(node, "on_return") {
+        let h_name = crate::identificador(&h)?;
+        Ok(format!(
+            "        {{\n\
+             \x20           let form = app.clone();\n\
+             \x20           window.on_{field}_accepted(move || {{\n\
+             \x20               if let Ok(mut f) = form.lock() {{\n\
+             \x20                   f.form.{h_name}();\n\
+             \x20               }}\n\
+             \x20           }});\n\
+             \x20       }}\n"
+        ))
+    } else {
+        Ok(String::new())
+    }
+}
+
+/// Helper that emits TouchArea click block if on_click handler exists.
+pub fn emit_touch_area_click(name: &str) -> String {
+    format!(
+        "            TouchArea {{\n\
+         \x20               clicked => {{ root.{name}_clicked(); }}\n\
+         \x20           }}\n"
+    )
+}
+
+/// Helper that formats the base Rectangle opening with position and dimensions.
+pub fn emit_rectangle_header(
+    node: &Node,
+    x: f32,
+    y: f32,
+    w: f32,
+    h: f32,
+) -> Result<String, crate::Erro> {
+    let name = crate::identificador(node.name())?;
+    let pos = layout::position(x, y);
+    Ok(format!(
+        "        {name} := Rectangle {{\n\
+         \x20           {pos}\n\
+         \x20           width: {w:.1}px;\n\
+         \x20           height: {h:.1}px;\n"
+    ))
+}
+
+/// Helper that emits horizontal layout header with position and dimensions.
+pub fn emit_horizontal_layout_header(
+    node: &Node,
+    x: f32,
+    y: f32,
+    w: f32,
+    h: f32,
+) -> Result<String, crate::Erro> {
+    let name = crate::identificador(node.name())?;
+    let pos = layout::position(x, y);
+    Ok(format!(
+        "        {name} := HorizontalLayout {{\n\
+         \x20           {pos}\n\
+         \x20           width: {w:.1}px;\n\
+         \x20           height: {h:.1}px;\n"
+    ))
+}

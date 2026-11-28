@@ -71,6 +71,7 @@ impl SlintComponentCodegen for MultiSelectCodegen {
         inits.extend(util::catalogue_inits(
             node,
             &desc,
+            // multi_select inits
             &[
                 "visible",
                 "enabled",
@@ -90,20 +91,15 @@ impl SlintComponentCodegen for MultiSelectCodegen {
 
     fn emit_actions(
         &self,
+        // multi_select action target
         _doc: &Document,
         node: &Node,
         field: &str,
         _emitted: &[&Node],
     ) -> Result<String, crate::Erro> {
-        let mut code = String::new();
-        let on_change_call = match layout::event_handler(node, "on_change") {
-            Some(h) => {
-                let h_name = identificador(&h)?;
-                format!("                    f.form.{h_name}();\n")
-            }
-            None => String::new(),
-        };
-        code.push_str(&format!(
+        // multi_select on_change handler
+        let on_change_call = util::format_handler_call(node, "on_change")?;
+        Ok(format!(
             "        {{\n\
              \x20           let form = app.clone();\n\
              \x20           window.on_{field}_clicked(move || {{\n\
@@ -112,20 +108,22 @@ impl SlintComponentCodegen for MultiSelectCodegen {
              \x20               }}\n\
              \x20           }});\n\
              \x20       }}\n"
-        ));
-        Ok(code)
+        ))
     }
 
     fn emit_slint(
         &self,
+        // multi_select document reference
         _doc: &Document,
         _reg: &crawrad_registry::Registry,
         node: &Node,
+        // multi_select layout bounds
         x: f32,
         y: f32,
         w: f32,
         h: f32,
     ) -> Result<String, crate::Erro> {
+        // multi_select component name
         let name = identificador(node.name())?;
         let selected_items = match node.props.get("selected_items") {
             Some(v) => util::extract_string_items(v),
@@ -141,23 +139,9 @@ impl SlintComponentCodegen for MultiSelectCodegen {
             (selected_items.join(", "), "#1c1b1f")
         };
         let display_esc = util::escape_slint_string(&display_text);
-        let pos = layout::position(x, y);
-        let vis = layout::is_visible(node);
         let en = layout::is_enabled(node);
 
-        let mut out = String::new();
-        out.push_str(&format!("        {name} := Rectangle {{\n"));
-        out.push_str(&format!("            {pos}\n"));
-        out.push_str(&format!("            width: {w:.1}px;\n"));
-        out.push_str(&format!("            height: {h:.1}px;\n"));
-        out.push_str("            border-width: 1px;\n");
-        out.push_str("            border-color: #cccccc;\n");
-        out.push_str("            border-radius: 4px;\n");
-        out.push_str("            background: #ffffff;\n");
-        out.push_str("            clip: true;\n");
-        if !vis {
-            out.push_str("            visible: false;\n");
-        }
+        let mut out = util::emit_container_header(node, x, y, w, h, 4.0, true)?;
         out.push_str("            HorizontalLayout {\n");
         out.push_str("                padding-left: 8px;\n");
         out.push_str("                padding-right: 8px;\n");

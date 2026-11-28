@@ -2,7 +2,7 @@ use crate::Gerador;
 use crate::targets::slint::GeradorSlint;
 use crate::targets::slint::layout::{position, text};
 use crate::targets::slint::main_app::main_rs;
-use crawrad_ir::{Document, Node, Rect};
+use crawrad_ir::{Document, Node, Rect, Value};
 
 #[test]
 fn slint_generator_emits_four_files() {
@@ -1486,7 +1486,7 @@ fn test_slint_slice3_components() {
     // 4. StatusBar
     let mut stb = Node::new("stb_foot", "StatusBar");
     stb.set_name("stb_foot");
-    stb.set_rect(Rect::new(0.0, 580.0, 800.0, 20.0));
+    stb.set_rect(Rect::new(0.0, 580.0, 780.0, 20.0));
     stb.props
         .insert("simple_text".to_string(), Value::Str("Ready".to_string()));
     stb.events
@@ -1496,6 +1496,8 @@ fn test_slint_slice3_components() {
     // 5. MainMenu and MenuItem child
     let mut mnu = Node::new("mnu_main", "MainMenu");
     mnu.set_name("mnu_main");
+    mnu.props
+        .insert("images".to_string(), Value::Str("iml_icons".to_string()));
     let mut mni = Node::new("mni_file", "MenuItem");
     mni.set_name("mni_file");
     mni.set_text("File");
@@ -1507,6 +1509,8 @@ fn test_slint_slice3_components() {
     // 6. PopupMenu
     let mut pop = Node::new("pop_ctx", "PopupMenu");
     pop.set_name("pop_ctx");
+    pop.props
+        .insert("images".to_string(), Value::Str("iml_icons".to_string()));
     let _ = doc.add_child("FormSlice3", pop);
 
     let generator = GeradorSlint;
@@ -1521,6 +1525,10 @@ fn test_slint_slice3_components() {
     let sc = &slint_file.conteudo;
 
     // === Assertions for ToolBar ===
+    assert!(
+        sc.contains("tbr_actions := Rectangle {\n            x: 0.0px; y: 0.0px;\n            width: 800.0px;\n            height: 32.0px;"),
+        "ToolBar geometry with width 800.0px missing or incorrect"
+    );
     assert!(
         sc.contains("tbr_actions := Rectangle {"),
         "ToolBar element missing"
@@ -1607,12 +1615,16 @@ fn test_slint_slice3_components() {
 
     // === Assertions for StatusBar ===
     assert!(
+        sc.contains("stb_foot := Rectangle {\n            x: 0.0px; y: 580.0px;\n            width: 780.0px;\n            height: 20.0px;"),
+        "StatusBar geometry with width 780.0px missing or incorrect"
+    );
+    assert!(
         sc.contains("stb_foot := Rectangle {"),
         "StatusBar element missing"
     );
     assert!(sc.contains("x: 0.0px;"), "StatusBar x missing");
     assert!(sc.contains("y: 580.0px;"), "StatusBar y missing");
-    assert!(sc.contains("width: 800.0px;"), "StatusBar width missing");
+    assert!(sc.contains("width: 780.0px;"), "StatusBar width missing");
     assert!(sc.contains("height: 20.0px;"), "StatusBar height missing");
     assert!(
         sc.contains("background: #252526;"),
@@ -1693,6 +1705,14 @@ fn test_slint_slice3_components() {
     assert!(
         dc.contains("pub struct PopupMenu"),
         "PopupMenu struct definition missing"
+    );
+    assert!(
+        dc.contains("mnu_main: MainMenu { images: \"iml_icons\".to_string() }"),
+        "MainMenu default initialization missing"
+    );
+    assert!(
+        dc.contains("pop_ctx: PopupMenu { images: \"iml_icons\".to_string() }"),
+        "PopupMenu default initialization missing"
     );
 
     // Action wiring in designer
@@ -2416,6 +2436,10 @@ fn test_slint_slice5_components() {
         "ImageItem struct definition missing"
     );
     assert!(
+        dc.contains("iml_icons: ImageList { image_width: 24, image_height: 24, images: vec![ImageItem { name: \"save\".to_string(), symbol: \"floppy\".to_string() }] }"),
+        "ImageList default initialization missing"
+    );
+    assert!(
         dc.contains("pub clb_tasks: CheckListBox,"),
         "CheckListBox field missing in designer struct"
     );
@@ -2508,5 +2532,47 @@ fn test_slint_slice5_components() {
     assert!(
         dc.contains("f.form.grd_click();"),
         "Grid on_click action invocation missing"
+    );
+}
+
+#[test]
+fn test_slint_border_radius_property() {
+    let mut doc = Document::new("FormRadius", "Form");
+    {
+        let form = doc.node_mut("FormRadius").unwrap();
+        form.set_rect(Rect::new(0.0, 0.0, 800.0, 600.0));
+        form.set_name("FormRadius");
+    }
+
+    let mut grd = Node::new("grd_custom", "Grid");
+    grd.set_name("grd_custom");
+    grd.set_rect(Rect::new(10.0, 10.0, 300.0, 200.0));
+    grd.props
+        .insert("slint.border-radius".to_string(), Value::Int(10));
+    let _ = doc.add_child("FormRadius", grd);
+
+    let mut grd_default = Node::new("grd_default", "Grid");
+    grd_default.set_name("grd_default");
+    grd_default.set_rect(Rect::new(10.0, 220.0, 300.0, 200.0));
+    let _ = doc.add_child("FormRadius", grd_default);
+
+    let generator = GeradorSlint;
+    let files = generator
+        .gerar(&doc, "radius_app", &crawrad_registry::Registry::builtin())
+        .expect("must generate form with border-radius property");
+
+    let slint_file = files
+        .iter()
+        .find(|a| a.caminho.to_str().unwrap() == "src/FormRadius.slint")
+        .unwrap();
+    let sc = &slint_file.conteudo;
+
+    assert!(
+        sc.contains("border-radius: 10.0px;"),
+        "Custom slint.border-radius = 10 must emit border-radius: 10.0px;"
+    );
+    assert!(
+        sc.contains("border-radius: 4px;"),
+        "Default node without slint.border-radius must fallback to border-radius: 4px;"
     );
 }

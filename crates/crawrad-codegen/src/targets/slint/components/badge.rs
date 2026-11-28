@@ -38,24 +38,29 @@ impl SlintComponentCodegen for BadgeCodegen {
 
     fn emit_actions(
         &self,
+        // badge action doc
         _doc: &Document,
         node: &Node,
         field: &str,
         _emitted: &[&Node],
     ) -> Result<String, crate::Erro> {
+        // badge action call
         util::emit_click_action(node, field)
     }
 
     fn emit_slint(
         &self,
+        // badge doc
         _doc: &Document,
         _reg: &crawrad_registry::Registry,
         node: &Node,
+        // badge bounds
         x: f32,
         y: f32,
         w: f32,
         h: f32,
     ) -> Result<String, crate::Erro> {
+        // badge id
         let name = identificador(node.name())?;
         let caption = layout::text(node);
         let count = match node.props.get("count") {
@@ -103,15 +108,15 @@ impl SlintComponentCodegen for BadgeCodegen {
         };
 
         let radius = (h * 0.5).min(w * 0.5);
-        let pos = layout::position(x, y);
         let vis = layout::is_visible(node);
 
-        let mut out = String::new();
-        out.push_str(&format!("        {name} := Rectangle {{\n"));
-        out.push_str(&format!("            {pos}\n"));
-        out.push_str(&format!("            width: {w:.1}px;\n"));
-        out.push_str(&format!("            height: {h:.1}px;\n"));
-        out.push_str(&format!("            border-radius: {radius:.1}px;\n"));
+        let mut out = util::emit_rectangle_header(node, x, y, w, h)?;
+        let br_str = if node.props.contains_key("slint.border-radius") {
+            util::border_radius_px(node, radius)
+        } else {
+            format!("{radius:.1}px")
+        };
+        out.push_str(&format!("            border-radius: {br_str};\n"));
         out.push_str(&format!("            background: {bg_color};\n"));
         out.push_str(&format!("            border-color: {border_color};\n"));
         out.push_str("            border-width: 1px;\n");
@@ -124,11 +129,7 @@ impl SlintComponentCodegen for BadgeCodegen {
         out.push_str("                vertical-alignment: center;\n");
         out.push_str("            }\n");
         if layout::event_handler(node, "on_click").is_some() {
-            out.push_str("            TouchArea {\n");
-            out.push_str(&format!(
-                "                clicked => {{ root.{name}_clicked(); }}\n"
-            ));
-            out.push_str("            }\n");
+            out.push_str(&util::emit_touch_area_click(&name));
         }
         out.push_str("        }\n");
         Ok(out)

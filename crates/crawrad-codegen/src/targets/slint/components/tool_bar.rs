@@ -53,6 +53,7 @@ impl SlintComponentCodegen for ToolBarCodegen {
         inits.extend(util::catalogue_inits(
             node,
             &desc,
+            // tool_bar inits
             &[
                 "visible",
                 "enabled",
@@ -68,46 +69,43 @@ impl SlintComponentCodegen for ToolBarCodegen {
 
     fn emit_actions(
         &self,
+        // tool_bar action doc
         _doc: &Document,
         node: &Node,
         field: &str,
         _emitted: &[&Node],
     ) -> Result<String, crate::Erro> {
+        // tool_bar action call
         util::emit_click_action(node, field)
     }
 
     fn emit_slint(
         &self,
+        // tool_bar doc
         doc: &Document,
         reg: &crawrad_registry::Registry,
         node: &Node,
+        // tool_bar bounds
         x: f32,
         y: f32,
         w: f32,
         h: f32,
     ) -> Result<String, crate::Erro> {
+        // tool_bar id
         let name = identificador(node.name())?;
-        let pos = layout::position(x, y);
         let vis = layout::is_visible(node);
         let en = layout::is_enabled(node);
+        // tool_bar child nodes
         let children = super::emit_children(doc, reg, node, "    ")?;
 
-        let mut out = String::new();
-        out.push_str(&format!("        {name} := Rectangle {{\n"));
-        out.push_str(&format!("            {pos}\n"));
-        out.push_str(&format!("            width: {w:.1}px;\n"));
-        out.push_str(&format!("            height: {h:.1}px;\n"));
+        let mut out = util::emit_rectangle_header(node, x, y, w, h)?;
         out.push_str("            background: #2d3139;\n");
         out.push_str("            border-bottom-width: 1px;\n");
         out.push_str("            border-color: #1e1e24;\n");
         out.push_str(&format!("            visible: {vis};\n"));
         out.push_str(&format!("            enabled: {en};\n"));
         if layout::event_handler(node, "on_click").is_some() {
-            out.push_str("            TouchArea {\n");
-            out.push_str(&format!(
-                "                clicked => {{ root.{name}_clicked(); }}\n"
-            ));
-            out.push_str("            }\n");
+            out.push_str(&util::emit_touch_area_click(&name));
         }
         if !children.is_empty() {
             out.push_str(&children);

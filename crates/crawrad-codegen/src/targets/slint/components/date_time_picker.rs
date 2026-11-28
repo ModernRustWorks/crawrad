@@ -68,6 +68,7 @@ impl SlintComponentCodegen for DateTimePickerCodegen {
         inits.extend(util::catalogue_inits(
             node,
             &desc,
+            // date_time_picker inits
             &[
                 "visible",
                 "enabled",
@@ -88,18 +89,14 @@ impl SlintComponentCodegen for DateTimePickerCodegen {
 
     fn emit_actions(
         &self,
+        // date_time_picker action target
         _doc: &Document,
         node: &Node,
         field: &str,
         _emitted: &[&Node],
     ) -> Result<String, crate::Erro> {
-        let on_change_call = match layout::event_handler(node, "on_change") {
-            Some(h) => {
-                let h_name = identificador(&h)?;
-                format!("                    f.form.{h_name}();\n")
-            }
-            None => String::new(),
-        };
+        // date_time_picker on_change handler
+        let on_change_call = util::format_handler_call(node, "on_change")?;
         Ok(format!(
             "        {{\n\
              \x20           let form = app.clone();\n\
@@ -116,14 +113,17 @@ impl SlintComponentCodegen for DateTimePickerCodegen {
 
     fn emit_slint(
         &self,
+        // date_time_picker document reference
         _doc: &Document,
         _reg: &crawrad_registry::Registry,
         node: &Node,
+        // date_time_picker layout bounds
         x: f32,
         y: f32,
         w: f32,
         h: f32,
     ) -> Result<String, crate::Erro> {
+        // date_time_picker component name
         let name = identificador(node.name())?;
         let shown = crawrad_ir::date_time::shown_of(node);
         let shown_esc = util::escape_slint_string(&shown);
@@ -132,22 +132,9 @@ impl SlintComponentCodegen for DateTimePickerCodegen {
             _ => "dtkDate",
         };
         let icon = if kind == "dtkTime" { "🕒" } else { "📅" };
-        let pos = layout::position(x, y);
-        let vis = layout::is_visible(node);
         let en = layout::is_enabled(node);
 
-        let mut out = String::new();
-        out.push_str(&format!("        {name} := Rectangle {{\n"));
-        out.push_str(&format!("            {pos}\n"));
-        out.push_str(&format!("            width: {w:.1}px;\n"));
-        out.push_str(&format!("            height: {h:.1}px;\n"));
-        out.push_str("            border-width: 1px;\n");
-        out.push_str("            border-color: #cccccc;\n");
-        out.push_str("            border-radius: 4px;\n");
-        out.push_str("            background: #ffffff;\n");
-        if !vis {
-            out.push_str("            visible: false;\n");
-        }
+        let mut out = util::emit_container_header(node, x, y, w, h, 4.0, false)?;
         out.push_str("            HorizontalLayout {\n");
         out.push_str("                padding-left: 6px;\n");
         out.push_str("                padding-right: 6px;\n");

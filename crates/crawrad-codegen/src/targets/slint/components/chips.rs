@@ -48,12 +48,15 @@ impl SlintComponentCodegen for ChipsCodegen {
 
     fn emit_actions(
         &self,
+        // chips action doc
         _doc: &Document,
         node: &Node,
         field: &str,
         _emitted: &[&Node],
     ) -> Result<String, crate::Erro> {
+        // chips action call
         let mut calls = String::new();
+        // chips click & change
         for ev in ["on_click", "on_change"] {
             if let Some(h) = layout::event_handler(node, ev) {
                 let h_name = identificador(&h)?;
@@ -103,16 +106,18 @@ impl SlintComponentCodegen for ChipsCodegen {
 
     fn emit_slint(
         &self,
+        // chips doc
         _doc: &Document,
         _reg: &crawrad_registry::Registry,
         node: &Node,
+        // chips bounds
         x: f32,
         y: f32,
         w: f32,
         h: f32,
     ) -> Result<String, crate::Erro> {
+        // chips id
         let name = identificador(node.name())?;
-        let pos = layout::position(x, y);
         let vis = layout::is_visible(node);
         let en = layout::is_enabled(node);
         let (_, _, raw_items) = util::extract_items_and_selected(node);
@@ -127,12 +132,9 @@ impl SlintComponentCodegen for ChipsCodegen {
             .map(|s| format!("\"{}\"", util::escape_slint_string(s)))
             .collect();
         let items_lit = items_escaped.join(", ");
+        let br_chip = util::border_radius_px(node, 12.0);
 
-        let mut out = String::new();
-        out.push_str(&format!("        {name} := HorizontalLayout {{\n"));
-        out.push_str(&format!("            {pos}\n"));
-        out.push_str(&format!("            width: {w:.1}px;\n"));
-        out.push_str(&format!("            height: {h:.1}px;\n"));
+        let mut out = util::emit_horizontal_layout_header(node, x, y, w, h)?;
         out.push_str("            spacing: 6px;\n");
         out.push_str("            alignment: start;\n");
         out.push_str(&format!("            visible: {vis};\n"));
@@ -140,7 +142,7 @@ impl SlintComponentCodegen for ChipsCodegen {
         out.push_str(&format!(
             "            for item[index] in [{items_lit}]: Rectangle {{\n"
         ));
-        out.push_str("                border-radius: 12px;\n");
+        out.push_str(&format!("                border-radius: {br_chip};\n"));
         out.push_str(&format!(
             "                background: index == {item_idx} ? #3a598c : #e0e0e0;\n"
         ));

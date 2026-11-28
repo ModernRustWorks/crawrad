@@ -41,56 +41,30 @@ impl SlintComponentCodegen for MaskEditCodegen {
 
     fn emit_actions(
         &self,
+        // mask_edit action target
         _doc: &Document,
         node: &Node,
         field: &str,
         _emitted: &[&Node],
     ) -> Result<String, crate::Erro> {
-        let mut code = String::new();
-        let on_change_call = match layout::event_handler(node, "on_change") {
-            Some(h) => {
-                let h_name = identificador(&h)?;
-                format!("                    f.form.{h_name}();\n")
-            }
-            None => String::new(),
-        };
-        code.push_str(&format!(
-            "        {{\n\
-             \x20           let form = app.clone();\n\
-             \x20           window.on_{field}_edited(move |val| {{\n\
-             \x20               if let Ok(mut f) = form.lock() {{\n\
-             \x20                   f.form.{field}.text = val.to_string();\n\
-             {on_change_call}\
-             \x20               }}\n\
-             \x20           }});\n\
-             \x20       }}\n"
-        ));
-        if let Some(h) = layout::event_handler(node, "on_return") {
-            let h_name = identificador(&h)?;
-            code.push_str(&format!(
-                "        {{\n\
-                 \x20           let form = app.clone();\n\
-                 \x20           window.on_{field}_accepted(move || {{\n\
-                 \x20               if let Ok(mut f) = form.lock() {{\n\
-                 \x20                   f.form.{h_name}();\n\
-                 \x20               }}\n\
-                 \x20           }});\n\
-                 \x20       }}\n"
-            ));
-        }
+        let mut code = util::emit_text_edited_action(node, field)?;
+        code.push_str(&util::emit_return_action(node, field)?);
         Ok(code)
     }
 
     fn emit_slint(
         &self,
+        // mask_edit document reference
         _doc: &Document,
         _reg: &crawrad_registry::Registry,
         node: &Node,
+        // mask_edit layout bounds
         x: f32,
         y: f32,
         w: f32,
         h: f32,
     ) -> Result<String, crate::Erro> {
+        // mask_edit component name
         let name = identificador(node.name())?;
         let text = layout::text(node);
         let text_esc = util::escape_slint_string(&text);

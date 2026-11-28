@@ -41,9 +41,11 @@ impl SlintComponentCodegen for ActionListCodegen {
 
     fn emit_slint(
         &self,
+        // action_list slint doc
         _doc: &Document,
         _reg: &crawrad_registry::Registry,
         _node: &Node,
+        // action_list slint stub
         _x: f32,
         _y: f32,
         _w: f32,
@@ -123,9 +125,11 @@ impl SlintComponentCodegen for ActionCodegen {
 
     fn emit_slint(
         &self,
+        // action_list slint doc
         _doc: &Document,
         _reg: &crawrad_registry::Registry,
         _node: &Node,
+        // action_list slint stub
         _x: f32,
         _y: f32,
         _w: f32,

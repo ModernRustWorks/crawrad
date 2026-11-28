@@ -80,11 +80,13 @@ impl SlintComponentCodegen for MenuItemCodegen {
 
     fn emit_actions(
         &self,
+        // main_menu action doc
         _doc: &Document,
         node: &Node,
         field: &str,
         _emitted: &[&Node],
     ) -> Result<String, crate::Erro> {
+        // main_menu action call
         let mut calls = String::new();
         if let Some(h) = crate::targets::slint::layout::event_handler(node, "on_click") {
             let h_name = identificador(&h)?;

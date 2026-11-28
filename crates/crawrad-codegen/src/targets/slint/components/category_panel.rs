@@ -75,21 +75,26 @@ impl SlintComponentCodegen for CategoryPanelCodegen {
 
     fn emit_slint(
         &self,
+        // category_panel doc
         doc: &Document,
         reg: &crawrad_registry::Registry,
         node: &Node,
+        // category_panel bounds
         x: f32,
         y: f32,
         w: f32,
         h: f32,
     ) -> Result<String, crate::Erro> {
+        // category_panel id
         let name = identificador(node.name())?;
         let pos = layout::position(x, y);
         let vis = layout::is_visible(node);
         let en = layout::is_enabled(node);
+        // category_panel title text
         let caption = layout::text(node);
         let caption_esc = util::escape_slint_string(&caption);
         let collapsed = matches!(node.props.get("collapsed"), Some(Value::Bool(true)));
+        // category_panel child nodes
         let children = super::emit_children(doc, reg, node, "    ")?;
 
         let mut out = String::new();

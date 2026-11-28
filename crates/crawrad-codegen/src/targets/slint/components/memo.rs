@@ -98,26 +98,7 @@ pub fn emit_default(node: &Node) -> String {
 }
 
 pub fn emit_actions(node: &Node, field: &str) -> Result<String, crate::Erro> {
-    let mut code = String::new();
-    let on_change_call = match layout::event_handler(node, "on_change") {
-        Some(h) => {
-            let h_name = identificador(&h)?;
-            format!("                    f.form.{h_name}();\n")
-        }
-        None => String::new(),
-    };
-    code.push_str(&format!(
-        "        {{\n\
-         \x20           let form = app.clone();\n\
-         \x20           window.on_{field}_edited(move |val| {{\n\
-         \x20               if let Ok(mut f) = form.lock() {{\n\
-         \x20                   f.form.{field}.text = val.to_string();\n\
-         {on_change_call}\
-         \x20               }}\n\
-         \x20           }});\n\
-         \x20       }}\n"
-    ));
-    Ok(code)
+    util::emit_text_edited_action(node, field)
 }
 
 pub fn emit_slint(node: &Node, x: f32, y: f32, w: f32, h: f32) -> Result<String, crate::Erro> {

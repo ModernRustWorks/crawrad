@@ -19,8 +19,10 @@ impl SlintComponentCodegen for DrawerCodegen {
         fields.push("    pub opened: bool,".to_string());
         fields.push("    pub show_header: bool,".to_string());
         fields.push("    pub overlay: bool,".to_string());
+        // drawer text catalogue fields
         fields.extend(util::catalogue_fields(
             &desc,
+            // drawer fields
             &[
                 "visible",
                 "enabled",
@@ -55,6 +57,7 @@ impl SlintComponentCodegen for DrawerCodegen {
         inits.extend(util::catalogue_inits(
             node,
             &desc,
+            // drawer inits
             &[
                 "visible",
                 "enabled",
@@ -97,29 +100,29 @@ impl SlintComponentCodegen for DrawerCodegen {
 
     fn emit_slint(
         &self,
+        // drawer doc
         doc: &Document,
         reg: &crawrad_registry::Registry,
         node: &Node,
+        // drawer bounds
         x: f32,
         y: f32,
         w: f32,
         h: f32,
     ) -> Result<String, crate::Erro> {
+        // drawer id
         let name = identificador(node.name())?;
-        let pos = layout::position(x, y);
         let vis = layout::is_visible(node);
         let en = layout::is_enabled(node);
+        // drawer title text
         let caption = layout::text(node);
         let caption_esc = util::escape_slint_string(&caption);
         let opened = matches!(node.props.get("opened"), Some(Value::Bool(true)));
         let show_header = !matches!(node.props.get("show_header"), Some(Value::Bool(false)));
+        // drawer child nodes
         let children = super::emit_children(doc, reg, node, "    ")?;
 
-        let mut out = String::new();
-        out.push_str(&format!("        {name} := Rectangle {{\n"));
-        out.push_str(&format!("            {pos}\n"));
-        out.push_str(&format!("            width: {w:.1}px;\n"));
-        out.push_str(&format!("            height: {h:.1}px;\n"));
+        let mut out = util::emit_rectangle_header(node, x, y, w, h)?;
         out.push_str("            background: #2f2f45;\n");
         out.push_str("            border-width: 1px;\n");
         out.push_str("            border-color: #6e7290;\n");

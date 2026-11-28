@@ -63,18 +63,14 @@ impl SlintComponentCodegen for CheckListBoxCodegen {
 
     fn emit_actions(
         &self,
+        // check_list_box target doc
         _doc: &Document,
         node: &Node,
         field: &str,
         _emitted: &[&Node],
     ) -> Result<String, crate::Erro> {
-        let on_change_call = match layout::event_handler(node, "on_change") {
-            Some(h) => {
-                let h_name = identificador(&h)?;
-                format!("                    f.form.{h_name}();\n")
-            }
-            None => String::new(),
-        };
+        // check_list_box on_change handler
+        let on_change_call = util::format_handler_call(node, "on_change")?;
         Ok(format!(
             "        {{\n\
              \x20           let form = app.clone();\n\
@@ -89,14 +85,17 @@ impl SlintComponentCodegen for CheckListBoxCodegen {
 
     fn emit_slint(
         &self,
+        // check_list_box document reference
         _doc: &Document,
         _reg: &crawrad_registry::Registry,
         node: &Node,
+        // check_list_box layout bounds
         x: f32,
         y: f32,
         w: f32,
         h: f32,
     ) -> Result<String, crate::Erro> {
+        // check_list_box component name
         let name = identificador(node.name())?;
         let items = match node.props.get("items") {
             Some(v) => util::extract_string_items(v),
@@ -106,23 +105,9 @@ impl SlintComponentCodegen for CheckListBoxCodegen {
             Some(v) => util::extract_string_items(v).into_iter().collect(),
             None => std::collections::HashSet::new(),
         };
-        let pos = layout::position(x, y);
-        let vis = layout::is_visible(node);
         let en = layout::is_enabled(node);
 
-        let mut out = String::new();
-        out.push_str(&format!("        {name} := Rectangle {{\n"));
-        out.push_str(&format!("            {pos}\n"));
-        out.push_str(&format!("            width: {w:.1}px;\n"));
-        out.push_str(&format!("            height: {h:.1}px;\n"));
-        out.push_str("            border-width: 1px;\n");
-        out.push_str("            border-color: #cccccc;\n");
-        out.push_str("            border-radius: 4px;\n");
-        out.push_str("            background: #ffffff;\n");
-        out.push_str("            clip: true;\n");
-        if !vis {
-            out.push_str("            visible: false;\n");
-        }
+        let mut out = util::emit_container_header(node, x, y, w, h, 4.0, true)?;
         out.push_str("            VerticalLayout {\n");
         out.push_str("                padding: 4px;\n");
         out.push_str("                spacing: 2px;\n");

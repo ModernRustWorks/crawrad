@@ -57,6 +57,7 @@ impl SlintComponentCodegen for PaginationCodegen {
         inits.extend(util::catalogue_inits(
             node,
             &desc,
+            // pagination inits
             &[
                 "visible",
                 "enabled",
@@ -72,11 +73,13 @@ impl SlintComponentCodegen for PaginationCodegen {
 
     fn emit_actions(
         &self,
+        // pagination action doc
         _doc: &Document,
         node: &Node,
         field: &str,
         _emitted: &[&Node],
     ) -> Result<String, crate::Erro> {
+        // pagination action call
         let mut calls = String::new();
         if let Some(h) = layout::event_handler(node, "on_change") {
             let h_name = identificador(&h)?;
@@ -97,16 +100,18 @@ impl SlintComponentCodegen for PaginationCodegen {
 
     fn emit_slint(
         &self,
+        // pagination doc
         _doc: &Document,
         _reg: &crawrad_registry::Registry,
         node: &Node,
+        // pagination bounds
         x: f32,
         y: f32,
         w: f32,
         h: f32,
     ) -> Result<String, crate::Erro> {
+        // pagination id
         let name = identificador(node.name())?;
-        let pos = layout::position(x, y);
         let vis = layout::is_visible(node);
         let en = layout::is_enabled(node);
         let page_count = match node.props.get("page_count") {
@@ -122,12 +127,9 @@ impl SlintComponentCodegen for PaginationCodegen {
             _ => 7,
         };
         let show_arrows = !matches!(node.props.get("show_arrows"), Some(Value::Bool(false)));
+        let br_btn = util::border_radius_px(node, 4.0);
 
-        let mut out = String::new();
-        out.push_str(&format!("        {name} := HorizontalLayout {{\n"));
-        out.push_str(&format!("            {pos}\n"));
-        out.push_str(&format!("            width: {w:.1}px;\n"));
-        out.push_str(&format!("            height: {h:.1}px;\n"));
+        let mut out = util::emit_horizontal_layout_header(node, x, y, w, h)?;
         out.push_str("            spacing: 4px;\n");
         out.push_str("            alignment: center;\n");
         out.push_str(&format!("            visible: {vis};\n"));
@@ -140,7 +142,7 @@ impl SlintComponentCodegen for PaginationCodegen {
             out.push_str("            Rectangle {\n");
             out.push_str("                width: 24px;\n");
             out.push_str(&format!("                height: {h:.1}px;\n"));
-            out.push_str("                border-radius: 4px;\n");
+            out.push_str(&format!("                border-radius: {br_btn};\n"));
             out.push_str("                background: #f0f0f0;\n");
             out.push_str("                border-width: 1px;\n");
             out.push_str("                border-color: #d0d0d0;\n");
@@ -162,7 +164,7 @@ impl SlintComponentCodegen for PaginationCodegen {
             out.push_str("            Rectangle {\n");
             out.push_str("                width: 24px;\n");
             out.push_str(&format!("                height: {h:.1}px;\n"));
-            out.push_str("                border-radius: 4px;\n");
+            out.push_str(&format!("                border-radius: {br_btn};\n"));
             out.push_str(&format!("                background: {bg};\n"));
             out.push_str("                border-width: 1px;\n");
             out.push_str("                border-color: #d0d0d0;\n");
@@ -181,7 +183,7 @@ impl SlintComponentCodegen for PaginationCodegen {
             out.push_str("            Rectangle {\n");
             out.push_str("                width: 24px;\n");
             out.push_str(&format!("                height: {h:.1}px;\n"));
-            out.push_str("                border-radius: 4px;\n");
+            out.push_str(&format!("                border-radius: {br_btn};\n"));
             out.push_str("                background: #f0f0f0;\n");
             out.push_str("                border-width: 1px;\n");
             out.push_str("                border-color: #d0d0d0;\n");

@@ -50,11 +50,13 @@ impl SlintComponentCodegen for SplitterCodegen {
 
     fn emit_actions(
         &self,
+        // splitter action doc
         _doc: &Document,
         node: &Node,
         field: &str,
         _emitted: &[&Node],
     ) -> Result<String, crate::Erro> {
+        // splitter action call
         let mut calls = String::new();
         if let Some(h) = layout::event_handler(node, "on_moved") {
             let h_name = identificador(&h)?;
@@ -74,25 +76,23 @@ impl SlintComponentCodegen for SplitterCodegen {
 
     fn emit_slint(
         &self,
+        // splitter doc
         _doc: &Document,
         _reg: &crawrad_registry::Registry,
         node: &Node,
+        // splitter bounds
         x: f32,
         y: f32,
         w: f32,
         h: f32,
     ) -> Result<String, crate::Erro> {
+        // splitter id
         let name = identificador(node.name())?;
-        let pos = layout::position(x, y);
         let vis = layout::is_visible(node);
         let en = layout::is_enabled(node);
         let cursor = if h >= w { "col-resize" } else { "row-resize" };
 
-        let mut out = String::new();
-        out.push_str(&format!("        {name} := Rectangle {{\n"));
-        out.push_str(&format!("            {pos}\n"));
-        out.push_str(&format!("            width: {w:.1}px;\n"));
-        out.push_str(&format!("            height: {h:.1}px;\n"));
+        let mut out = util::emit_rectangle_header(node, x, y, w, h)?;
         out.push_str("            background: #252538;\n");
         out.push_str(&format!("            visible: {vis};\n"));
         out.push_str(&format!("            enabled: {en};\n"));
